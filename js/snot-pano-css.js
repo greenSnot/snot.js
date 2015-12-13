@@ -105,8 +105,7 @@
          loadImages(config.imgs_compressed,config.imgs_original,config.imgs_rotation);
 
          if(config){
-             _loadSpots(config.spots);
-             _loadComments(config.comments);
+             _loadSprites(config.sprites);
          }
 
          if ( checkMobile() ) {
@@ -176,69 +175,16 @@
 
      };
 
-     var genElement=function(type,id,extra){
-
-         var element= document.createElement('div');
-         element.className=type;
-         element.id=type.split('_')[0]+'_'+id;
-         element.setAttribute('data-id',id);
-
-         element.style.width="1px";
-         element.style.height="1px";
-         element.style.marginLeft='-50%';
-         element.style.zIndex="20";
-
-         if(type.indexOf('spot')==0){
-             element.setAttribute('data-scene',extra.scene);
-             element.setAttribute('data-type',extra.type);
-             element.setAttribute('data-text',extra.text);
-             var spot=document.createElement('div');
-             var image=document.createElement('div');
-             image.className='spot_image';
-             spot.className='spot_icon';
-             var description=document.createElement('div');
-             description.className='spot_description';
-             description.innerHTML=extra.text;
-             element.appendChild(description);
-             spot.appendChild(image);
-             element.appendChild(spot);
-         }else if(type.indexOf('comment')==0){
-             element.style.width="auto";
-             element.style.height="auto";
-             element.style.marginLeft='auto';
-             var comment=document.createElement('div');
-             comment.className="comment-content";
-             comment.innerHTML=extra.text;
-             element.appendChild(comment);
-         }
-
-         return element;
-
-     }
-
-     var _loadComments=function(comments){
-            // Loading Comments
-            for(var i in comments){
-                var t=comments[i];
-                var element=genElement('comment',t.id,{text:t.text,x:t.position_x,y:t.position_y,z:t.position_z,avatar_url:t.avatar_url,type:t.type,is_description:t.is_description,is_mosaic:t.is_mosaic});
-                addSpriteByPosition(element,t.position_x*1.4,t.position_y*1.4,t.position_z*1.4);
-            }
-     }
-
-     var _loadSpots=function(spots){
-         for(var i in spots){
-             var t=spots[i];
+     var _loadSprites=function(sprites){
+         for(var i in sprites){
+             var t=sprites[i];
              var standard=_pointStandardlization(t.position_x,t.position_y,t.position_z);
              t.position_x=standard[0];
              t.position_y=standard[1];
              t.position_z=standard[2];
-             var element=genElement('spot_'+t.type,t.id,{text:t.text,scene:t.sceneKey,type:t.type,x:t.position_x,y:t.position_y,z:t.position_z});
-             var d=distance3D(t.position_x,t.position_y,t.position_z,0,0,0);
-             d=d>0?d:1;
-             var ratio=d/400;
-             addSpriteByPosition(element,t.position_x/ratio,t.position_y/ratio,t.position_z/ratio);
+             var element=$(template(t.templateId,t))[0];
+             addSpriteByPosition(element,t.position_x,t.position_y,t.position_z);
          }
-
      }
 
      var rotate=function(x,y,z,rx,ry){
@@ -515,7 +461,6 @@
         setRx: _setRx,
         setRy: _setRy,
         init: _init,
-        loadSpots: _loadSpots,
-        loadComments: _loadComments
+        loadSprites: _loadSprites,
      });
 }(window);

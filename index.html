@@ -22,6 +22,19 @@
         </div>
         <div id="logger"></div>
     </body>
+    <script id="template-spot" type="text/html">
+        <div data-type="sprite" class="<#=className#>" id="<#=id#>" >
+            <div class="spot-description"><#=text#></div>
+            <div class="spot-image-wrap">
+                <div class="spot-image"></div>
+            </div>
+        </div>
+    </script>
+    <script src="js/template-native.js"></script>
+    <script>
+        template.config('openTag','<#');
+        template.config('closeTag','#>');
+    </script>
     <script src="js/zepto.min.js"></script>
     <script src="js/tween.min.js"></script>
     <script src="js/snot-utils.js"></script>
@@ -37,9 +50,10 @@
         alert('onSpriteClick');
     }
     function onClickCallback(x,y,z,rx,ry){
-        snot.loadSpots([{
-                type:randoms(['straight','left','right']),
-                id:123,
+        snot.loadSprites([{
+                templateId:'template-spot',
+                className:'spot-'+randoms(['straight','left','right']),
+                id:'spot-'+123,
                 text:'haha',
                 position_x:x,
                 position_y:y,
@@ -71,11 +85,20 @@
         minFov:60,
         smooth:0,
         movingRatio:0.3,
-        autoRotation:0.1,
+        autoRotation:0.0,
         rx:0,
         ry:0,
         minDetectDistance:20,
         onClickCallback:onClickCallback,
-        onSpriteClickCallback:onSpriteClickCallback
+        onSpriteClickCallback:onSpriteClickCallback,
+        sprites:[{
+                templateId:'template-spot',
+                className:'spot-'+randoms(['straight','left','right']),
+                id:'spot-'+123,
+                text:'Home',
+                position_x:100,
+                position_y:100,
+                position_z:100
+        }]
     });
 </script>
