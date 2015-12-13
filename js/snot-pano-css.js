@@ -210,18 +210,6 @@
              comment.className="comment-content";
              comment.innerHTML=extra.text;
              element.appendChild(comment);
-         }else if(type.indexOf('advertisement')==0){
-             var ad=document.createElement('div');
-             var content=document.createElement('div');
-             ad.className='ad';
-             content.className='ad-content';
-             content.innerHTML=extra.text;
-             ad.appendChild(content);
-             element.appendChild(ad);
-         }else{
-             var e=document.createElement('div');
-             e.className=type+'-content';
-             element.appendChild(e);
          }
 
          return element;
