@@ -1,0 +1,40 @@
+html,body{padding:0;margin:0;width:100%;height:100%;overflow:hidden;}
+
+#snot-pano   {width:100%;height:100%;margin:0;padding:0;overflow:hidden;}
+
+#container  {width:100%;height:100%;-webkit-transform:scale(1);}
+#camera     {width:100%;height:100%;-webkit-transform-style: preserve-3d;}
+.cube       {position:absolute;background-size:100%;z-index:1;}
+
+#logger     {position:absolute;top:0;width:100%;z-index:100;color:#fff;font-size:20px;text-shadow:1px 1px #000;word-break:break-all;}
+.spot_description{
+    display:inline-block;
+    width:128px;
+    text-align:center;
+    margin-left:-64px;
+    margin-top:-64px;
+}
+
+            .spot_straight,.spot_left,.spot_right,.spot_upleft,.spot_upright,.spot_dotone,.spot_dottwo,.spot_finger,.spot_magnifier,.spot_down{
+                height:55px;
+                color:#fff;
+                font-weight:bold;
+                text-shadow:1px 1px 2px #000;
+                margin-top:20px;
+                z-index:25;
+            }
+            .spot_straight>.spot_icon,.spot_left>.spot_icon,.spot_right>.spot_icon,.spot_upleft>.spot_icon,.spot_upright>.spot_icon,.spot_dotone>.spot_icon,.spot_dottwo>.spot_icon,.spot_finger>.spot_icon,.spot_magnifier>.spot_icon,.spot_down>.spot_icon{content:'';display:block;position:absolute;bottom:-50px;left:50%;margin-left:-64px;width:128px;height:128px;background-size:128px 3200px;overflow:hidden;
+            }
+            .spot_straight>.spot_icon>.spot_image,.spot_left>.spot_icon>.spot_image,.spot_right>.spot_icon>.spot_image,.spot_upleft>.spot_icon>.spot_image,.spot_upright>.spot_icon>.spot_image,.spot_dotone>.spot_icon>.spot_image,.spot_dottwo>.spot_icon>.spot_image,.spot_finger>.spot_icon>.spot_image,.spot_magnifier>.spot_icon>.spot_image,.spot_down>.spot_icon>.spot_image{
+            content:'';display:block;width:128px;height:3200px;
+        }
+            .spot_straight>.spot_icon>.spot_image{background-image:url(../images/tools/spot0.png);}
+            .spot_left>.spot_icon>.spot_image{background-image:url(../images/tools/spot1.png);}
+            .spot_right>.spot_icon>.spot_image{background-image:url(../images/tools/spot2.png);}
+            .spot_upleft>.spot_icon>.spot_image{background-image:url(/images/tools/spot3.png);}
+            .spot_upright>.spot_icon>.spot_image{background-image:url(/images/tools/spot4.png);}
+            .spot_dotone>.spot_icon>.spot_image{background-image:url(/images/tools/spot5.png);}
+            .spot_dottwo>.spot_icon>.spot_image{background-image:url(/images/tools/spot6.png);}
+            .spot_finger>.spot_icon>.spot_image{background-image:url(/images/tools/spot7.png);}
+            .spot_magnifier>.spot_icon>.spot_image{background-image:url(/images/tools/spot8.png);}
+            .spot_down>.spot_icon>.spot_image{background-image:url(/images/tools/spot9.png);}

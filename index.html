@@ -1,0 +1,81 @@
+<html>
+    <meta charset="utf-8">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport" content="width= user-scalable=no, initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="author" content="Calculon 0x00111111@gmail.com">
+    <meta http-equiv="pragma" content="no-cache">
+    <head>
+        <link rel="stylesheet" type="text/css" href="css/snot-pano.css">
+    </head>
+    <body>
+        <div id="snot-pano">
+            <div id="container">
+                <div id="camera">
+                    <img class="cube front"></img>
+                    <img class="cube left"></img>
+                    <img class="cube right"></img>
+                    <img class="cube back"></img>
+                    <img class="cube top"></img>
+                    <img class="cube bottom"></img>
+                </div>
+            </div>
+        </div>
+        <div id="logger"></div>
+    </body>
+    <script src="js/zepto.min.js"></script>
+    <script src="js/tween.min.js"></script>
+    <script src="js/snot-utils.js"></script>
+    <script src="js/snot-pano-css.js"></script>
+</html>
+<script>
+    function randoms(arr){
+        return arr[parseInt(Math.random()*(arr.length))]
+    }
+    function onSpriteClickCallback(element,x,y,z,rx,ry){
+        console.log(x,y,z,rx,ry);
+        console.log(element);
+        alert('onSpriteClick');
+    }
+    function onClickCallback(x,y,z,rx,ry){
+        snot.loadSpots([{
+                type:randoms(['straight','left','right']),
+                id:123,
+                text:'haha',
+                position_x:x,
+                position_y:y,
+                position_z:z
+        }]);
+    }
+
+    snot.init({
+        cubeSize:1248,
+        imgs_compressed:[
+                'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a0/rotate/0/interlace/1/thumbnail/!10p',
+                'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a1248/rotate/0/interlace/1/thumbnail/!10p',
+                'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a2496/rotate/0/interlace/1/thumbnail/!10p',
+                'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a3744/rotate/0/interlace/1/thumbnail/!10p',
+                'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a4992/rotate/0/interlace/1/thumbnail/!10p',
+                'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a6240/rotate/0/interlace/1/thumbnail/!10p',
+        ],
+        imgs_original:[
+            'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a0/rotate/0/interlace/1/thumbnail/!100p',
+            'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a1248/rotate/0/interlace/1/thumbnail/!100p',
+            'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a2496/rotate/0/interlace/1/thumbnail/!100p',
+            'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a3744/rotate/0/interlace/1/thumbnail/!100p',
+            'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a4992/rotate/0/interlace/1/thumbnail/!100p',
+            'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a6240/rotate/0/interlace/1/thumbnail/!100p',
+        ],
+        imgs_rotation:[0,0,0,0,0,0],
+        fov:90,
+        maxFov:110,
+        minFov:60,
+        smooth:0,
+        movingRatio:0.3,
+        autoRotation:0.1,
+        rx:0,
+        ry:0,
+        minDetectDistance:20,
+        onClickCallback:onClickCallback,
+        onSpriteClickCallback:onSpriteClickCallback
+    });
+</script>
