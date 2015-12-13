@@ -1,28 +1,31 @@
-# sti-pano
-HTML5 panorama viewer
+# Snot-pano
+The simplest HTML5 panorama viewer
+
+##Summary
+To create a textured cube for panorama viewing by CSS 3D trasformation.
+
+#Useage
+`
+`
+
+##Compatibility
+###Support:
+* Safari
+* Chrome
+###Unsupport:
+* IE
+* Firefox
+###Unstable:
+* Android-QQbrowser-x5(微信浏览器）
+* Android-original-browser(webkit) 
+
+###Demo
+* mclassical.org/mclassical.com
+
 简易的HTML5全景展示工具
 
-使用css构造的一个6面正方体 分别贴上纹理 实现全景效果
+##简介
+使用css变换构造的一个6面正方体,分别贴上纹理实现全景效果
 
-demo: wx.sz-sti.com/panotest
-
-兼容性
-    支持以下:
-        Android-original-browser 
-        Android-QQbrowser-x5(微信浏览器）
-        Safari
-        Chrome
-    不支持以下:
-        IE
-        Firefox
-
-To do list:
-1）虚拟现实 增删改 Sprite
-2）摄像机旋转 优化
-3）兼容firefox
-
-Change log:
-1.0 
-  多点触摸缩放
-  初始视角设置
-  初始视点设置
+#To do list:
+* Compatibility
