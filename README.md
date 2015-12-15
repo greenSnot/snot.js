@@ -5,7 +5,7 @@ The simplest HTML5 panorama viewer
 To create a textured cube for panorama viewing by CSS 3D trasformation.
 
 #Useage
-`
+```
 <div id="snot-pano">
     <div id="container">
         <div id="camera">
@@ -49,11 +49,10 @@ To create a textured cube for panorama viewing by CSS 3D trasformation.
         movingRatio:0.3,
         autoRotation:0.1,
         rx:0,
-        ry:0,
-        }]
+        ry:0
     });
 </script>
-`
+```
 
 ##Compatibility
 ###Support:
@@ -68,13 +67,16 @@ To create a textured cube for panorama viewing by CSS 3D trasformation.
 * Android-QQbrowser-x5(微信浏览器）
 * Android-original-browser(webkit) 
 
-###Demo
+#Demo
 * mclassical.org/mclassical.com
 
+#To do list:
+* Compatibility
+***
+#Snot-pano
 简易的HTML5全景展示工具
 
 ##简介
 使用css变换构造的一个6面正方体,分别贴上纹理实现全景效果
 
-#To do list:
-* Compatibility
+
