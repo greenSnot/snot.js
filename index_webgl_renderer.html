@@ -21,14 +21,6 @@
             </div>
         </div>
     </body>
-    <script id="template-spot" type="text/html">
-        <div data-type="sprite" class="<#=spriteType+'-'+spotType#>" id="<#=id#>" >
-            <div class="spot-description"><#=text#></div>
-            <div class="spot-image-wrap">
-                <div class="spot-image"></div>
-            </div>
-        </div>
-    </script>
     <script>
     function customSprites(){
         snot.genSpot=function(spot){
@@ -70,21 +62,13 @@
     <script src="js/tween.min.js"></script>
     <script src="js/snot-utils.js"></script>
 
+    <script src="js/three.min.js"></script>
+    <script src="js/three.patch.js"></script>
+    <script src="js/Projector.js"></script>
+    <script src="js/snot-pano-webgl.js"></script>
 </html>
 <script>
-
-    if(webgl_detect()){
-        include_js("./js/three.min.js",function(){
-            include_js("./js/three.patch.js",function(){
-                include_js("./js/Projector.js",function(){
-                    include_js("./js/snot-pano-webgl.js",function(){initPano(customSprites)});
-                });
-            });
-        });
-    }else{
-        console.log("Webgl unsupported!!");
-        include_js("./js/snot-pano-css.js",initPano);
-    }
+    initPano(customSprites);
 
     function random(arr){
         return arr[parseInt(Math.random()*(arr.length))]

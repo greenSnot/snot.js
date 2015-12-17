@@ -102,7 +102,7 @@
 
          }
          _setFov(snot.fov);
-         loadImages(config.imgs_compressed,config.imgs_original,config.imgs_rotation);
+         loadImages(config.imgs_preview,config.imgs_original,config.imgs_rotation);
 
          if(config){
              _loadSprites(config.sprites);
@@ -127,8 +127,8 @@
 
      }
 
-     function loadImages(imgs_compressed,imgs_original,imgs_rotation,onCompressedImagesLoad){
-         onCompressedImagesLoad=onCompressedImagesLoad?onCompressedImagesLoad:function(){console.log('Compressed images loaded')};
+     function loadImages(imgs_preview,imgs_original,imgs_rotation,onPreviewImagesLoad){
+         onPreviewImagesLoad=onPreviewImagesLoad?onPreviewImagesLoad:function(){console.log('Preview images loaded')};
 
         var _cubeConfig={
 
@@ -148,7 +148,7 @@
             $('.cube.'+i).css('width' ,snot.cubeSize+2+'px');        // 2 more pixels for overlapping gaps ( chrome's bug )
             $('.cube.'+i).css('height',snot.cubeSize+2+'px');        // 2 more pixels for overlapping gaps ( chrome's bug )
 
-            $('.cube.'+i).attr('src',imgs_compressed[counter]);
+            $('.cube.'+i).attr('src',imgs_preview[counter]);
             $('.cube.'+i).attr('data-index',counter);
             $('.cube.'+i)[0].onload=function(){
                 _imageDownloaded=_imageDownloaded>0?_imageDownloaded+1:1;
@@ -178,12 +178,13 @@
      var _loadSprites=function(sprites){
          for(var i in sprites){
              var t=sprites[i];
-             var standard=_pointStandardlization(t.position_x,t.position_y,t.position_z);
-             t.position_x=standard[0];
-             t.position_y=standard[1];
-             t.position_z=standard[2];
-             var element=$(template(t.templateId,t))[0];
-             addSpriteByPosition(element,t.position_x,t.position_y,t.position_z);
+             var standard=_pointStandardlization(t.x,t.y,t.z);
+             t.x=standard[0];
+             t.y=standard[1];
+             t.z=standard[2];
+             var element=$(template(t.template,t))[0];
+             element.data=sprites[i];
+             addSpriteByPosition(element,t.x,t.y,t.z);
          }
      }
 
@@ -222,7 +223,6 @@
          var r=distance3D(x,y,z,0,0,0);
          x+=snot.cubeSize/2;
          y+=snot.cubeSize/2;
-
 
          var transform=text2Matrix('translate3d('+epsilon(x)+'px,'+epsilon(y)+'px,'+epsilon(z)+'px) rotateY('+epsilon(arc)+'deg) rotateX('+epsilon((y-snot.cubeSize/2)/r*-90)+'deg) rotateY(180deg)');
 
@@ -404,9 +404,9 @@
 
              var rotation=position2rotation(ax,az,ay);
              if(nearest){
-                 snot.onSpriteClickCallback(nearest,ax,ay,az,rotation[0],rotation[1]);
+                 snot.onSpriteClick(nearest[0].data);
              }else{
-                 snot.onClickCallback(ax,ay,az,rotation[0],rotation[1]);
+                 snot.onClick(ax,ay,az,rotation[0],rotation[1]);
              }
 
          }
