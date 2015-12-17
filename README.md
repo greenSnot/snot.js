@@ -11,12 +11,12 @@ To create a textured cube for panorama viewing by CSS 3D trasformation/Webgl.
 <div id="snot-pano">
     <div id="container">
         <div id="camera">
-            <img class="cube front"></img>
-            <img class="cube left"></img>
-            <img class="cube right"></img>
-            <img class="cube back"></img>
-            <img class="cube top"></img>
-            <img class="cube bottom"></img>
+            <img class="cube front">
+            <img class="cube left">
+            <img class="cube right">
+            <img class="cube back">
+            <img class="cube top">
+            <img class="cube bottom">
         </div>
     </div>
 </div>
@@ -95,14 +95,6 @@ To create a textured cube for panorama viewing by CSS 3D trasformation/Webgl.
 ```
 <div id="snot-pano">
     <div id="container">
-        <div id="camera">
-            <img class="cube front"></img>
-            <img class="cube left"></img>
-            <img class="cube right"></img>
-            <img class="cube back"></img>
-            <img class="cube top"></img>
-            <img class="cube bottom"></img>
-        </div>
     </div>
 </div>
 <script src="js/zepto.min.js"></script>
@@ -150,9 +142,18 @@ To create a textured cube for panorama viewing by CSS 3D trasformation/Webgl.
 ####./index.html
 
 ##Compatibility
+
+###Known
+* iOS < 8 unsupprot Webgl but all the iOS devices work well in both CSS/Webgl.
+* Almost all of Android phones support webgl but unstable.
+* Many Android phones is very unstable when using CSS transform.
+* Few Android phones unsupport VR mode.
+
 ###Support:
 * Safari
+* Safari Mobile
 * Chrome
+* Chrome Mobile
 
 ###Unsupport:
 * IE
@@ -168,6 +169,7 @@ To create a textured cube for panorama viewing by CSS 3D trasformation/Webgl.
 #To do list:
 * Compatibility
 * Callback when imgs loaded
+* VR mode
 
 #Snot-pano
 简易的HTML5全景展示工具

@@ -102,7 +102,10 @@
 
          }
          _setFov(snot.fov);
-         loadImages(config.imgs_preview,config.imgs_original,config.imgs_rotation);
+
+         if(config.imgs_preview){
+             loadImages(config.imgs_preview,config.imgs_original,config.imgs_rotation);
+         }
 
          if(config){
              _loadSprites(config.sprites);
