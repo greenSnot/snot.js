@@ -47,11 +47,11 @@ To create a textured cube for panorama viewing by CSS 3D trasformation/Webgl.
         fov:90,             // Field Of View (euler angle)
         maxFov:110,         // max Field Of View (euler angle)
         minFov:60,          // min Field Of View (euler angle)
-        smooth:0.8,         // 0-1 float
+        smooth:0.8,         // 0-1 float 
         movingRatio:0.3,
         autoRotation:0.1,
-        rx:0,
-        ry:0
+        rx:0,               // Rotation around x axis (euler angle)
+        ry:0                // Rotation around y axis (euler angle)
     });
 </script>
 ```
@@ -138,13 +138,41 @@ To create a textured cube for panorama viewing by CSS 3D trasformation/Webgl.
 ####Custom Sprites
 ####./index_webgl_renderer.html
 
+##Interaction
+```
+function onClick(x,y,z,rx,ry){
+    console.log(x,y,z,rx,ry);
+}
+function onSpriteClick(data){
+    //data is the JSON what you define in sprites like following.
+    console.log(data);
+    /*Output:{
+          template:'template-spot',
+
+          spriteType:'spot',
+          id:'spot-'+123,
+          x:100,
+          y:200,
+          z:100,
+
+          spotType:'left',
+          text:'haha'
+    }*/
+}
+sti.init({
+    //...
+    onClick:onClick,
+    onSpriteClick:onSpriteClick
+});
+```
+
 ##Auto Detection (CSS/Webgl)
 ####./index.html
 
 ##Compatibility
 
 ###Known
-* iOS < 8 unsupprot Webgl but all the iOS devices work well in both CSS/Webgl.
+* iOS < 8 unsupport Webgl but all the iOS devices work well in both CSS/Webgl.
 * Almost all of Android phones support webgl but unstable.
 * Many Android phones is very unstable when using CSS transform.
 * Few Android phones unsupport VR mode.
