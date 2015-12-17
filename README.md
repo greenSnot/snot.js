@@ -27,7 +27,7 @@ To create a textured cube for panorama viewing by CSS 3D trasformation/Webgl.
 <script>
     snot.init({
         cubeSize:1248,
-        imgs_compressed:[
+        imgs_preview:[
             'http://front.jpg',
             'http://down.jpg',
             'http://left.jpg',
@@ -115,7 +115,7 @@ To create a textured cube for panorama viewing by CSS 3D trasformation/Webgl.
 <script>
     snot.init({
         cubeSize:1248,
-        imgs_compressed:[
+        imgs_preview:[
             'http://front.jpg',
             'http://down.jpg',
             'http://left.jpg',
