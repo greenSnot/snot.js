@@ -4,7 +4,7 @@ The simplest HTML5/Webgl panorama viewer
 ##Summary
 To create a textured cube for panorama viewing by CSS 3D trasformation/Webgl.
 
-#Useage
+#Usage
 ###CSS Render
 ####./index_css_render.html
 ```
@@ -44,9 +44,9 @@ To create a textured cube for panorama viewing by CSS 3D trasformation/Webgl.
             'http://right.jpg'
         ],
         imgs_rotation:[0,0,0,0,0,0],
-        fov:90,             // Field Of View (angle)
-        maxFov:110,         // max Field Of View (angle)
-        minFov:60,          // min Field Of View (angle)
+        fov:90,             // Field Of View (euler angle)
+        maxFov:110,         // max Field Of View (euler angle)
+        minFov:60,          // min Field Of View (euler angle)
         smooth:0.8,         // 0-1 float
         movingRatio:0.3,
         autoRotation:0.1,
