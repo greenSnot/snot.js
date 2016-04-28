@@ -1,3 +1,65 @@
+function quaternion2euler(w,x,y,z){
+    var a=Math.atan2(2*(w*x+y*z),1-2*(x*x+y*y));
+    var b=Math.asin(2*(w*y-z*x));
+    var c=Math.atan2(2*(w*z+x*y),1-2*(y*y+z*z));
+    return [a,b,c]
+}
+function getQuaternion( alpha, beta, gamma ) {
+
+    var degtorad=Math.PI/180;
+  var _x = beta  ? beta  * degtorad : 0; // beta value
+  var _y = gamma ? gamma * degtorad : 0; // gamma value
+  var _z = alpha ? alpha * degtorad : 0; // alpha value
+
+  var cX = Math.cos( _x/2 );
+  var cY = Math.cos( _y/2 );
+  var cZ = Math.cos( _z/2 );
+  var sX = Math.sin( _x/2 );
+  var sY = Math.sin( _y/2 );
+  var sZ = Math.sin( _z/2 );
+
+  //
+  // ZXY quaternion construction.
+  //
+
+  var w = cX * cY * cZ - sX * sY * sZ;
+  var x = sX * cY * cZ - cX * sY * sZ;
+  var y = cX * sY * cZ + sX * cY * sZ;
+  var z = cX * cY * sZ + sX * sY * cZ;
+
+  return [ w, x, y, z ];
+
+}
+var unbindOrientation=function(){
+	window.removeEventListener( 'orientationchange');
+	window.removeEventListener( 'deviceorientation');
+}
+var bindOrientation=function(callback){
+    var scope=this;
+    window.addEventListener('orientationchange',function(){
+        scope.screenOrientation=window.orientation||0;
+    },false);
+    window.addEventListener('deviceorientation', function(){ 
+        /*
+        var beta=event.beta?event.beta*Math.PI/180:0;
+        var gamma=event.gamma?event.gamma*Math.PI/180:0;
+        var alpha=event.alpha?event.alpha*Math.PI/180:0;
+        var orient=scope.screenOrientation?scope.screenOrientation*Math.PI/180:0;
+
+        var euler= new THREE.Euler();
+        euler.set(beta,alpha,-gamma,'YXZ');
+        var q=new THREE.Quaternion().setFromEuler(euler);
+        q.multiply(new THREE.Quaternion(-Math.sqrt(0.5),0,0,Math.sqrt(0.5)));
+        q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),-orient));
+        callback(q.w,q.x,q.y,q.z);
+        return;
+        */
+
+        var q=getQuaternion(event.alpha,event.beta,event.gamma);
+        callback(q[0],q[1],q[2],q[3]);
+    });
+}
+
 function leftPos(elem) {
     var curleft = 0;
     if (elem.offsetParent) {
@@ -97,7 +159,7 @@ function isIpad(){
     return u.indexOf('iPad')>=0?1:0;
 }
 
-function checkMobile(){
+function isMobile(){
     if(/AppleWebKit.*Mobile/i.test(navigator.userAgent) 
             || /Android/i.test(navigator.userAgent) 
             || /BlackBerry/i.test(navigator.userAgent) 
@@ -180,3 +242,15 @@ function include_js(file,callback) {
         }
     }
 }
+function rotation2Position(z,rx,ry){
+    z=-z;
+    rx=-rx;
+
+    var x=snot.cubeSize/2;
+    var y=snot.cubeSize/2;
+
+    var transform = text2Matrix( 'translate3d('+x+'px,'+y+'px,0) rotateY('+(0)+'deg) rotateX('+(0)+'deg) rotateY('+(ry?-ry:0)+'deg) rotateX('+(rx?-rx:0)+'deg) translateZ('+z+'px)' );
+    return [-transform[12]+snot.cubeSize/2,transform[13]-snot.cubeSize/2,-transform[14]];
+
+}
+

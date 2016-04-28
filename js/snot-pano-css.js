@@ -126,6 +126,9 @@
 
          }
 
+         if(config.callback){
+             config.callback();
+         }
          _animate();
 
      }
@@ -181,10 +184,12 @@
      var _loadSprites=function(sprites){
          for(var i in sprites){
              var t=sprites[i];
-             var standard=_pointStandardlization(t.x,t.y,t.z);
-             t.x=standard[0];
-             t.y=standard[1];
-             t.z=standard[2];
+             if(t.standardlization){
+                var standard=_pointStandardlization(t.x,t.y,t.z);
+                t.x=standard[0];
+                t.y=standard[1];
+                t.z=standard[2];
+             }
              var element=$(template(t.template,t))[0];
              element.data=sprites[i];
              addSpriteByPosition(element,t.x,t.y,t.z);
@@ -233,19 +238,6 @@
 
          wrap.appendChild( element );
          snot.camera.appendChild( wrap );
-     }
-
-     var rotation2Position=function(z,rx,ry){
-
-         z=-z;
-         rx=-rx;
-
-         var x=snot.cubeSize/2;
-         var y=snot.cubeSize/2;
-
-         var transform = text2Matrix( 'translate3d('+x+'px,'+y+'px,0) rotateY('+(0)+'deg) rotateX('+(0)+'deg) rotateY('+(ry?-ry:0)+'deg) rotateX('+(rx?-rx:0)+'deg) translateZ('+z+'px)' );
-         return [-transform[12]+snot.cubeSize/2,transform[13]-snot.cubeSize/2,-transform[14]];
-
      }
 
      var mouseMove = function (event) {
@@ -407,7 +399,7 @@
 
              var rotation=position2rotation(ax,az,ay);
              if(nearest){
-                 snot.onSpriteClick(nearest[0].data);
+                 snot.onSpriteClick(nearest[0].data,nearest[0]);
              }else{
                  snot.onClick(ax,ay,az,rotation[0],rotation[1]);
              }
@@ -438,24 +430,30 @@
      }
 
      var _setRx=function(rx,smooth){
-         if(!smooth){
-             snot.rx=rx;
+         rx=parseFloat(rx);
+         if(smooth){
+             _rx=rx;
+             tween
+                  .to({ry:_ry,rx:_rx},300)
+                  .start();
          }else{
-             snot.camera.style['-webkit-transition']='none';
              snot.rx=rx;
-             _update();
-             snot.camera.style['-webkit-transition']='all 0.3s ease-out';
          }
      }
 
      var _setRy=function(ry,smooth){
-         if(!smooth){
-             snot.ry=ry;
+         ry=parseFloat(ry);
+         if(smooth){
+             if(ry-snot.ry%360>180)snot.ry+=360;
+             if(snot.ry%360-ry>180)snot.ry-=360;
+             _ry=ry;
+             console.log('ry:'+_ry);
+             console.log('panory:'+snot.ry);
+             tween
+                  .to({ry:_ry,rx:_rx},300)
+                  .start();
          }else{
-             snot.camera.style['-webkit-transition']='none';
-             snot.ry=ry;
-             _update();
-             snot.camera.style['-webkit-transition']='all 0.3s ease-out';
+             pano.ry=ry;
          }
      }
 

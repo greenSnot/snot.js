@@ -188,17 +188,15 @@
     	renderer.setSize( window.innerWidth, window.innerHeight );
     	container.appendChild( renderer.domElement );
     
-        if(checkMobile()){
-            container.addEventListener( 'touchstart', onDocumentMouseDown, false );
-            container.addEventListener( 'touchmove', onDocumentMouseMove, false );
-            container.addEventListener( 'touchend', onDocumentMouseUp, false );
-        }else{
-            container.addEventListener( 'mousedown', onDocumentMouseDown, false );
-            container.addEventListener( 'mousemove', onDocumentMouseMove, false );
-            container.addEventListener( 'mouseup', onDocumentMouseUp, false );
-            container.addEventListener( 'mousewheel', onDocumentMouseWheel, false );
-            //container.addEventListener( 'DOMMouseScroll', onDocumentMouseWheel, false);
-        }
+        container.addEventListener( 'touchstart', onDocumentMouseDown, false );
+        container.addEventListener( 'touchmove', onDocumentMouseMove, false );
+        container.addEventListener( 'touchend', onDocumentMouseUp, false );
+
+        container.addEventListener( 'mousedown', onDocumentMouseDown, false );
+        container.addEventListener( 'mousemove', onDocumentMouseMove, false );
+        container.addEventListener( 'mouseup', onDocumentMouseUp, false );
+        container.addEventListener( 'mousewheel', onDocumentMouseWheel, false );
+        //container.addEventListener( 'DOMMouseScroll', onDocumentMouseWheel, false);
     
         animate();
         snot.smooth=smooth;
