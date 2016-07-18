@@ -1,45 +1,44 @@
 <html>
-    <meta charset="utf-8">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="viewport" content=" user-scalable=no, initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0">
-    <meta name="author" content="greenSnot@github">
-    <meta http-equiv="pragma" content="no-cache">
-    <head>
-        <link rel="stylesheet" type="text/css" href="css/snot-pano.css">
-    </head>
-    <body>
-        <div id="snot-pano">
-            <div id="container">
-                <div id="camera">
-                    <img class="cube front">
-                    <img class="cube left">
-                    <img class="cube right">
-                    <img class="cube back">
-                    <img class="cube top">
-                    <img class="cube bottom">
-                </div>
-            </div>
+  <meta charset="utf-8">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="viewport" content=" user-scalable=no, initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="author" content="greenSnot@github">
+  <meta http-equiv="pragma" content="no-cache">
+  <head>
+    <link rel="stylesheet" type="text/css" href="css/snot-pano.css">
+  </head>
+  <body>
+    <div id="snot-pano">
+      <div id="container">
+        <div id="camera">
+          <img class="cube front">
+          <img class="cube left">
+          <img class="cube right">
+          <img class="cube back">
+          <img class="cube top">
+          <img class="cube bottom">
         </div>
-        <div id="logger"></div>
-    </body>
-    <script id="template-spot" type="text/html">
-        <div data-type="sprite" class="<#=spriteType+'-'+spotType#>" id="<#=id#>" >
-            <div class="spot-description"><#=text#></div>
-            <div class="spot-image-wrap">
-                <div class="spot-image"></div>
-            </div>
-        </div>
-    </script>
-    <script src="js/template-native.js"></script>
-    <script>
-        template.config('openTag','<#');
-        template.config('closeTag','#>');
-    </script>
-    <script src="js/zepto.min.js"></script>
-    <script src="js/tween.min.js"></script>
-    <script src="js/snot-utils.js"></script>
-    <script src="js/snot-pano-css.js"></script>
-
+      </div>
+    </div>
+    <div id="logger"></div>
+  </body>
+  <script id="template-spot" type="text/html">
+      <div data-type="sprite" class="<#=spriteType+'-'+spotType#>" id="<#=id#>" >
+          <div class="spot-description"><#=text#></div>
+          <div class="spot-image-wrap">
+              <div class="spot-image"></div>
+          </div>
+      </div>
+  </script>
+  <script src="js/template-native.js"></script>
+  <script>
+      template.config('openTag','<#');
+      template.config('closeTag','#>');
+  </script>
+  <script src="js/zepto.min.js"></script>
+  <script src="js/tween.min.js"></script>
+  <script src="js/snot-utils.js"></script>
+  <script src="js/snot-pano-css.js"></script>
 </html>
 <script>
 

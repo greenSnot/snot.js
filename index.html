@@ -20,7 +20,7 @@
                 </div>
             </div>
         </div>
-        <button class="btn-gryo" style="position:fixed;left:10px;top:10px;">GRYO</button>
+        <button class="btn-gyro" style="position:fixed;left:10px;top:10px;">GYRO</button>
     </body>
     <script id="template-spot" type="text/html">
         <div data-type="sprite" class="<#=spriteType+'-'+spotType#>" id="<#=id#>" >
@@ -86,7 +86,7 @@
         console.log("Webgl unsupported!!");
         include_js("./js/snot-pano-css.js",initPano);
     }
-    $('body').delegate('.btn-gryo','click',function(){
+    $('body').delegate('.btn-gyro','click',function(){
         bindOrientation(function(w,x,y,z){
 
                 var e=quaternion2euler(w,x,y,z);
