@@ -70,6 +70,22 @@ function leftPos(elem) {
     return curleft;
 };
 
+function is_mobile() {
+  return get_window_width() < 500;
+}
+
+function is_wechat_login() {
+  return window.navigator.userAgent.indexOf('MicroMessenger') >= 0 ? true : false;
+}
+
+function get_window_width() {
+  return document.documentElement.clientWidth;
+}
+
+function get_window_height() {
+  return document.documentElement.clientHeight;
+}
+
 function position2rotation(x,y,z){
     var r=distance3D(x,y,z,0,0,0);
     var rx=Math.asin(z/r);
@@ -157,28 +173,6 @@ function isIphone(){
 function isIpad(){
     var u=navigator.userAgent;
     return u.indexOf('iPad')>=0?1:0;
-}
-
-function isMobile(){
-    if(/AppleWebKit.*Mobile/i.test(navigator.userAgent) 
-            || /Android/i.test(navigator.userAgent) 
-            || /BlackBerry/i.test(navigator.userAgent) 
-            || /IEMobile/i.test(navigator.userAgent) 
-            || (/MIDP|SymbianOS|NOKIA|SAMSUNG|LG|NEC|TCL|Alcatel|BIRD|DBTEL|Dopod|PHILIPS|HAIER|LENOVO|MOT-|Nokia|SonyEricsson|SIE-|Amoi|ZTE/.test(navigator.userAgent))){
-                if(/iPad/i.test(navigator.userAgent)){
-                    if(/MicroMessenger/i.test(navigator.userAgent)){
-                        return 3; //微信
-                    }
-                    return 2;//平板
-                }else{
-                    if(/MicroMessenger/i.test(navigator.userAgent)){
-                        return 3; //微信
-                    }
-                    return 1;//手机
-                }
-            }else{
-                return 0;
-            }
 }
 
 window.requestAnimationFrame= (function () { 

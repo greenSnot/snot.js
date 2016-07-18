@@ -1,6 +1,3 @@
-[submodule "libs/quaternion"]
-	path = libs/quaternion
-	url = https://github.com/aressler38/Quaternion.git
 [submodule "libs/fastclick"]
 	path = libs/fastclick
 	url = https://github.com/ftlabs/fastclick.git
