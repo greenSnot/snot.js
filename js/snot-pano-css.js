@@ -433,7 +433,7 @@
     if (vars.z === -1 && vars.x === -1 && vars.y === -1)
       return;
     quat = RQ.setFromEuler(vars.z, vars.x, vars.y, 'ZXY').conjugate();
-    snot.camera.style.transform = "matrix3d(" + quat.toMatrix4() + ")";
+    snot.camera.style.transform = 'translateZ('+epsilon(snot.perspective)+'px)'+"matrix3d(" + quat.toMatrix4() + ")"+ snot.cameraBaseTransform;
 
   }
 
@@ -465,11 +465,11 @@
     }
   }
 
-  window.addeventlistener("deviceorientation", function(ev) {
+  window.addEventListener("deviceorientation", function(ev) {
     if (ev.alpha !== null) {
-      vars.x = ev.beta / 180 * math.pi;
-      vars.y = ev.gamma / 180 * math.pi;
-      vars.z = ev.alpha / 180 * math.pi;
+      vars.x = ev.beta / 180 * Math.PI;
+      vars.y = ev.gamma / 180 * Math.PI;
+      vars.z = ev.alpha / 180 * Math.PI;
     } else {
       vars.x = vars.y = vars.z = -1;
     }
