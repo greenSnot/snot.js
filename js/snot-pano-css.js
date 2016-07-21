@@ -410,17 +410,6 @@
     }
   }
 
-  var vars = {
-    x: 0,
-    y: .7,
-    z: 0
-  };
-  var varsDest = {
-    x: .4,
-    y: 0,
-    z: 0
-  };
-  var RQ = new Quaternion;
   function _update() {
     snot.frames++;
 
@@ -430,12 +419,72 @@
     //snot.camera.style.webkitTransform = 'translateZ('+epsilon(snot.perspective)+'px)'+' rotateX('+epsilon(snot.rx)+'deg) rotateY('+epsilon(snot.ry)+'deg)'+ snot.cameraBaseTransform;
 
     
-    if (vars.z === -1 && vars.x === -1 && vars.y === -1)
+    if (vars.alpha === -1 && vars.beta === -1 && vars.gamma === -1)
       return;
-    quat = RQ.setFromEuler(vars.z, vars.x, vars.y, 'ZXY').conjugate();
-    snot.camera.style.transform = 'translateZ('+epsilon(snot.perspective)+'px)'+"matrix3d(" + quat.toMatrix4() + ")"+ snot.cameraBaseTransform;
+		var zee = new THREE.Vector3( 0, 0, 1 );
 
+		var euler = new THREE.Euler();
+
+		var q0 = new THREE.Quaternion();
+
+		var q1 = new THREE.Quaternion( - Math.sqrt( 0.5 ), 0, 0, Math.sqrt( 0.5 ) ); // - PI/2 around the x-axis
+    var quaternion = new THREE.Quaternion();
+			euler.set( vars.beta, vars.alpha, - vars.gamma, 'YXZ' ); // 'ZXY' for the device, but 'YXZ' for us
+
+			quaternion.setFromEuler( euler ); // orient the device
+
+			quaternion.multiply( q1 ); // camera looks out the back of the device, not the top
+
+			quaternion.multiply( q0.setFromAxisAngle( zee, - screen_orientation) ); // adjust for screen orientation
+function toMat(q) {
+
+      var w = q['w'];
+      var x = -q['x'];
+      var y = q['y'];
+      var z = -q['z'];
+
+      var n = w * w + x * x + y * y + z * z;
+      var s = n === 0 ? 0 : 2 / n;
+      var wx = s * w * x, wy = s * w * y, wz = s * w * z;
+      var xx = s * x * x, xy = s * x * y, xz = s * x * z;
+      var yy = s * y * y, yz = s * y * z, zz = s * z * z;
+
+      return [
+        1 - (yy + zz), xy - wz, xz + wy, 0,
+        xy + wz, 1 - (xx + zz), yz - wx, 0,
+        xz - wy, yz + wx, 1 - (xx + yy), 0,
+        0, 0, 0, 1];
+    }
+    snot.camera.style.transform = 'translateZ('+epsilon(snot.perspective)+'px)'+" matrix3d(" + toMat(quaternion) + ")"+ snot.cameraBaseTransform;
   }
+
+  var screen_orientation = 0;
+  window.addEventListener( 'orientationchange', function(ev) {
+    screen_orientation = window.orientation || 0;
+  }, false );
+
+  var vars = {
+    alpha: 0,
+    beta: .7,
+    gamma: 0
+  };
+
+  var varsDest = {
+    alpha: .4,
+    beta: 0,
+    gamma: 0
+  };
+
+  window.addEventListener("deviceorientation", function(ev) {
+    if (ev.alpha !== null) {
+      vars.beta = ev.beta  * Math.PI/ 180 ;
+      vars.gamma = ev.gamma  * Math.PI/ 180;
+      vars.alpha = ev.alpha  * Math.PI/ 180;
+    } else {
+      vars.beta = vars.gamma = vars.alpha = -1;
+    }
+  }, true);
+
 
   var _setRx=function(rx,smooth){
     rx=parseFloat(rx);
@@ -464,16 +513,6 @@
       pano.ry=ry;
     }
   }
-
-  window.addEventListener("deviceorientation", function(ev) {
-    if (ev.alpha !== null) {
-      vars.x = ev.beta / 180 * Math.PI;
-      vars.y = ev.gamma / 180 * Math.PI;
-      vars.z = ev.alpha / 180 * Math.PI;
-    } else {
-      vars.x = vars.y = vars.z = -1;
-    }
-  }, true);
 
   $.extend(global.snot,{
     setFov: _setFov,

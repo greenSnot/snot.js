@@ -7,6 +7,3 @@
 [submodule "libs/art-template"]
 	path = libs/art-template
 	url = https://github.com/aui/artTemplate.git
-[submodule "libs/quaternion"]
-	path = libs/quaternion
-	url = https://github.com/infusion/Quaternion.js.git
