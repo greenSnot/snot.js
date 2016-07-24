@@ -20,6 +20,7 @@
     maxfov : 120, // Max field of view (degree)
     minfov : 60,  // Min field of view (degree)
     fov : 90,     // Default field of view
+    smooth : 0.17,
   }
 
   var _rx;
@@ -190,10 +191,16 @@
   }
 
   var rotate=function(x,y,z,rx,ry){
-    var t=text2Matrix('rotateY('+epsilon(-ry)+'deg) rotateX('+epsilon(-rx)+'deg) translate3d('+epsilon(x)+'px,'+epsilon(y)+'px,'+epsilon(z)+'px)');
-    return([-parseFloat(t[12]),
-        -parseFloat(t[13]),
-        -parseFloat(t[14])]);
+    // todo ,error in approximate 90deg of screen
+    var PI=Math.PI;
+    var pos = new THREE.Matrix4().multiplyMatrices(
+        new THREE.Matrix4().multiplyMatrices(
+          new THREE.Matrix4().makeRotationAxis({x:0,y:1,z:0},-ry*PI/180),
+          new THREE.Matrix4().makeRotationAxis({x:1,y:0,z:0},-rx*PI/180)
+        ),
+        new THREE.Matrix4().setPosition({x:x,y:y,z:z})
+    ).getPosition();
+    return ([-pos.x,-pos.y,-pos.z]);
   }
 
   var addSpriteByPosition=function(element,x,y,z,rx,ry){
@@ -336,8 +343,68 @@
 
   }
 
-  var mouseUp = function (event) {
+  function onClick (x, y) {
+    var R=100;
+    var fov = snot.fov;
+    var width = snot.width;
+    var height = snot.height;
+    var cubeSize = snot.cubeSize;
+    var arcFactor = Math.PI/180;
 
+    var ry=(x/width-0.5)*fov;
+    var rx=(y/height-0.5)*fov*height/width;
+    var r=Math.cos(fov/2*arcFactor)*cubeSize;
+    var ratiox=(x-width/2)/width*2;
+    var ratioy=(y-height/2)/width*2;
+    var P=Math.sin(fov/2*arcFactor)*cubeSize;
+
+    ry=Math.atan(ratiox*P/r);
+    rx=Math.atan(ratioy*P/r);
+
+    ry*=180/Math.PI;
+    rx*=180/Math.PI;
+
+    var xyz2=rotation2Position(R,rx,0);
+
+    var rr=distance3D(-Math.tan(ry*arcFactor)*xyz2[2],-xyz2[1],xyz2[2],0,0,0);
+    var ratio=R/rr;
+
+    var rotation=rotate(-Math.tan(ry*Math.PI/180)*xyz2[2]*ratio,-xyz2[1]*ratio,xyz2[2]*ratio,snot.rx,snot.ry);
+    var ax=-rotation[0];
+    var ay=-rotation[1];
+    var az=-rotation[2];
+
+    // rotateZ
+    // ...
+    var r_center = rotate(0,0,1,snot.rx,snot.ry);
+    var pos = new THREE.Matrix4().multiplyMatrices(new THREE.Matrix4().makeRotationAxis({x:r_center[0],y:r_center[1],z:r_center[2]},snot.rz*Math.PI/180),new THREE.Matrix4().setPosition({x:ax,y:ay,z:az})).getPosition();
+    ax=pos.x;
+    ay=pos.y;
+    az=pos.z;
+
+    var minOffset=0.4;
+    var minDistance=snot.minDetectDistance;
+    var nearest;
+    $('.sprite').each(function(){
+      var matrix=text2Matrix($(this)[0].style.webkitTransform);
+      var rate_=100/distance3D(0,0,0,snot.cubeSize/2-matrix[12],matrix[13]-snot.cubeSize/2,-matrix[14]);
+
+      var distance=distance3D(ax,-ay,az,(snot.cubeSize/2-matrix[12])*rate_,rate_*(matrix[13]-snot.cubeSize/2),rate_*(-matrix[14]));
+      if(distance<minDistance){
+        minDistance=distance;
+        nearest=$(this).children().eq(0);
+      }
+    });
+
+    var rotation=position2rotation(ax,az,ay);
+    if(nearest){
+      snot.onSpriteClick(nearest[0].data,nearest[0]);
+    }else{
+      snot.onClick(ax,ay,az,rotation[0],rotation[1]);
+    }
+  }
+
+  var mouseUp = function (event) {
     event.preventDefault();
     event.stopPropagation();
 
@@ -347,58 +414,10 @@
     y-=dom_offset_top;
 
     //Screen coordinate to Sphere 3d coordinate
-    if (distance2D(mouseDownX,mouseDownY,x,y)<5) {     // Single click
-
-      var R=100;
-
-      var ry=(x/snot.width-0.5)*snot.fov;
-      var rx=(y/snot.height-0.5)*snot.fov*snot.height/snot.width;
-      var r=Math.cos(snot.fov/2*Math.PI/180)*snot.cubeSize;
-      var ratiox=(x-snot.width/2)/snot.width*2;
-      var ratioy=(y-snot.height/2)/snot.width*2;
-      var P=Math.sin(snot.fov/2*Math.PI/180)*snot.cubeSize;
-
-      ry=Math.atan(ratiox*P/r);
-      rx=Math.atan(ratioy*P/r);
-
-      ry*=180/Math.PI;
-      rx*=180/Math.PI;
-
-      var xyz2=rotation2Position(R,rx,0);
-
-      var rr=distance3D(-Math.tan(ry*Math.PI/180)*xyz2[2],-xyz2[1],xyz2[2],0,0,0);
-      var ratio=R/rr;
-
-      var rotation=rotate(-Math.tan(ry*Math.PI/180)*xyz2[2]*ratio,-xyz2[1]*ratio,xyz2[2]*ratio,snot.rx,snot.ry);
-      var ax=-rotation[0];
-      var ay=-rotation[1];
-      var az=-rotation[2];
-
-      var minOffset=0.4;
-      var minDistance=snot.minDetectDistance;
-      var nearest;
-      $('.sprite').each(function(){
-        var matrix=text2Matrix($(this)[0].style.webkitTransform);
-        var rate_=100/distance3D(0,0,0,snot.cubeSize/2-matrix[12],matrix[13]-snot.cubeSize/2,-matrix[14]);
-
-        var distance=distance3D(ax,-ay,az,(snot.cubeSize/2-matrix[12])*rate_,rate_*(matrix[13]-snot.cubeSize/2),rate_*(-matrix[14]));
-        if(distance<minDistance){
-          minDistance=distance;
-          nearest=$(this).children().eq(0);
-        }
-      });
-
-      var rotation=position2rotation(ax,az,ay);
-      if(nearest){
-        snot.onSpriteClick(nearest[0].data,nearest[0]);
-      }else{
-        snot.onClick(ax,ay,az,rotation[0],rotation[1]);
-      }
-
+    if (distance2D(mouseDownX,mouseDownY,x,y)<5) {
+      onClick(x, y);
     }
-
     touches.onTouching=false;
-
   }
 
 
@@ -455,8 +474,19 @@ function toMat(q) {
         xz - wy, yz + wx, 1 - (xx + yy), 0,
         0, 0, 0, 1];
     }
-    snot.camera.style.transform = 'translateZ('+epsilon(snot.perspective)+'px)'+" matrix3d(" + toMat(quaternion) + ")"+ snot.cameraBaseTransform;
+    var newQuaternion = new THREE.Quaternion();
+    THREE.Quaternion.slerp( quaternion, previous_quat , newQuaternion, 1 - snot.smooth);
+    previous_quat = newQuaternion;
+    var mat = toMat(newQuaternion);
+    var mat4= {elements:mat};
+    var a=new THREE.Euler().setFromRotationMatrix(mat4,'XZY');
+    snot.rx = a._x*180/Math.PI;
+    snot.ry = a._y*180/Math.PI;
+    snot.rz = a._z*180/Math.PI;
+    $('#logger').html(parseInt(snot.rx)+','+ parseInt(snot.ry) +','+ parseInt(snot.rz));
+    snot.camera.style.transform = 'translateZ('+epsilon(snot.perspective)+'px)'+" matrix3d(" + mat + ")"+ snot.cameraBaseTransform;
   }
+  var previous_quat = new THREE.Quaternion();
 
   var screen_orientation = 0;
   window.addEventListener( 'orientationchange', function(ev) {

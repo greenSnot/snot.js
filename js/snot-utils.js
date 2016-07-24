@@ -236,14 +236,14 @@ function include_js(file,callback) {
         }
     }
 }
-function rotation2Position(z,rx,ry){
+function rotation2Position(z,rx,ry,rz){
     z=-z;
     rx=-rx;
 
     var x=snot.cubeSize/2;
     var y=snot.cubeSize/2;
 
-    var transform = text2Matrix( 'translate3d('+x+'px,'+y+'px,0) rotateY('+(0)+'deg) rotateX('+(0)+'deg) rotateY('+(ry?-ry:0)+'deg) rotateX('+(rx?-rx:0)+'deg) translateZ('+z+'px)' );
+    var transform = text2Matrix( 'translate3d('+x+'px,'+y+'px,0) rotateY('+(0)+'deg) rotateX('+(0)+'deg) rotateY('+(ry?-ry:0)+'deg) rotateX('+(rx?-rx:0)+'deg) rotateZ('+(rz?rz:0)+'deg) translateZ('+z+'px)' );
     return [-transform[12]+snot.cubeSize/2,transform[13]-snot.cubeSize/2,-transform[14]];
 
 }

@@ -30,8 +30,18 @@
           </div>
       </div>
   </script>
-  <script>THREE={}</script>
+  <script>
+    THREE={};
+    THREE.Math={
+      clamp:function(a,b,c){
+        if(a>c)return c;
+        if(a<b)return b;
+        return a;
+      }
+    };
+  </script>
   <script src="libs/Vector3.js"></script>
+  <script src="libs/Matrix4.js"></script>
   <script src="libs/Quaternion.js"></script>
   <script src="libs/Euler.js"></script>
   <script src="js/template-native.js"></script>
@@ -54,7 +64,6 @@
         alert('onSpriteClick');
     }
     function onClick(x,y,z,rx,ry){
-        console.log(x,y,z,rx,ry);
         snot.loadSprites([{
                 //For CSS Renderer
                 //TemplateId for template renderer
@@ -65,9 +74,9 @@
                 spotType:random(['straight','left','right']),
                 id:'spot-'+123,
                 text:'haha',
-                x:x,
-                y:y,
-                z:z
+                x:x*4,
+                y:y*4,
+                z:z*4
         }]);
     }
 
@@ -93,7 +102,7 @@
         fov:90,
         maxFov:110,
         minFov:60,
-        smooth:0.8,
+        smooth:0.17,
         movingRatio:0.3,
         autoRotation:0.0,
         rx:0,
