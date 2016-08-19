@@ -1,65 +1,3 @@
-function quaternion2euler(w,x,y,z){
-    var a=Math.atan2(2*(w*x+y*z),1-2*(x*x+y*y));
-    var b=Math.asin(2*(w*y-z*x));
-    var c=Math.atan2(2*(w*z+x*y),1-2*(y*y+z*z));
-    return [a,b,c]
-}
-function getQuaternion( alpha, beta, gamma ) {
-
-    var degtorad=Math.PI/180;
-  var _x = beta  ? beta  * degtorad : 0; // beta value
-  var _y = gamma ? gamma * degtorad : 0; // gamma value
-  var _z = alpha ? alpha * degtorad : 0; // alpha value
-
-  var cX = Math.cos( _x/2 );
-  var cY = Math.cos( _y/2 );
-  var cZ = Math.cos( _z/2 );
-  var sX = Math.sin( _x/2 );
-  var sY = Math.sin( _y/2 );
-  var sZ = Math.sin( _z/2 );
-
-  //
-  // ZXY quaternion construction.
-  //
-
-  var w = cX * cY * cZ - sX * sY * sZ;
-  var x = sX * cY * cZ - cX * sY * sZ;
-  var y = cX * sY * cZ + sX * cY * sZ;
-  var z = cX * cY * sZ + sX * sY * cZ;
-
-  return [ w, x, y, z ];
-
-}
-var unbindOrientation=function(){
-	window.removeEventListener( 'orientationchange');
-	window.removeEventListener( 'deviceorientation');
-}
-var bindOrientation=function(callback){
-    var scope=this;
-    window.addEventListener('orientationchange',function(){
-        scope.screenOrientation=window.orientation||0;
-    },false);
-    window.addEventListener('deviceorientation', function(){ 
-        /*
-        var beta=event.beta?event.beta*Math.PI/180:0;
-        var gamma=event.gamma?event.gamma*Math.PI/180:0;
-        var alpha=event.alpha?event.alpha*Math.PI/180:0;
-        var orient=scope.screenOrientation?scope.screenOrientation*Math.PI/180:0;
-
-        var euler= new THREE.Euler();
-        euler.set(beta,alpha,-gamma,'YXZ');
-        var q=new THREE.Quaternion().setFromEuler(euler);
-        q.multiply(new THREE.Quaternion(-Math.sqrt(0.5),0,0,Math.sqrt(0.5)));
-        q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),-orient));
-        callback(q.w,q.x,q.y,q.z);
-        return;
-        */
-
-        var q=getQuaternion(event.alpha,event.beta,event.gamma);
-        callback(q[0],q[1],q[2],q[3]);
-    });
-}
-
 function leftPos(elem) {
     var curleft = 0;
     if (elem.offsetParent) {
@@ -139,28 +77,6 @@ function matrix2Text(a,b,c,d ,e,f,g,h, i,j,k,l, m,n,o,p){
         return 'matrix3d('+(a.join(','))+')';
     }
     return 'matrix3d('+a+','+b+','+c+','+d+','+e+','+f+','+g+','+h+','+i+','+j+','+k+','+l+','+m+','+n+','+o+','+p+')';
-}
-
-function multiplyMatrix(a,b){
-    var m=
-        [
-                    a[0] *b[0]+a[1] *b[4]+a[2] *b[8]+a[3] *b[12], a[0] *b[1]+a[1] *b[5]+a[2] *b[9]+a[3] *b[13], a[0] *b[2]+a[1] *b[6]+a[2] *b[10]+a[3] *b[14], a[0] *b[3]+a[1] *b[7]+a[2] *b[11]+a[3] *b[15],
-                       a[4] *b[0]+a[5] *b[4]+a[6] *b[8]+a[7] *b[12], a[4] *b[1]+a[5] *b[5]+a[6] *b[9]+a[7] *b[13], a[4] *b[2]+a[5] *b[6]+a[6] *b[10]+a[7] *b[14], a[4] *b[3]+a[5] *b[7]+a[6] *b[11]+a[7] *b[15],
-                       a[8] *b[0]+a[9] *b[4]+a[10]*b[8]+a[11]*b[12], a[8] *b[1]+a[9] *b[5]+a[10]*b[9]+a[11]*b[13], a[8] *b[2]+a[9] *b[6]+a[10]*b[10]+a[11]*b[14], a[8] *b[3]+a[9] *b[7]+a[10]*b[11]+a[11]*b[15],
-                       a[12]*b[0]+a[13]*b[4]+a[14]*b[8]+a[15]*b[12], a[12]*b[1]+a[13]*b[5]+a[14]*b[9]+a[15]*b[13], a[12]*b[2]+a[13]*b[6]+a[14]*b[10]+a[15]*b[14], a[12]*b[3]+a[13]*b[7]+a[14]*b[11]+a[15]*b[15]
-        ];
-    return m;
-}
-
-function multiplyMatrixs(list){
-    if(list.length==1){
-        return list[0];
-    }
-    var t=[multiplyMatrix(list[1],list[0])];
-    for(var j=2;j<list.length;++j){
-        t.push(list[j]);
-    }
-    return multiplyMatrixs(t);
 }
 function isAndroid(){
     var u=navigator.userAgent;

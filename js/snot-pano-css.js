@@ -45,11 +45,6 @@
   }
 
 
-  var tween = new TWEEN.Tween(snot)
-  //.easing(TWEEN.Easing.Exponential.Out);
-  .easing(TWEEN.Easing.Quartic.Out);
-  //.easing(TWEEN.Easing.Cubic.Out);
-  //.easing(TWEEN.Easing.Linear);
 
 
   var _init = function(config,ajax){
@@ -232,10 +227,7 @@
     x+=snot.cubeSize/2;
     y+=snot.cubeSize/2;
 
-    var transform=text2Matrix('translate3d('+epsilon(x)+'px,'+epsilon(y)+'px,'+epsilon(z)+'px) rotateY('+epsilon(arc)+'deg) rotateX('+epsilon((y-snot.cubeSize/2)/r*-90)+'deg) rotateY(180deg)');
-
-    wrap.style['-webkit-transform']=matrix2Text(transform);
-
+    wrap.style['-webkit-transform']='translate3d('+epsilon(x)+'px,'+epsilon(y)+'px,'+epsilon(z)+'px) rotateY('+epsilon(arc)+'deg) rotateX('+epsilon((y-snot.cubeSize/2)/r*-90)+'deg) rotateY(180deg)';
     wrap.appendChild( element );
     snot.camera.appendChild( wrap );
   }
@@ -290,16 +282,8 @@
     _rx=_rx>90?90  :_rx;
     _rx=_rx<-90?-90:_rx;
 
-    if(isIphone()||isAndroid()||!isIpad()){
-      tween
-        .to({ry:_ry,rx:_rx},300)
-        .start();
-    }else{
-      snot.camera.style['-webkit-transition']='all 0.3s ease-out';
-      snot.rx=_rx;
-      snot.ry=_ry;
-    }
 
+    //TODO
 
   };
 
@@ -343,13 +327,33 @@
 
   }
 
+  function multiply(mats){
+    if (mats.length == 2) {
+      return new THREE.Matrix4().multiplyMatrices(
+        mats[0],
+        mats[1]
+      );
+    }
+    for (var i in mats) {
+      var last2 = mats[mats.length - 2];
+      var last1 = mats[mats.length - 1];
+      mats[mats.length - 2] = new THREE.Matrix4().multiplyMatrices(
+        last2,
+        last1
+      );
+      mats.pop();
+      return multiply(mats);
+    }
+  }
+
   function onClick (x, y) {
     var R=100;
     var fov = snot.fov;
-    var width = snot.width;
-    var height = snot.height;
     var cubeSize = snot.cubeSize;
     var arcFactor = Math.PI/180;
+    var rz = snot.rz*arcFactor;
+    var width = snot.width;
+    var height = snot.height;
 
     var ry=(x/width-0.5)*fov;
     var rx=(y/height-0.5)*fov*height/width;
@@ -369,18 +373,20 @@
     var rr=distance3D(-Math.tan(ry*arcFactor)*xyz2[2],-xyz2[1],xyz2[2],0,0,0);
     var ratio=R/rr;
 
-    var rotation=rotate(-Math.tan(ry*Math.PI/180)*xyz2[2]*ratio,-xyz2[1]*ratio,xyz2[2]*ratio,snot.rx,snot.ry);
-    var ax=-rotation[0];
-    var ay=-rotation[1];
-    var az=-rotation[2];
+    var new_x = -Math.tan(ry*Math.PI/180)*xyz2[2]*ratio;
+    var new_y = -xyz2[1]*ratio;
+    var new_z = xyz2[2]*ratio;
 
-    // rotateZ
-    // ...
-    var r_center = rotate(0,0,1,snot.rx,snot.ry);
-    var pos = new THREE.Matrix4().multiplyMatrices(new THREE.Matrix4().makeRotationAxis({x:r_center[0],y:r_center[1],z:r_center[2]},snot.rz*Math.PI/180),new THREE.Matrix4().setPosition({x:ax,y:ay,z:az})).getPosition();
-    ax=pos.x;
-    ay=pos.y;
-    az=pos.z;
+    var pos = multiply([
+      new THREE.Matrix4().makeRotationAxis({x:0,y:1,z:0},-snot.ry*Math.PI/180),
+      new THREE.Matrix4().makeRotationAxis({x:0,y:0,z:1},-snot.rz*Math.PI/180),
+      new THREE.Matrix4().makeRotationAxis({x:1,y:0,z:0},-snot.rx*Math.PI/180),
+      new THREE.Matrix4().setPosition({x:new_x,y:new_y,z:new_z})
+    ]).getPosition();
+
+    ax = pos.x;
+    ay = pos.y;
+    az = pos.z;
 
     var minOffset=0.4;
     var minDistance=snot.minDetectDistance;
@@ -420,60 +426,53 @@
     touches.onTouching=false;
   }
 
-
   function _animate() {
     snot._animateId=requestAnimationFrame( _animate );
     if(!snot.pauseAnimation){
       _update();
-      TWEEN.update();
     }
+  }
+
+  function toMat(q) {
+
+    var w = q['w'];
+    var x = -q['x'];
+    var y = q['y'];
+    var z = -q['z'];
+
+    var n = w * w + x * x + y * y + z * z;
+    var s = n === 0 ? 0 : 2 / n;
+    var wx = s * w * x, wy = s * w * y, wz = s * w * z;
+    var xx = s * x * x, xy = s * x * y, xz = s * x * z;
+    var yy = s * y * y, yz = s * y * z, zz = s * z * z;
+
+    return [
+      1 - (yy + zz), xy - wz, xz + wy, 0,
+        xy + wz, 1 - (xx + zz), yz - wx, 0,
+        xz - wy, yz + wx, 1 - (xx + yy), 0,
+        0, 0, 0, 1];
   }
 
   function _update() {
     snot.frames++;
 
-    //snot.ry+=snot.autoRotation;
-    //_ry+=snot.autoRotation;
-
-    //snot.camera.style.webkitTransform = 'translateZ('+epsilon(snot.perspective)+'px)'+' rotateX('+epsilon(snot.rx)+'deg) rotateY('+epsilon(snot.ry)+'deg)'+ snot.cameraBaseTransform;
-
-    
     if (vars.alpha === -1 && vars.beta === -1 && vars.gamma === -1)
       return;
-		var zee = new THREE.Vector3( 0, 0, 1 );
+    var zee = new THREE.Vector3( 0, 0, 1 );
 
-		var euler = new THREE.Euler();
+    var euler = new THREE.Euler();
 
-		var q0 = new THREE.Quaternion();
+    var q0 = new THREE.Quaternion();
 
-		var q1 = new THREE.Quaternion( - Math.sqrt( 0.5 ), 0, 0, Math.sqrt( 0.5 ) ); // - PI/2 around the x-axis
+    var q1 = new THREE.Quaternion( - Math.sqrt( 0.5 ), 0, 0, Math.sqrt( 0.5 ) ); // - PI/2 around the x-axis
     var quaternion = new THREE.Quaternion();
-			euler.set( vars.beta, vars.alpha, - vars.gamma, 'YXZ' ); // 'ZXY' for the device, but 'YXZ' for us
+    euler.set( vars.beta, vars.alpha, - vars.gamma, 'YXZ' ); // 'ZXY' for the device, but 'YXZ' for us
 
-			quaternion.setFromEuler( euler ); // orient the device
+    quaternion.setFromEuler( euler ); // orient the device
 
-			quaternion.multiply( q1 ); // camera looks out the back of the device, not the top
+    quaternion.multiply( q1 ); // camera looks out the back of the device, not the top
 
-			quaternion.multiply( q0.setFromAxisAngle( zee, - screen_orientation) ); // adjust for screen orientation
-function toMat(q) {
-
-      var w = q['w'];
-      var x = -q['x'];
-      var y = q['y'];
-      var z = -q['z'];
-
-      var n = w * w + x * x + y * y + z * z;
-      var s = n === 0 ? 0 : 2 / n;
-      var wx = s * w * x, wy = s * w * y, wz = s * w * z;
-      var xx = s * x * x, xy = s * x * y, xz = s * x * z;
-      var yy = s * y * y, yz = s * y * z, zz = s * z * z;
-
-      return [
-        1 - (yy + zz), xy - wz, xz + wy, 0,
-        xy + wz, 1 - (xx + zz), yz - wx, 0,
-        xz - wy, yz + wx, 1 - (xx + yy), 0,
-        0, 0, 0, 1];
-    }
+    quaternion.multiply( q0.setFromAxisAngle( zee, - screen_orientation) ); // adjust for screen orientation
     var newQuaternion = new THREE.Quaternion();
     THREE.Quaternion.slerp( quaternion, previous_quat , newQuaternion, 1 - snot.smooth);
     previous_quat = newQuaternion;
@@ -517,31 +516,11 @@ function toMat(q) {
 
 
   var _setRx=function(rx,smooth){
-    rx=parseFloat(rx);
-    if(smooth){
-      _rx=rx;
-      tween
-        .to({ry:_ry,rx:_rx},300)
-        .start();
-    }else{
-      snot.rx=rx;
-    }
+    //TODO
   }
 
   var _setRy=function(ry,smooth){
-    ry=parseFloat(ry);
-    if(smooth){
-      if(ry-snot.ry%360>180)snot.ry+=360;
-      if(snot.ry%360-ry>180)snot.ry-=360;
-      _ry=ry;
-      console.log('ry:'+_ry);
-      console.log('panory:'+snot.ry);
-      tween
-        .to({ry:_ry,rx:_rx},300)
-        .start();
-    }else{
-      pano.ry=ry;
-    }
+    //TODO
   }
 
   $.extend(global.snot,{
