@@ -44,9 +44,6 @@
     snot.container.style['-webkit-transform']='scale('+Math.tan(snot.maxfov/2*Math.PI/180)/Math.tan(snot.fov/2*Math.PI/180)+')';
   }
 
-
-
-
   var _init = function(config,ajax){
     $('.sprite').remove();
     _imageDownloaded=0;
@@ -90,8 +87,8 @@
       // rotateY rotate around Y axis
       // translateX translate the Camera to center
       // translateY
-      snot.camera.style['-webkit-transform']='translateZ('+snot.perspective+'px) rotateX('+snot.rx+'deg) rotateY('+snot.ry+'deg) translateX('+((snot.cubeSize-snot.width)/-2)+'px) translateY('+((snot.cubeSize-snot.height)/-2)+'px)';
       snot.cameraBaseTransform='translateX('+epsilon((snot.cubeSize-snot.width)/-2)+'px) translateY('+epsilon((snot.cubeSize-snot.height)/-2)+'px)';
+      snot.camera.style['-webkit-transform']='translateZ(-'+snot.perspective+'px) rotateX('+snot.rx+'deg) rotateY('+snot.ry+'deg)'+ snot.cameraBaseTransform;
 
     }
     _setFov(snot.fov);
@@ -137,6 +134,7 @@
       back  :"rotateY(90deg)"+"rotateY(180deg) rotateZ("+imgs_rotation[3]+"deg)  translateZ(-" + (snot.cubeSize/2)+"px)",
       top   :"rotateY(90deg)"+"rotateX(-90deg) rotateZ("+imgs_rotation[4]+"deg)  translateZ(-" + (snot.cubeSize/2)+"px) rotateZ(-90deg)",
       right :"rotateY(90deg)"+"rotateY(-90deg) rotateZ("+imgs_rotation[5]+"deg)  translateZ(-" + (snot.cubeSize/2)+"px)"
+
 
     };
 
@@ -185,8 +183,7 @@
     }
   }
 
-  var rotate=function(x,y,z,rx,ry){
-    // todo ,error in approximate 90deg of screen
+  var rotate = function(x,y,z,rx,ry){
     var PI=Math.PI;
     var pos = new THREE.Matrix4().multiplyMatrices(
         new THREE.Matrix4().multiplyMatrices(
@@ -237,8 +234,8 @@
     event.preventDefault();
     event.stopPropagation();
 
-    var x=parseInt(event.clientX>=0?event.clientX:event.touches[0].pageX);
-    var y=parseInt(event.clientY>=0?event.clientY:event.touches[0].pageY);
+    var x=Math.floor(event.clientX>=0?event.clientX:event.touches[0].pageX);
+    var y=Math.floor(event.clientY>=0?event.clientY:event.touches[0].pageY);
     x-=dom_offset_left;
     y-=dom_offset_top;
 
@@ -294,8 +291,8 @@
     event.preventDefault();
     event.stopPropagation();
 
-    var x=parseInt(event.clientX>=0?event.clientX:event.touches[0].clientX);
-    var y=parseInt(event.clientY>=0?event.clientY:event.touches[0].clientY);
+    var x=Math.floor(event.clientX>=0?event.clientX:event.touches[0].clientX);
+    var y=Math.floor(event.clientY>=0?event.clientY:event.touches[0].clientY);
     x-=dom_offset_left;
     y-=dom_offset_top;
 
@@ -414,8 +411,8 @@
     event.preventDefault();
     event.stopPropagation();
 
-    var x=parseInt(event.clientX>=0?event.clientX:event.changedTouches[0].pageX);
-    var y=parseInt(event.clientY>=0?event.clientY:event.changedTouches[0].pageY);
+    var x=Math.floor(event.clientX>=0?event.clientX:event.changedTouches[0].pageX);
+    var y=Math.floor(event.clientY>=0?event.clientY:event.changedTouches[0].pageY);
     x-=dom_offset_left;
     y-=dom_offset_top;
 
@@ -482,7 +479,7 @@
     snot.rx = a._x*180/Math.PI;
     snot.ry = a._y*180/Math.PI;
     snot.rz = a._z*180/Math.PI;
-    $('#logger').html(parseInt(snot.rx)+','+ parseInt(snot.ry) +','+ parseInt(snot.rz));
+    //$('#logger').html(Math.floor(snot.rx)+','+ Math.floor(snot.ry) +','+ Math.floor(snot.rz));
     snot.camera.style.transform = 'translateZ('+epsilon(snot.perspective)+'px)'+" matrix3d(" + mat + ")"+ snot.cameraBaseTransform;
   }
   var previous_quat = new THREE.Quaternion();
@@ -494,12 +491,12 @@
 
   var vars = {
     alpha: 0,
-    beta: .7,
+    beta: Math.PI/2,
     gamma: 0
   };
 
   var varsDest = {
-    alpha: .4,
+    alpha: 0,
     beta: 0,
     gamma: 0
   };
