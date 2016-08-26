@@ -195,25 +195,24 @@
     return ([-pos.x,-pos.y,-pos.z]);
   }
 
-  var addSpriteByPosition=function(element,x,y,z,rx,ry){
+  var addSpriteByRotation = function(element, rx, ry) {
+    var rotation = rotate(x,y,z,rx,ry);
+    addSpriteByPosition(element,rotation[0],rotation[1],rotation[2]);
+  }
+
+  var addSpriteByPosition=function(element,x,y,z){
 
     z=-z;
-    x=-x;
     y=-y;
 
-    if(rx!=undefined&&ry!=undefined){
-      var rotation=rotate(x,y,z,rx,ry);
-      addSpriteByPosition(element,rotation[0],rotation[1],rotation[2]);
-      return;
-    }
+    var spriteContainer = document.createElement('div');
+    spriteContainer.style.display='inline-block';
+    spriteContainer.style.position='absolute';
+    spriteContainer.className="sprite-container";
+    spriteContainer.id = element.data.id;
 
-    var wrap= document.createElement('div');
-    wrap.style.display='inline-block';
-    wrap.style.position='absolute';
-    wrap.className="sprite";
-
-    wrap.style['-webkit-transform-origin-x']='0';
-    wrap.style['-webkit-transform-origin-y']='0';
+    spriteContainer.style['-webkit-transform-origin-x']='0';
+    spriteContainer.style['-webkit-transform-origin-y']='0';
 
     var arc=x==0&&z==0?0:Math.acos(z/Math.pow(x*x+z*z,0.5));
 
@@ -224,14 +223,31 @@
     x+=snot.cubeSize/2;
     y+=snot.cubeSize/2;
 
-    wrap.style['-webkit-transform']='translate3d('+epsilon(x)+'px,'+epsilon(y)+'px,'+epsilon(z)+'px) rotateY('+epsilon(arc)+'deg) rotateX('+epsilon((y-snot.cubeSize/2)/r*-90)+'deg) rotateY(180deg)';
+    spriteContainer.style['-webkit-transform']='translate3d('+epsilon(x)+'px,'+epsilon(y)+'px,'+epsilon(z)+'px) rotateY('+epsilon(arc)+'deg) rotateX('+epsilon((y-snot.cubeSize/2)/r*-90)+'deg) rotateY(180deg)';
 
-    var contentWrap = document.createElement('div');
-    contentWrap.setAttribute('data-type','sprite');
-    contentWrap.appendChild(element);
+    var spriteWrap = document.createElement('div');
+    spriteWrap.className='sprite-wrap';
+    spriteWrap.appendChild(element);
 
-    wrap.appendChild(contentWrap);
-    snot.camera.appendChild( wrap );
+    spriteContainer.appendChild(spriteWrap);
+    snot.camera.appendChild(spriteContainer);
+  }
+
+  var updateSpritePosition = function(id, x, y, z) {
+    z=-z;
+    y=-y;
+    var arc=x==0&&z==0?0:Math.acos(z/Math.pow(x*x+z*z,0.5));
+
+    arc=x<0?2*Math.PI-arc:arc;
+    arc=arc*180/Math.PI;
+
+    var r=distance3D(x,y,z,0,0,0);
+    x+=snot.cubeSize/2;
+    y+=snot.cubeSize/2;
+
+    var spriteContainer = document.getElementById(id);
+
+    spriteContainer.style['-webkit-transform']='translate3d('+epsilon(x)+'px,'+epsilon(y)+'px,'+epsilon(z)+'px) rotateY('+epsilon(arc)+'deg) rotateX('+epsilon((y-snot.cubeSize/2)/r*-90)+'deg) rotateY(180deg)';
   }
 
   var mouseMove = function (event) {
@@ -386,18 +402,18 @@
       new THREE.Matrix4().setPosition({x:new_x,y:new_y,z:new_z})
     ]).getPosition();
 
-    ax = pos.x;
+    ax = -pos.x;
     ay = pos.y;
     az = pos.z;
 
     var minOffset=0.4;
     var minDistance=snot.minDetectDistance;
     var nearest;
-    $('.sprite').each(function(){
+    $('.sprite-container').each(function(){
       var matrix=text2Matrix($(this)[0].style.webkitTransform);
       var rate_=100/distance3D(0,0,0,snot.cubeSize/2-matrix[12],matrix[13]-snot.cubeSize/2,-matrix[14]);
 
-      var distance=distance3D(ax,-ay,az,(snot.cubeSize/2-matrix[12])*rate_,rate_*(matrix[13]-snot.cubeSize/2),rate_*(-matrix[14]));
+      var distance=distance3D(-ax,-ay,az,(snot.cubeSize/2-matrix[12])*rate_,rate_*(matrix[13]-snot.cubeSize/2),rate_*(-matrix[14]));
       if(distance<minDistance){
         minDistance=distance;
         nearest=$(this).children().eq(0);
@@ -531,5 +547,6 @@
     setRy: _setRy,
     init: _init,
     loadSprites: _loadSprites,
+    updateSpritePosition: updateSpritePosition
   });
 }(window);
