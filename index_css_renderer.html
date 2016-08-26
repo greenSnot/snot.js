@@ -23,12 +23,15 @@
     <div id="logger"></div>
   </body>
   <script id="template-spot" type="text/html">
-      <div data-type="sprite" class="<#=spriteType+'-'+spotType#>" id="<#=id#>" >
-          <div class="spot-description"><#=text#></div>
-          <div class="spot-image-wrap">
-              <div class="spot-image"></div>
-          </div>
+    <div class="spot-<#=spotType#>">
+      <div class="spot-description"><#=text#></div>
+      <div class="spot-image-wrap">
+          <div class="spot-image"></div>
       </div>
+    </div>
+  </script>
+  <script id="template-bullet" type="text/html">
+    <div style="width:2px;height:4px;background:rgba(255,0,0,0.4);"></div>
   </script>
   <script>
     THREE={};
@@ -50,7 +53,6 @@
       template.config('closeTag','#>');
   </script>
   <script src="js/zepto.min.js"></script>
-  <script src="js/tween.min.js"></script>
   <script src="js/snot-utils.js"></script>
   <script src="js/snot-pano-css.js"></script>
 </html>
@@ -119,9 +121,9 @@
                 spotType:random(['straight','left','right']),
                 id:'spot-'+123,
                 text:'Home',
-                x:1,
-                y:30,
-                z:90
+                x:4,
+                y:120,
+                z:360
         },{
                 //For CSS Renderer
                 template:'template-spot',
@@ -131,9 +133,9 @@
                 spotType:random(['straight','left','right']),
                 id:'spot-'+123,
                 text:'Market',
-                x:82,
+                x:329,
                 y:0,
-                z:56
+                z:240
         },{
                 //For CSS Renderer
                 template:'template-spot',
@@ -143,9 +145,9 @@
                 spotType:random(['straight','left','right']),
                 id:'spot-'+123,
                 text:'Zoo',
-                x:83,
+                x:320,
                 y:0,
-                z:-55
+                z:-230
         },{
                 //For CSS Renderer
                 template:'template-spot',
@@ -155,9 +157,49 @@
                 spotType:random(['straight','left','right']),
                 id:'spot-'+123,
                 text:'Garage',
-                x:96,
+                x:400,
                 y:0,
-                z:-27
+                z:-110
+        },{
+                //For CSS Renderer
+                template:'template-bullet',
+
+                id:'spot-'+123,
+                x:0,
+                y:0,
+                z:50
+        },{
+                //For CSS Renderer
+                template:'template-bullet',
+
+                id:'spot-'+123,
+                x:0,
+                y:0,
+                z:40
+        },{
+                //For CSS Renderer
+                template:'template-bullet',
+
+                id:'spot-'+123,
+                x:0,
+                y:0,
+                z:30
+        },{
+                //For CSS Renderer
+                template:'template-bullet',
+
+                id:'spot-'+123,
+                x:0,
+                y:0,
+                z:20
+        },{
+                //For CSS Renderer
+                template:'template-bullet',
+
+                id:'spot-'+123,
+                x:0,
+                y:0,
+                z:10
         }]
     });
 </script>

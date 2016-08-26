@@ -225,7 +225,12 @@
     y+=snot.cubeSize/2;
 
     wrap.style['-webkit-transform']='translate3d('+epsilon(x)+'px,'+epsilon(y)+'px,'+epsilon(z)+'px) rotateY('+epsilon(arc)+'deg) rotateX('+epsilon((y-snot.cubeSize/2)/r*-90)+'deg) rotateY(180deg)';
-    wrap.appendChild( element );
+
+    var contentWrap = document.createElement('div');
+    contentWrap.setAttribute('data-type','sprite');
+    contentWrap.appendChild(element);
+
+    wrap.appendChild(contentWrap);
     snot.camera.appendChild( wrap );
   }
 
