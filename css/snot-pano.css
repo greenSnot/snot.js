@@ -8,9 +8,9 @@ html,body{padding:0;margin:0;width:100%;height:100%;overflow:hidden;}
 
 #logger     {position:absolute;top:0;width:100%;z-index:100;color:#fff;font-size:20px;text-shadow:1px 1px #000;word-break:break-all;}
 .spot-description{
-    display:inline-block;
-    width:128px;
-    text-align:center;
+  display:inline-block;
+  width:128px;
+  text-align:center;
 }
 
 .sprite-wrap{
@@ -19,10 +19,10 @@ html,body{padding:0;margin:0;width:100%;height:100%;overflow:hidden;}
 }
 
 .spot-straight,.spot-left,.spot-right{
-    color:#fff;
-    font-weight:bold;
-    text-shadow:1px 1px 2px #000;
-    z-index:25;
+  color:#fff;
+  font-weight:bold;
+  text-shadow:1px 1px 2px #000;
+  z-index:25;
 }
 .spot-straight>.spot-image-wrap,.spot-left>.spot-image-wrap,.spot-right>.spot-image-wrap{content:'';display:block;position:absolute;bottom:14px;width:128px;height:128px;background-size:128px 3200px;overflow:hidden;
 }

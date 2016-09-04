@@ -4,6 +4,11 @@
   var dom_offset_left;
   var snot={
 
+    cameraLookAt:{
+      x: 0,
+      y: 0,
+      z: 1,
+    },
     movingRatio:0.3,
     autoRotation:0,
     frames:0,
@@ -11,7 +16,9 @@
 
     pauseAnimation: false,
 
-    dom       : $('#snot-pano'),
+    dom       : document.getElementById('snot-pano'),
+    camera   : document.getElementById('camera'),
+    container: document.getElementById('container'),
 
     cubeSize : 1024,
 
@@ -44,8 +51,15 @@
     snot.container.style['-webkit-transform']='scale('+Math.tan(snot.maxfov/2*Math.PI/180)/Math.tan(snot.fov/2*Math.PI/180)+')';
   }
 
+  function reset() {
+    var sprites = document.getElementsByClassName('sprite');
+    for (var i = 0; i < sprites.length; ++ i) {
+      sprites[i].remove();
+    }
+  }
+
   var _init = function(config,ajax){
-    $('.sprite').remove();
+    reset();
     _imageDownloaded=0;
 
     cancelAnimationFrame(snot._animateId);
@@ -54,8 +68,8 @@
       snot[i]=config[i];
     }
 
-    dom_offset_left=leftPos(snot.dom[0]);
-    dom_offset_top=topPos(snot.dom[0]);
+    dom_offset_left=leftPos(snot.dom);
+    dom_offset_top=topPos(snot.dom);
 
     _rx=snot.rx;
     _ry=snot.ry;
@@ -63,14 +77,8 @@
     //First init
     if(!ajax){
 
-      snot.camera    = snot.dom.find('#camera')[0],
-        snot.container = snot.dom.find('#container')[0],
-        snot.dom.find('.link').each(function(){
-          $(this).remove();
-        });
-
-      snot.width=snot.dom.width();
-      snot.height=snot.dom.height();
+      snot.width = snot.dom.offsetWidth;
+      snot.height = snot.dom.offsetHeight;
 
       //compute the max Horizontal Field of view
       //perspective= projectiveScreenWidth/2
@@ -119,8 +127,6 @@
     if(config.callback){
       config.callback();
     }
-    _animate();
-
   }
 
   function loadImages(imgs_preview,imgs_original,imgs_rotation,onPreviewImagesLoad){
@@ -139,18 +145,21 @@
     };
 
     var counter=0;
+    var cubeDom;
     for(var i in _cubeConfig){
-      $('.cube.'+i).css('-webkit-transform',_cubeConfig[i]);
-      $('.cube.'+i).css('width' ,snot.cubeSize+2+'px');        // 2 more pixels for overlapping gaps ( chrome's bug )
-      $('.cube.'+i).css('height',snot.cubeSize+2+'px');        // 2 more pixels for overlapping gaps ( chrome's bug )
+      cubeDom = document.getElementsByClassName('cube ' + i)[0];
+      cubeDom.style['-webkit-transform'] = _cubeConfig[i];
+      cubeDom.style['width'] = snot.cubeSize + 2 + 'px';        // 2 more pixels for overlapping gaps ( chrome's bug )
+      cubeDom.style['height'] = snot.cubeSize + 2 + 'px';        // 2 more pixels for overlapping gaps ( chrome's bug )
 
-      $('.cube.'+i).attr('src',imgs_preview[counter]);
-      $('.cube.'+i).attr('data-index',counter);
-      $('.cube.'+i)[0].onload=function(){
+      cubeDom.setAttribute('src', imgs_preview[counter]);
+      cubeDom.setAttribute('data-index', counter);
+      cubeDom.onload = function(){
         _imageDownloaded=_imageDownloaded>0?_imageDownloaded+1:1;
         if(_imageDownloaded==6){
           for(var i in _cubeConfig){
-            $('.cube.'+i).attr('src',imgs_original[$('.cube.'+i).attr('data-index')]);
+            var node = document.getElementsByClassName('cube ' + i)[0];
+            node.setAttribute('src', imgs_original[node.getAttribute('data-index')]);
           }
 
         }
@@ -177,7 +186,10 @@
         t.y=standard[1];
         t.z=standard[2];
       }
-      var element=$(template(t.template,t))[0];
+
+      var temp_wrapper = document.createElement('div');
+      temp_wrapper.innerHTML = template(t.template,t);
+      var element = temp_wrapper.firstChild;
       element.data=sprites[i];
       addSpriteByPosition(element,t.x,t.y,t.z);
     }
@@ -185,13 +197,13 @@
 
   var rotate = function(x,y,z,rx,ry){
     var PI=Math.PI;
-    var pos = new THREE.Matrix4().multiplyMatrices(
+    var pos = new THREE.Vector3().setFromMatrixPosition(new THREE.Matrix4().multiplyMatrices(
         new THREE.Matrix4().multiplyMatrices(
           new THREE.Matrix4().makeRotationAxis({x:0,y:1,z:0},-ry*PI/180),
           new THREE.Matrix4().makeRotationAxis({x:1,y:0,z:0},-rx*PI/180)
         ),
         new THREE.Matrix4().setPosition({x:x,y:y,z:z})
-    ).getPosition();
+    ));
     return ([-pos.x,-pos.y,-pos.z]);
   }
 
@@ -234,6 +246,9 @@
   }
 
   var updateSpritePosition = function(id, x, y, z) {
+    snot.sprites[id].x = x;
+    snot.sprites[id].y = y;
+    snot.sprites[id].z = z;
     z=-z;
     y=-y;
     var arc=x==0&&z==0?0:Math.acos(z/Math.pow(x*x+z*z,0.5));
@@ -395,12 +410,12 @@
     var new_y = -xyz2[1]*ratio;
     var new_z = xyz2[2]*ratio;
 
-    var pos = multiply([
+    var pos = new THREE.Vector3().setFromMatrixPosition(multiply([
       new THREE.Matrix4().makeRotationAxis({x:0,y:1,z:0},-snot.ry*Math.PI/180),
       new THREE.Matrix4().makeRotationAxis({x:0,y:0,z:1},-snot.rz*Math.PI/180),
       new THREE.Matrix4().makeRotationAxis({x:1,y:0,z:0},-snot.rx*Math.PI/180),
       new THREE.Matrix4().setPosition({x:new_x,y:new_y,z:new_z})
-    ]).getPosition();
+    ]));
 
     ax = -pos.x;
     ay = pos.y;
@@ -409,20 +424,23 @@
     var minOffset=0.4;
     var minDistance=snot.minDetectDistance;
     var nearest;
-    $('.sprite-container').each(function(){
-      var matrix=text2Matrix($(this)[0].style.webkitTransform);
-      var rate_=100/distance3D(0,0,0,snot.cubeSize/2-matrix[12],matrix[13]-snot.cubeSize/2,-matrix[14]);
 
-      var distance=distance3D(-ax,-ay,az,(snot.cubeSize/2-matrix[12])*rate_,rate_*(matrix[13]-snot.cubeSize/2),rate_*(-matrix[14]));
-      if(distance<minDistance){
-        minDistance=distance;
-        nearest=$(this).children().eq(0);
+    var spriteContainers = document.getElementsByClassName('sprite-container');
+    for (var i = 0 ;i < spriteContainers.length; ++i) {
+      var self = spriteContainers[i];
+      var matrix = text2Matrix(self.style.webkitTransform);
+      var rate_ = 100 / distance3D(0, 0, 0, snot.cubeSize / 2 - matrix[12], matrix[13] - snot.cubeSize / 2, - matrix[14]);
+
+      var distance = distance3D(-ax, -ay, az, (snot.cubeSize / 2 - matrix[12]) * rate_, rate_ * (matrix[13] - snot.cubeSize / 2), rate_ * ( - matrix[14]));
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearest = self.children[0];
       }
-    });
+    };
 
     var rotation=position2rotation(ax,az,ay);
     if(nearest){
-      snot.onSpriteClick(nearest[0].data,nearest[0]);
+      snot.onSpriteClick(snot.sprites[nearest.parentElement.id],nearest);
     }else{
       snot.onClick(ax,ay,az,rotation[0],rotation[1]);
     }
@@ -444,8 +462,8 @@
     touches.onTouching=false;
   }
 
-  function _animate() {
-    snot._animateId=requestAnimationFrame( _animate );
+  function _run() {
+    snot._animateId=requestAnimationFrame( _run );
     if(!snot.pauseAnimation){
       _update();
     }
@@ -497,9 +515,22 @@
     var mat = toMat(newQuaternion);
     var mat4= {elements:mat};
     var a=new THREE.Euler().setFromRotationMatrix(mat4,'XZY');
+
     snot.rx = a._x*180/Math.PI;
     snot.ry = a._y*180/Math.PI;
     snot.rz = a._z*180/Math.PI;
+
+    var cameraLookAt = new THREE.Vector3().setFromMatrixPosition(multiply([
+      new THREE.Matrix4().makeRotationAxis({x:0,y:1,z:0},-snot.ry*Math.PI/180),
+      new THREE.Matrix4().makeRotationAxis({x:0,y:0,z:1},-snot.rz*Math.PI/180),
+      new THREE.Matrix4().makeRotationAxis({x:1,y:0,z:0},-snot.rx*Math.PI/180),
+      new THREE.Matrix4().setPosition({x: 0, y: 0,z: 1})
+    ]));
+
+    snot.cameraLookAt.x = -cameraLookAt.x;
+    snot.cameraLookAt.y = cameraLookAt.y;
+    snot.cameraLookAt.z = cameraLookAt.z;
+
     //$('#logger').html(Math.floor(snot.rx)+','+ Math.floor(snot.ry) +','+ Math.floor(snot.rz));
     snot.camera.style.transform = 'translateZ('+epsilon(snot.perspective)+'px)'+" matrix3d(" + mat + ")"+ snot.cameraBaseTransform;
   }
@@ -512,7 +543,7 @@
 
   var vars = {
     alpha: 0,
-    beta: Math.PI/2,
+    beta: 90 * Math.PI/180,
     gamma: 0
   };
 
@@ -541,11 +572,19 @@
     //TODO
   }
 
-  $.extend(global.snot,{
+  function extend(obj, json) {
+    for (var i in json) {
+      obj[i] = json[i];
+    }
+  }
+
+  extend(snot, {
     setFov: _setFov,
     setRx: _setRx,
     setRy: _setRy,
     init: _init,
+    run: _run,
+    update: _update,
     loadSprites: _loadSprites,
     updateSpritePosition: updateSpritePosition
   });
