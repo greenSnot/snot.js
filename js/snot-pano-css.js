@@ -240,9 +240,15 @@
     var spriteWrap = document.createElement('div');
     spriteWrap.className='sprite-wrap';
     spriteWrap.appendChild(element);
+    spriteWrap.setAttribute('data-visibility', element.data.visibility ? true : false);
 
     spriteContainer.appendChild(spriteWrap);
     snot.camera.appendChild(spriteContainer);
+  }
+
+  var updateSpriteVisibility = function(id, visibility) {
+    var spriteContainer = document.getElementById(id);
+    spriteContainer.firstChild.setAttribute('data-visibility', visibility ? true : false);
   }
 
   var updateSpritePosition = function(id, x, y, z) {
@@ -533,6 +539,7 @@
 
     //$('#logger').html(Math.floor(snot.rx)+','+ Math.floor(snot.ry) +','+ Math.floor(snot.rz));
     snot.camera.style.transform = 'translateZ('+epsilon(snot.perspective)+'px)'+" matrix3d(" + mat + ")"+ snot.cameraBaseTransform;
+
   }
   var previous_quat = new THREE.Quaternion();
 
@@ -586,6 +593,7 @@
     run: _run,
     update: _update,
     loadSprites: _loadSprites,
-    updateSpritePosition: updateSpritePosition
+    updateSpritePosition: updateSpritePosition,
+    updateSpriteVisibility: updateSpriteVisibility
   });
 }(window);

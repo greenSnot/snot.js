@@ -62,7 +62,8 @@ var sprites = {
   }
 };
 
-var bullets_id = [];
+var bullets_pool = [];
+var bullets_running = [];
 for (var i = 0 ;i < 5; ++i) {
   var id = 'bullet' + i;
   sprites[id] = {
@@ -72,14 +73,15 @@ for (var i = 0 ;i < 5; ++i) {
     y:-1,
     z:0,
 
-    dist_x:0,
-    dist_y:0,
-    dist_z:40,
-    status:-1,
+    dist_x: 0,
+    dist_y: 0,
+    dist_z: 40,
+    status: -1,
+    visibility: false,
 
     velocity:1, // 1 px per frame
   };
-  bullets_id.push(id);
+  bullets_pool.push(id);
 }
 
 snot.init({
@@ -115,11 +117,34 @@ snot.init({
   sprites:sprites
 });
 
+let last_shoot_time = 0;
+let shoot_interval = 300; //ms
+let max_bullets = 4;
+function shoot() {
+  let now = new Date().valueOf();
+  if (now - last_shoot_time > shoot_interval) {
+    bullets_running.push(bullets_pool.pop());
+    last_shoot_time = now;
+  }
+}
+function destory_bullet(id) {
+  for (var i = 0;i < bullets_running.length; ++i) {
+    if (id == bullets_running[i]) {
+      bullets_running.splice(i, 1);
+      bullets_pool.push(id);
+      return;
+    }
+  }
+}
+
 function update() {
   requestAnimationFrame(update);
   snot.update();
-  for (var i = 0; i < bullets_id.length; ++i) {
-    var id = bullets_id[i];
+  if (bullets_running.length != max_bullets) {
+    shoot();
+  }
+  for (var i = 0; i < bullets_running.length; ++i) {
+    var id = bullets_running[i];
     var bullet = snot.sprites[id];
     if (bullet.status == -1) {
       // init or reset
@@ -131,6 +156,7 @@ function update() {
       bullet.step_x = (bullet.dist_x - bullet.x) * bullet.velocity / bullet.distanceToOrigin;
       bullet.step_y = (bullet.dist_y - bullet.y) * bullet.velocity / bullet.distanceToOrigin;
       bullet.step_z = (bullet.dist_z - bullet.z) * bullet.velocity / bullet.distanceToOrigin;
+      bullet.visibility = true;
       bullet.status = 0;
     }
     if (!bullet.steps) {
@@ -141,10 +167,13 @@ function update() {
       bullet.y = snot.cameraLookAt.y,
       bullet.z = - snot.cameraLookAt.z -3;
       bullet.status = -1;
+      bullet.visibility = false;
+      destory_bullet(id);
     } else {
       snot.updateSpritePosition(id, bullet.x + bullet.step_x, bullet.y + bullet.step_y, bullet.z + bullet.step_z);
       bullet.steps --;
     }
+    snot.updateSpriteVisibility(bullet.id, bullet.visibility);
   }
 }
 update();
