@@ -2,32 +2,32 @@
 
   var dom_offset_top;
   var dom_offset_left;
-  var snot={
+  var snot = {
 
-    cameraLookAt:{
+    camera_look_at: {
       x: 0,
       y: 0,
       z: 1,
     },
-    movingRatio:0.3,
-    autoRotation:0,
-    frames:0,
-    imgs_rotation:[0,0,0,0,0,0],
+    moving_ratio: 0.3,
+    auto_rotation: 0,
+    frames: 0,
+    imgs_rotation: [0, 0, 0, 0, 0, 0],
 
-    pauseAnimation: false,
+    pause_animation: false,
 
-    dom       : document.getElementById('snot-pano'),
+    dom      : document.getElementById('snot-pano'),
     camera   : document.getElementById('camera'),
     container: document.getElementById('container'),
 
-    cubeSize : 1024,
+    cubeSize: 1024,
 
-    ry : 0,       // Rotate * degree around y axis
-    rx : 0,       // Rotate * degree around x axis
-    maxfov : 120, // Max field of view (degree)
-    minfov : 60,  // Min field of view (degree)
-    fov : 90,     // Default field of view
-    smooth : 0.17,
+    ry: 0,        // Rotate * degree around y axis
+    rx: 0,        // Rotate * degree around x axis
+    max_fov: 120,  // Max field of view (degree)
+    minfov: 60,   // Min field of view (degree)
+    fov: 90,      // Default field of view
+    smooth: 0.17,
   }
 
   var _rx;
@@ -43,12 +43,12 @@
 
   var _setFov = function (degree) {
 
-    if(degree<snot.minfov||degree>snot.maxfov){
+    if(degree<snot.minfov||degree>snot.max_fov){
       return;
     }
 
     snot.fov=degree;
-    snot.container.style['-webkit-transform']='scale('+Math.tan(snot.maxfov/2*Math.PI/180)/Math.tan(snot.fov/2*Math.PI/180)+')';
+    snot.container.style['-webkit-transform']='scale('+Math.tan(snot.max_fov/2*Math.PI/180)/Math.tan(snot.fov/2*Math.PI/180)+')';
   }
 
   function reset() {
@@ -82,8 +82,8 @@
 
       //compute the max Horizontal Field of view
       //perspective= projectiveScreenWidth/2
-      //           = width/2/tan(maxfov/2)
-      snot.perspective=snot.width/2/Math.tan(snot.maxfov/2*Math.PI/180);
+      //           = width/2/tan(max_fov/2)
+      snot.perspective=snot.width/2/Math.tan(snot.max_fov/2*Math.PI/180);
 
       snot.container.style['-webkit-perspective']=snot.perspective+'px';
 
@@ -106,7 +106,7 @@
     }
 
     if(config){
-      _loadSprites(config.sprites);
+      _load_sprites(config.sprites);
     }
 
     if ( is_mobile() ) {
@@ -177,7 +177,7 @@
 
   };
 
-  var _loadSprites=function(sprites){
+  var _load_sprites=function(sprites){
     for(var i in sprites){
       var t=sprites[i];
       if(t.standardlization){
@@ -246,12 +246,12 @@
     snot.camera.appendChild(spriteContainer);
   }
 
-  var updateSpriteVisibility = function(id, visibility) {
+  var update_sprite_visibility = function(id, visibility) {
     var spriteContainer = document.getElementById(id);
     spriteContainer.firstChild.setAttribute('data-visibility', visibility ? true : false);
   }
 
-  var updateSpritePosition = function(id, x, y, z) {
+  var update_sprite_position = function(id, x, y, z) {
     snot.sprites[id].x = x;
     snot.sprites[id].y = y;
     snot.sprites[id].z = z;
@@ -310,7 +310,7 @@
 
     }
 
-    var ratio=snot.movingRatio;
+    var ratio=snot.moving_ratio;
 
     _ry=_ry+(touches.fx-x)*ratio;
     _rx=_rx-(touches.fy-y)*ratio;
@@ -385,7 +385,7 @@
     }
   }
 
-  function onClick (x, y) {
+  function on_click (x, y) {
     var R=100;
     var fov = snot.fov;
     var cubeSize = snot.cubeSize;
@@ -427,8 +427,8 @@
     ay = pos.y;
     az = pos.z;
 
-    var minOffset=0.4;
-    var minDistance=snot.minDetectDistance;
+    var min_offset=0.4;
+    var min_distance=snot.min_detect_distance;
     var nearest;
 
     var spriteContainers = document.getElementsByClassName('sprite-container');
@@ -438,8 +438,8 @@
       var rate_ = 100 / distance3D(0, 0, 0, snot.cubeSize / 2 - matrix[12], matrix[13] - snot.cubeSize / 2, - matrix[14]);
 
       var distance = distance3D(-ax, -ay, az, (snot.cubeSize / 2 - matrix[12]) * rate_, rate_ * (matrix[13] - snot.cubeSize / 2), rate_ * ( - matrix[14]));
-      if (distance < minDistance) {
-        minDistance = distance;
+      if (distance < min_distance) {
+        min_distance = distance;
         nearest = self.children[0];
       }
     };
@@ -448,7 +448,7 @@
     if(nearest){
       snot.onSpriteClick(snot.sprites[nearest.parentElement.id],nearest);
     }else{
-      snot.onClick(ax,ay,az,rotation[0],rotation[1]);
+      snot.on_click(ax,ay,az,rotation[0],rotation[1]);
     }
   }
 
@@ -463,14 +463,14 @@
 
     //Screen coordinate to Sphere 3d coordinate
     if (distance2D(mouseDownX,mouseDownY,x,y)<5) {
-      onClick(x, y);
+      on_click(x, y);
     }
     touches.onTouching=false;
   }
 
   function _run() {
     snot._animateId=requestAnimationFrame( _run );
-    if(!snot.pauseAnimation){
+    if(!snot.pause_animation){
       _update();
     }
   }
@@ -526,16 +526,16 @@
     snot.ry = a._y*180/Math.PI;
     snot.rz = a._z*180/Math.PI;
 
-    var cameraLookAt = new THREE.Vector3().setFromMatrixPosition(multiply([
+    var camera_look_at = new THREE.Vector3().setFromMatrixPosition(multiply([
       new THREE.Matrix4().makeRotationAxis({x:0,y:1,z:0},-snot.ry*Math.PI/180),
       new THREE.Matrix4().makeRotationAxis({x:0,y:0,z:1},-snot.rz*Math.PI/180),
       new THREE.Matrix4().makeRotationAxis({x:1,y:0,z:0},-snot.rx*Math.PI/180),
       new THREE.Matrix4().setPosition({x: 0, y: 0,z: 1})
     ]));
 
-    snot.cameraLookAt.x = -cameraLookAt.x;
-    snot.cameraLookAt.y = cameraLookAt.y;
-    snot.cameraLookAt.z = cameraLookAt.z;
+    snot.camera_look_at.x = -camera_look_at.x;
+    snot.camera_look_at.y = camera_look_at.y;
+    snot.camera_look_at.z = camera_look_at.z;
 
     //$('#logger').html(Math.floor(snot.rx)+','+ Math.floor(snot.ry) +','+ Math.floor(snot.rz));
     snot.camera.style.transform = 'translateZ('+epsilon(snot.perspective)+'px)'+" matrix3d(" + mat + ")"+ snot.cameraBaseTransform;
@@ -592,8 +592,8 @@
     init: _init,
     run: _run,
     update: _update,
-    loadSprites: _loadSprites,
-    updateSpritePosition: updateSpritePosition,
-    updateSpriteVisibility: updateSpriteVisibility
+    load_sprites: _load_sprites,
+    update_sprite_position: update_sprite_position,
+    update_sprite_visibility: update_sprite_visibility
   });
 }(window);

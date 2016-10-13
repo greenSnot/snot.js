@@ -5,8 +5,8 @@ function onSpriteClick(data){
     console.log(data);
     alert('onSpriteClick');
 }
-function onClick(x,y,z,rx,ry){
-    snot.loadSprites([{
+function on_click(x,y,z,rx,ry){
+    snot.load_sprites([{
             //For CSS Renderer
             //TemplateId for template renderer
             template:'template-spot',
@@ -104,15 +104,15 @@ snot.init({
   ],
   imgs_rotation:[0,0,0,0,0,0],
   fov:90,
-  maxFov:110,
-  minFov:60,
+  max_fov:110,
+  min_fov:60,
   smooth:0.17,
-  movingRatio:0.3,
-  autoRotation:0.0,
+  moving_ratio:0.3,
+  auto_rotation:0.0,
   rx:0,
   ry:0,
-  minDetectDistance:20,
-  onClick:onClick,
+  min_detect_distance:20,
+  on_click:on_click,
   onSpriteClick:onSpriteClick,
   sprites:sprites
 });
@@ -160,20 +160,20 @@ function update() {
       bullet.status = 0;
     }
     if (!bullet.steps) {
-      snot.sprites[id].dist_x = snot.cameraLookAt.x * 30;
-      snot.sprites[id].dist_y = snot.cameraLookAt.y * 30;
-      snot.sprites[id].dist_z = snot.cameraLookAt.z * 30;
-      bullet.x = snot.cameraLookAt.x,
-      bullet.y = snot.cameraLookAt.y,
-      bullet.z = - snot.cameraLookAt.z -3;
+      snot.sprites[id].dist_x = snot.camera_look_at.x * 30;
+      snot.sprites[id].dist_y = snot.camera_look_at.y * 30;
+      snot.sprites[id].dist_z = snot.camera_look_at.z * 30;
+      bullet.x = snot.camera_look_at.x,
+      bullet.y = snot.camera_look_at.y,
+      bullet.z = - snot.camera_look_at.z -3;
       bullet.status = -1;
       bullet.visibility = false;
       destory_bullet(id);
     } else {
-      snot.updateSpritePosition(id, bullet.x + bullet.step_x, bullet.y + bullet.step_y, bullet.z + bullet.step_z);
+      snot.update_sprite_position(id, bullet.x + bullet.step_x, bullet.y + bullet.step_y, bullet.z + bullet.step_z);
       bullet.steps --;
     }
-    snot.updateSpriteVisibility(bullet.id, bullet.visibility);
+    snot.update_sprite_visibility(bullet.id, bullet.visibility);
   }
 }
 update();
