@@ -145,7 +145,7 @@ function update() {
     if (bullet.status == -1) {
       bullet.y = - bullet_offset_y;
       // init or reset
-      bullet.distanceToOrigin = distance3D(bullet.dist_x, bullet.dist_y, bullet.dist_z, 0, 0, 0);
+      bullet.distanceToOrigin = snot.util.distance3D(bullet.dist_x, bullet.dist_y, bullet.dist_z, 0, 0, 0);
       bullet.steps = Math.floor(bullet.distanceToOrigin / bullet.velocity);
       bullet.step_x = (bullet.dist_x - bullet.x) * bullet.velocity / bullet.distanceToOrigin;
       bullet.step_y = (bullet.dist_y - bullet.y) * bullet.velocity / bullet.distanceToOrigin;

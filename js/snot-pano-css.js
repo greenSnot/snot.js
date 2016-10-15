@@ -42,14 +42,25 @@
 
   var _rx;
   var _ry;
-  var _imageDownloaded = 0;
 
   function _pointStandardlization(x, y, z) {
     var ratio = 200 / distance3D(x, y, z, 0, 0, 0);
     return [x * ratio, y * ratio, z * ratio];
   }
 
-  global.snot= global.snot|| snot;
+  if (global.snot) {
+    for (var i in snot) {
+      global.snot[i] = snot[i];
+    }
+    snot = global.snot;
+  } else {
+    console.error('snot-util.js is missing');
+    return;
+  }
+  var util = global.snot.util;
+  var epsilon = util.epsilon;
+  var distance3D = util.distance3D;
+  var distance2D = util.distance2D;
 
   var set_fov = function (degree) {
     if (degree < snot.minfov || degree > snot.max_fov) {
@@ -68,7 +79,6 @@
 
   var _init = function(config, ajax) {
     reset();
-    _imageDownloaded = 0;
 
     cancelAnimationFrame(snot._animateId);
 
@@ -76,8 +86,8 @@
       snot[i] = config[i];
     }
 
-    dom_offset_left = leftPos(snot.dom);
-    dom_offset_top = topPos(snot.dom);
+    dom_offset_left = util.left_pos(snot.dom);
+    dom_offset_top = util.top_pos(snot.dom);
 
     _rx = snot.rx;
     _ry = snot.ry;
@@ -116,7 +126,7 @@
       _load_sprites(config.sprites);
     }
 
-    if ( is_mobile() ) {
+    if (util.is_mobile()) {
       snot.container.addEventListener('touchstart', mouseDown, false);
       snot.container.addEventListener('touchmove' , mouseMove, false);
       snot.container.addEventListener('touchend'  , mouseUp  , false);
@@ -397,7 +407,7 @@
     ry *= 180 / PI;
     rx *= 180 / PI;
 
-    var xyz2 = rotation2Position(R, rx, 0);
+    var xyz2 = util.rotation_to_position(R, rx, 0);
 
     var rr = distance3D(- tan(ry * arcFactor) * xyz2[2], - xyz2[1], xyz2[2], 0, 0, 0);
     var ratio = R / rr;
@@ -424,7 +434,7 @@
     var spriteContainers = document.getElementsByClassName('sprite-container');
     for (var i = 0 ;i < spriteContainers.length; ++i) {
       var self = spriteContainers[i];
-      var matrix = text2Matrix(self.style.webkitTransform);
+      var matrix = util.css_text_to_matrix(self.style.webkitTransform);
       var rate_ = 100 / distance3D(0, 0, 0, snot.bg_size / 2 - matrix[12], matrix[13] - snot.bg_size / 2, - matrix[14]);
 
       var distance = distance3D(- ax, - ay, az, (snot.bg_size / 2 - matrix[12]) * rate_, rate_ * (matrix[13] - snot.bg_size / 2), rate_ * ( - matrix[14]));
@@ -434,7 +444,7 @@
       }
     }
 
-    var rotation = position2rotation(ax, az, ay);
+    var rotation = util.position_to_rotation(ax, az, ay);
     if (nearest) {
       snot.onSpriteClick(snot.sprites[nearest.parentElement.id], nearest);
     } else {
