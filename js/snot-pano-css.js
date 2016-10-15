@@ -12,7 +12,7 @@
     moving_ratio: 0.3,
     auto_rotation: 0,
     frames: 0,
-    imgs_rotation: [0, 0, 0, 0, 0, 0],
+    bg_rotation: [0, 0, 0, 0, 0, 0],
 
     pause_animation: false,
 
@@ -20,7 +20,7 @@
     camera   : document.getElementById('camera'),
     container: document.getElementById('container'),
 
-    cubeSize: 1024,
+    bg_size: 1024,
 
     ry: 0,        // Rotate * degree around y axis
     rx: 0,        // Rotate * degree around x axis
@@ -52,7 +52,7 @@
   global.snot= global.snot|| snot;
 
   var set_fov = function (degree) {
-    if(degree<snot.minfov||degree>snot.max_fov){
+    if (degree < snot.minfov || degree > snot.max_fov) {
       return;
     }
     snot.fov = degree;
@@ -103,13 +103,13 @@
       // rotateY rotate around Y axis
       // translateX translate the Camera to center
       // translateY
-      snot.cameraBaseTransform = 'translateX(' + epsilon(- (snot.cubeSize - snot.width) / 2) + 'px) translateY(' + epsilon(- (snot.cubeSize - snot.height) / 2) + 'px)';
+      snot.cameraBaseTransform = 'translateX(' + epsilon(- (snot.bg_size - snot.width) / 2) + 'px) translateY(' + epsilon(- (snot.bg_size - snot.height) / 2) + 'px)';
       snot.camera.style['-webkit-transform'] = 'translateZ(-' + snot.perspective + 'px) rotateX(' + snot.rx + 'deg) rotateY(' + snot.ry + 'deg)' + snot.cameraBaseTransform;
     }
     set_fov(snot.fov);
 
-    if (config.imgs_preview) {
-      loadImages(config.imgs_preview, config.imgs_original, config.imgs_rotation);
+    if (config.bg_imgs) {
+      load_bg_imgs(config.bg_imgs, config.bg_rotation);
     }
 
     if (config) {
@@ -132,42 +132,27 @@
     }
   }
 
-  function loadImages(imgs_preview, imgs_original, imgs_rotation, onPreviewImagesLoad){
-    onPreviewImagesLoad = onPreviewImagesLoad ? onPreviewImagesLoad : function() {
-      console.log('Preview images loaded')
+  function load_bg_imgs(bg_imgs, bg_rotation) {
+    var bg_config = {
+      front : 'rotateY(90deg)' + '                rotateZ(' + bg_rotation[0] + 'deg)  translateZ(-' + (snot.bg_size / 2) + 'px)',
+      bottom: 'rotateY(90deg)' + 'rotateX(90deg)  rotateZ(' + bg_rotation[1] + 'deg)  translateZ(-' + (snot.bg_size / 2) + 'px) rotateZ(90deg)',
+      left  : 'rotateY(90deg)' + 'rotateY(90deg)  rotateZ(' + bg_rotation[2] + 'deg)  translateZ(-' + (snot.bg_size / 2) + 'px)',
+      back  : 'rotateY(90deg)' + 'rotateY(180deg) rotateZ(' + bg_rotation[3] + 'deg)  translateZ(-' + (snot.bg_size / 2) + 'px)',
+      top   : 'rotateY(90deg)' + 'rotateX(-90deg) rotateZ(' + bg_rotation[4] + 'deg)  translateZ(-' + (snot.bg_size / 2) + 'px) rotateZ(-90deg)',
+      right : 'rotateY(90deg)' + 'rotateY(-90deg) rotateZ(' + bg_rotation[5] + 'deg)  translateZ(-' + (snot.bg_size / 2) + 'px)'
     };
 
-    var _cubeConfig = {
+    var bg_dom;
+    var count = 0;
+    for (var i in bg_config) {
+      bg_dom = document.getElementsByClassName('cube ' + i)[0];
+      bg_dom.style['-webkit-transform'] = bg_config[i];
+      bg_dom.style['width'] = snot.bg_size + 2 + 'px';        // 2 more pixels for overlapping gaps ( chrome's bug )
+      bg_dom.style['height'] = snot.bg_size + 2 + 'px';        // 2 more pixels for overlapping gaps ( chrome's bug )
 
-      front :"rotateY(90deg)"+"                rotateZ("+imgs_rotation[0]+"deg)  translateZ(-" + (snot.cubeSize/2)+"px)",
-      bottom:"rotateY(90deg)"+"rotateX(90deg)  rotateZ("+imgs_rotation[1]+"deg)  translateZ(-" + (snot.cubeSize/2)+"px) rotateZ(90deg)",
-      left  :"rotateY(90deg)"+"rotateY(90deg)  rotateZ("+imgs_rotation[2]+"deg)  translateZ(-" + (snot.cubeSize/2)+"px)",
-      back  :"rotateY(90deg)"+"rotateY(180deg) rotateZ("+imgs_rotation[3]+"deg)  translateZ(-" + (snot.cubeSize/2)+"px)",
-      top   :"rotateY(90deg)"+"rotateX(-90deg) rotateZ("+imgs_rotation[4]+"deg)  translateZ(-" + (snot.cubeSize/2)+"px) rotateZ(-90deg)",
-      right :"rotateY(90deg)"+"rotateY(-90deg) rotateZ("+imgs_rotation[5]+"deg)  translateZ(-" + (snot.cubeSize/2)+"px)"
-
-    };
-
-    var counter = 0;
-    var cubeDom;
-    for (var i in _cubeConfig) {
-      cubeDom = document.getElementsByClassName('cube ' + i)[0];
-      cubeDom.style['-webkit-transform'] = _cubeConfig[i];
-      cubeDom.style['width'] = snot.cubeSize + 2 + 'px';        // 2 more pixels for overlapping gaps ( chrome's bug )
-      cubeDom.style['height'] = snot.cubeSize + 2 + 'px';        // 2 more pixels for overlapping gaps ( chrome's bug )
-
-      cubeDom.setAttribute('src', imgs_preview[counter]);
-      cubeDom.setAttribute('data-index', counter);
-      cubeDom.onload = function() {
-        _imageDownloaded = _imageDownloaded > 0 ? _imageDownloaded + 1 : 1;
-        if (_imageDownloaded == 6) {
-          for (var i in _cubeConfig) {
-            var node = document.getElementsByClassName('cube ' + i)[0];
-            node.setAttribute('src', imgs_original[node.getAttribute('data-index')]);
-          }
-        }
-      }
-      counter++;
+      bg_dom.setAttribute('src', bg_imgs[count]);
+      bg_dom.setAttribute('data-index', count);
+      ++count;
     }
   }
 
@@ -244,10 +229,10 @@
     arc = arc * 180 / PI;
 
     var r = distance3D(x, y, z, 0, 0, 0);
-    x += snot.cubeSize / 2;
-    y += snot.cubeSize / 2;
+    x += snot.bg_size / 2;
+    y += snot.bg_size / 2;
 
-    spriteContainer.style['-webkit-transform'] = 'translate3d(' + epsilon(x) + 'px,' + epsilon(y) + 'px,' + epsilon(z) + 'px) rotateY(' + epsilon(arc) + 'deg) rotateX(' + epsilon(- (y - snot.cubeSize / 2) / r * 90)+'deg) rotateY(180deg)';
+    spriteContainer.style['-webkit-transform'] = 'translate3d(' + epsilon(x) + 'px,' + epsilon(y) + 'px,' + epsilon(z) + 'px) rotateY(' + epsilon(arc) + 'deg) rotateX(' + epsilon(- (y - snot.bg_size / 2) / r * 90)+'deg) rotateY(180deg)';
 
     var spriteWrap = document.createElement('div');
     spriteWrap.className='sprite-wrap';
@@ -275,12 +260,12 @@
     arc = arc * 180/ PI;
 
     var r = distance3D(x, y, z, 0, 0, 0);
-    x += snot.cubeSize / 2;
-    y += snot.cubeSize / 2;
+    x += snot.bg_size / 2;
+    y += snot.bg_size / 2;
 
     var spriteContainer = document.getElementById(id);
 
-    spriteContainer.style['-webkit-transform'] = 'translate3d(' + epsilon(x) + 'px,' + epsilon(y) + 'px,' + epsilon(z) + 'px) rotateY(' + epsilon(arc) + 'deg) rotateX(' + epsilon(- (y - snot.cubeSize / 2) / r * 90) + 'deg) rotateY(180deg)';
+    spriteContainer.style['-webkit-transform'] = 'translate3d(' + epsilon(x) + 'px,' + epsilon(y) + 'px,' + epsilon(z) + 'px) rotateY(' + epsilon(arc) + 'deg) rotateX(' + epsilon(- (y - snot.bg_size / 2) / r * 90) + 'deg) rotateY(180deg)';
   }
 
   var mouseMove = function (event) {
@@ -393,7 +378,7 @@
   function on_click(x, y) {
     var R = 100;
     var fov = snot.fov;
-    var cubeSize = snot.cubeSize;
+    var bg_size = snot.bg_size;
     var arcFactor = Math.PI / 180;
     var rz = snot.rz * arcFactor;
     var width = snot.width;
@@ -401,10 +386,10 @@
 
     var ry = (x / width - 0.5) * fov;
     var rx = (y / height-0.5) * fov * height / width;
-    var r = cos(fov / 2 * arcFactor) * cubeSize;
+    var r = cos(fov / 2 * arcFactor) * bg_size;
     var ratiox = (x - width / 2) / width * 2;
     var ratioy = (y - height / 2) / width * 2;
-    var P = sin(fov / 2 * arcFactor) * cubeSize;
+    var P = sin(fov / 2 * arcFactor) * bg_size;
 
     ry = atan(ratiox * P / r);
     rx = atan(ratioy * P / r);
@@ -440,9 +425,9 @@
     for (var i = 0 ;i < spriteContainers.length; ++i) {
       var self = spriteContainers[i];
       var matrix = text2Matrix(self.style.webkitTransform);
-      var rate_ = 100 / distance3D(0, 0, 0, snot.cubeSize / 2 - matrix[12], matrix[13] - snot.cubeSize / 2, - matrix[14]);
+      var rate_ = 100 / distance3D(0, 0, 0, snot.bg_size / 2 - matrix[12], matrix[13] - snot.bg_size / 2, - matrix[14]);
 
-      var distance = distance3D(- ax, - ay, az, (snot.cubeSize / 2 - matrix[12]) * rate_, rate_ * (matrix[13] - snot.cubeSize / 2), rate_ * ( - matrix[14]));
+      var distance = distance3D(- ax, - ay, az, (snot.bg_size / 2 - matrix[12]) * rate_, rate_ * (matrix[13] - snot.bg_size / 2), rate_ * ( - matrix[14]));
       if (distance < min_distance) {
         min_distance = distance;
         nearest = self.children[0];

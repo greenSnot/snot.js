@@ -1,64 +1,65 @@
 function random(arr){
-    return arr[parseInt(Math.random()*(arr.length))]
+  return arr[parseInt(Math.random() * (arr.length))]
 }
+
 function onSpriteClick(data){
-    console.log(data);
-    alert('onSpriteClick');
+  console.log(data);
+  alert('onSpriteClick');
 }
-function on_click(x,y,z,rx,ry){
-    snot.load_sprites([{
-            //For CSS Renderer
-            //TemplateId for template renderer
-            template:'template-spot',
+function on_click(x, y, z, rx, ry) {
+  snot.load_sprites([{
+    //For CSS Renderer
+    //TemplateId for template renderer
+    template: 'template-spot',
 
-            spriteType:'spot',
+    spriteType: 'spot',
 
-            spotType:random(['straight','left','right']),
-            id:'spot-'+123,
-            text:'haha',
-            x:x*4,
-            y:y*4,
-            z:z*4
-    }]);
+    spotType: random(['straight', 'left', 'right']),
+    id: 'spot-' + 123,
+    text: 'haha',
+    x: x * 4,
+    y: y * 4,
+    z: z * 4
+  }]);
 }
 
 var sprites = {
   'spot1': {
-    template:'template-spot',
-    spriteType:'spot',
-    spotType:random(['straight','left','right']),
-    id:'spot1',
-    text:'Home',
-    x:4,
-    y:120,
-    z:360
+    template: 'template-spot',
+    spriteType: 'spot',
+    spotType: random(['straight','left','right']),
+    id: 'spot1',
+    text: 'Home',
+    x: 4,
+    y: 120,
+    z: 360
   }, 'spot2': {
-    template:'template-spot',
-    spriteType:'spot',
-    spotType:random(['straight','left','right']),
-    id:'spot2',
-    text:'Market',
-    x:329,
-    y:0,
-    z:240
+    template: 'template-spot',
+    spriteType: 'spot',
+    spotType: random(['straight','left','right']),
+    id: 'spot2',
+    text: 'Market',
+    x: 329,
+    y: 0,
+    z: 240
   }, 'spot3': {
-    template:'template-spot',
-    spriteType:'spot',
-    spotType:random(['straight','left','right']),
-    id:'spot3',
-    text:'Bridge',
-    x:320,
-    y:0,
-    z:-230
+    template: 'template-spot',
+    spriteType: 'spot',
+    spotType: random(['straight','left','right']),
+    id: 'spot3',
+    text: 'Bridge',
+    x: 320,
+    y: 0,
+    z: -230
   }, 'spot2': {
-    template:'template-spot',
-    spriteType:'spot2',
-    spotType:random(['straight','left','right']),
-    id:'spot4',
-    text:'Garage',
-    x:400,
-    y:0,
-    z:-110
+    template: 'template-spot',
+    spriteType: 'spot2',
+    spotType: random(['straight','left','right']),
+    id: 'spot4',
+    text: 'Garage',
+    x: 400,
+    y: 0,
+    z: -110
   }
 };
 
@@ -88,8 +89,8 @@ for (var i = 0 ;i < bullet_pool_size; ++i) {
 }
 
 snot.init({
-  cubeSize:1248,
-  imgs_preview:[
+  bg_size:1248,
+  bg_imgs:[
     'images/test.png',
     'images/test.png',
     'images/test.png',
@@ -97,27 +98,19 @@ snot.init({
     'images/test.png',
     'images/test.png',
   ],
-  imgs_original:[
-    'images/test.png',
-    'images/test.png',
-    'images/test.png',
-    'images/test.png',
-    'images/test.png',
-    'images/test.png',
-  ],
-  imgs_rotation:[0,0,0,0,0,0],
-  fov:90,
-  max_fov:110,
-  min_fov:60,
-  smooth:0.17,
-  moving_ratio:0.3,
-  auto_rotation:0.0,
-  rx:0,
-  ry:0,
-  min_detect_distance:20,
-  on_click:on_click,
-  onSpriteClick:onSpriteClick,
-  sprites:sprites
+  bg_rotation: [0,0,0,0,0,0],
+  fov: 90,
+  max_fov: 110,
+  min_fov: 60,
+  smooth: 0.17,
+  moving_ratio: 0.3,
+  auto_rotation: 0.0,
+  rx: 0,
+  ry: 0,
+  min_detect_distance: 20,
+  on_click: on_click,
+  onSpriteClick: onSpriteClick,
+  sprites: sprites
 });
 
 let last_shoot_time = 0;
