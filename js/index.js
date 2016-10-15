@@ -80,7 +80,7 @@ for (var i = 0 ;i < bullet_pool_size; ++i) {
     dist_y: 0,
     dist_z: bullet_shooting_range,
     status: -1,
-    visibility: false,
+    visible: false,
 
     velocity:15, // 1 px per frame
   };
@@ -146,7 +146,7 @@ function update() {
   if (bullets_running.length != max_bullets) {
     shoot();
   }
-  for (var i = 0; i < bullets_running.length; ++i) {
+  for (var i in bullets_running) {
     var id = bullets_running[i];
     var bullet = snot.sprites[id];
     if (bullet.status == -1) {
@@ -157,7 +157,7 @@ function update() {
       bullet.step_x = (bullet.dist_x - bullet.x) * bullet.velocity / bullet.distanceToOrigin;
       bullet.step_y = (bullet.dist_y - bullet.y) * bullet.velocity / bullet.distanceToOrigin;
       bullet.step_z = (bullet.dist_z - bullet.z) * bullet.velocity / bullet.distanceToOrigin;
-      bullet.visibility = true;
+      bullet.visible = true;
       bullet.status = 0;
     }
     if (!bullet.steps) {
@@ -168,13 +168,13 @@ function update() {
       bullet.y = snot.camera_look_at.y - bullet_offset_y,
       bullet.z = - snot.camera_look_at.z;
       bullet.status = -1;
-      bullet.visibility = false;
+      bullet.visible = false;
       destory_bullet(id);
     } else {
       snot.update_sprite_position(id, bullet.x + bullet.step_x, bullet.y + bullet.step_y, bullet.z + bullet.step_z);
       bullet.steps --;
     }
-    snot.update_sprite_visibility(bullet.id, bullet.visibility);
+    snot.update_sprite_visibility(bullet.id, bullet.visible);
   }
 }
 update();

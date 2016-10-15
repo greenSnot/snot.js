@@ -24,31 +24,38 @@
 
     ry: 0,        // Rotate * degree around y axis
     rx: 0,        // Rotate * degree around x axis
-    max_fov: 120,  // Max field of view (degree)
+    max_fov: 120, // Max field of view (degree)
     minfov: 60,   // Min field of view (degree)
     fov: 90,      // Default field of view
     smooth: 0.17,
   }
 
+  var PI = Math.PI;
+  var sin = Math.sin;
+  var cos = Math.cos;
+  var tan = Math.tan;
+  var acos = Math.acos;
+  var atan = Math.atan;
+  var pow = Math.pow;
+  var floor = Math.floor;
+
   var _rx;
   var _ry;
-  var _imageDownloaded=0;
+  var _imageDownloaded = 0;
 
-  function _pointStandardlization(x,y,z){
-    var ratio=200/distance3D(x,y,z,0,0,0);
-    return [x*ratio,y*ratio,z*ratio];
+  function _pointStandardlization(x, y, z) {
+    var ratio = 200 / distance3D(x, y, z, 0, 0, 0);
+    return [x * ratio, y * ratio, z * ratio];
   }
 
   global.snot= global.snot|| snot;
 
-  var _setFov = function (degree) {
-
+  var set_fov = function (degree) {
     if(degree<snot.minfov||degree>snot.max_fov){
       return;
     }
-
-    snot.fov=degree;
-    snot.container.style['-webkit-transform']='scale('+Math.tan(snot.max_fov/2*Math.PI/180)/Math.tan(snot.fov/2*Math.PI/180)+')';
+    snot.fov = degree;
+    snot.container.style['-webkit-transform'] = 'scale(' + tan(snot.max_fov / 2 * PI / 180) / tan(snot.fov / 2 * PI / 180) + ')';
   }
 
   function reset() {
@@ -58,24 +65,24 @@
     }
   }
 
-  var _init = function(config,ajax){
+  var _init = function(config, ajax) {
     reset();
-    _imageDownloaded=0;
+    _imageDownloaded = 0;
 
     cancelAnimationFrame(snot._animateId);
 
-    for(var i in config){
-      snot[i]=config[i];
+    for (var i in config) {
+      snot[i] = config[i];
     }
 
-    dom_offset_left=leftPos(snot.dom);
-    dom_offset_top=topPos(snot.dom);
+    dom_offset_left = leftPos(snot.dom);
+    dom_offset_top = topPos(snot.dom);
 
-    _rx=snot.rx;
-    _ry=snot.ry;
+    _rx = snot.rx;
+    _ry = snot.ry;
 
     //First init
-    if(!ajax){
+    if (!ajax) {
 
       snot.width = snot.dom.offsetWidth;
       snot.height = snot.dom.offsetHeight;
@@ -83,9 +90,9 @@
       //compute the max Horizontal Field of view
       //perspective= projectiveScreenWidth/2
       //           = width/2/tan(max_fov/2)
-      snot.perspective=snot.width/2/Math.tan(snot.max_fov/2*Math.PI/180);
+      snot.perspective = snot.width / 2 / tan(snot.max_fov / 2 * PI / 180);
 
-      snot.container.style['-webkit-perspective']=snot.perspective+'px';
+      snot.container.style['-webkit-perspective'] = snot.perspective + 'px';
 
       //camera offset
       // Z is depth(front) Y is height X is right
@@ -95,44 +102,41 @@
       // rotateY rotate around Y axis
       // translateX translate the Camera to center
       // translateY
-      snot.cameraBaseTransform='translateX('+epsilon((snot.cubeSize-snot.width)/-2)+'px) translateY('+epsilon((snot.cubeSize-snot.height)/-2)+'px)';
-      snot.camera.style['-webkit-transform']='translateZ(-'+snot.perspective+'px) rotateX('+snot.rx+'deg) rotateY('+snot.ry+'deg)'+ snot.cameraBaseTransform;
-
+      snot.cameraBaseTransform = 'translateX(' + epsilon(- (snot.cubeSize - snot.width) / 2) + 'px) translateY(' + epsilon(- (snot.cubeSize - snot.height) / 2) + 'px)';
+      snot.camera.style['-webkit-transform'] = 'translateZ(-' + snot.perspective + 'px) rotateX(' + snot.rx + 'deg) rotateY(' + snot.ry + 'deg)' + snot.cameraBaseTransform;
     }
-    _setFov(snot.fov);
+    set_fov(snot.fov);
 
-    if(config.imgs_preview){
-      loadImages(config.imgs_preview,config.imgs_original,config.imgs_rotation);
+    if (config.imgs_preview) {
+      loadImages(config.imgs_preview, config.imgs_original, config.imgs_rotation);
     }
 
-    if(config){
+    if (config) {
       _load_sprites(config.sprites);
     }
 
     if ( is_mobile() ) {
-
-      snot.container.addEventListener('touchstart',mouseDown,false);
-      snot.container.addEventListener('touchmove' ,mouseMove,false);
-      snot.container.addEventListener('touchend'  ,mouseUp  ,false);
-
+      snot.container.addEventListener('touchstart', mouseDown, false);
+      snot.container.addEventListener('touchmove' , mouseMove, false);
+      snot.container.addEventListener('touchend'  , mouseUp  , false);
     } else {
-
-      snot.container.addEventListener('mousedown' ,mouseDown ,false);
-      snot.container.addEventListener('mousemove' ,mouseMove ,false);
-      snot.container.addEventListener('mouseup'   ,mouseUp   ,false);
-      snot.container.addEventListener('mousewheel',mouseWheel,false);
-
+      snot.container.addEventListener('mousedown' , mouseDown , false);
+      snot.container.addEventListener('mousemove' , mouseMove , false);
+      snot.container.addEventListener('mouseup'   , mouseUp   , false);
+      snot.container.addEventListener('mousewheel', mouseWheel, false);
     }
 
-    if(config.callback){
+    if (config.callback) {
       config.callback();
     }
   }
 
-  function loadImages(imgs_preview,imgs_original,imgs_rotation,onPreviewImagesLoad){
-    onPreviewImagesLoad=onPreviewImagesLoad?onPreviewImagesLoad:function(){console.log('Preview images loaded')};
+  function loadImages(imgs_preview, imgs_original, imgs_rotation, onPreviewImagesLoad){
+    onPreviewImagesLoad = onPreviewImagesLoad ? onPreviewImagesLoad : function() {
+      console.log('Preview images loaded')
+    };
 
-    var _cubeConfig={
+    var _cubeConfig = {
 
       front :"rotateY(90deg)"+"                rotateZ("+imgs_rotation[0]+"deg)  translateZ(-" + (snot.cubeSize/2)+"px)",
       bottom:"rotateY(90deg)"+"rotateX(90deg)  rotateZ("+imgs_rotation[1]+"deg)  translateZ(-" + (snot.cubeSize/2)+"px) rotateZ(90deg)",
@@ -141,12 +145,11 @@
       top   :"rotateY(90deg)"+"rotateX(-90deg) rotateZ("+imgs_rotation[4]+"deg)  translateZ(-" + (snot.cubeSize/2)+"px) rotateZ(-90deg)",
       right :"rotateY(90deg)"+"rotateY(-90deg) rotateZ("+imgs_rotation[5]+"deg)  translateZ(-" + (snot.cubeSize/2)+"px)"
 
-
     };
 
-    var counter=0;
+    var counter = 0;
     var cubeDom;
-    for(var i in _cubeConfig){
+    for (var i in _cubeConfig) {
       cubeDom = document.getElementsByClassName('cube ' + i)[0];
       cubeDom.style['-webkit-transform'] = _cubeConfig[i];
       cubeDom.style['width'] = snot.cubeSize + 2 + 'px';        // 2 more pixels for overlapping gaps ( chrome's bug )
@@ -154,14 +157,13 @@
 
       cubeDom.setAttribute('src', imgs_preview[counter]);
       cubeDom.setAttribute('data-index', counter);
-      cubeDom.onload = function(){
-        _imageDownloaded=_imageDownloaded>0?_imageDownloaded+1:1;
-        if(_imageDownloaded==6){
-          for(var i in _cubeConfig){
+      cubeDom.onload = function() {
+        _imageDownloaded = _imageDownloaded > 0 ? _imageDownloaded + 1 : 1;
+        if (_imageDownloaded == 6) {
+          for (var i in _cubeConfig) {
             var node = document.getElementsByClassName('cube ' + i)[0];
             node.setAttribute('src', imgs_original[node.getAttribute('data-index')]);
           }
-
         }
       }
       counter++;
@@ -169,86 +171,95 @@
   }
 
   var touches = {
-
     fx:0,   // First  finger x
     fy:0,   // First  finger y
     sx:0,   // Second finger x
     sy:0    // Second finger y
-
   };
 
-  var _load_sprites=function(sprites){
-    for(var i in sprites){
-      var t=sprites[i];
-      if(t.standardlization){
-        var standard=_pointStandardlization(t.x,t.y,t.z);
+  var _load_sprites = function(sprites) {
+    for (var i in sprites) {
+      var t = sprites[i];
+      if (t.standardlization) {
+        var standard = _pointStandardlization(t.x,t.y,t.z);
         t.x=standard[0];
         t.y=standard[1];
         t.z=standard[2];
       }
 
       var temp_wrapper = document.createElement('div');
-      temp_wrapper.innerHTML = template(t.template,t);
+      temp_wrapper.innerHTML = template(t.template, t);
       var element = temp_wrapper.firstChild;
-      element.data=sprites[i];
-      addSpriteByPosition(element,t.x,t.y,t.z);
+      element.data = sprites[i];
+      addSpriteByPosition(element, t.x, t.y, t.z);
     }
   }
 
-  var rotate = function(x,y,z,rx,ry){
-    var PI=Math.PI;
-    var pos = new THREE.Vector3().setFromMatrixPosition(new THREE.Matrix4().multiplyMatrices(
-        new THREE.Matrix4().multiplyMatrices(
-          new THREE.Matrix4().makeRotationAxis({x:0,y:1,z:0},-ry*PI/180),
-          new THREE.Matrix4().makeRotationAxis({x:1,y:0,z:0},-rx*PI/180)
+  function make_rotation_axis(point, rotation) {
+    return new THREE.Matrix4().makeRotationAxis(point, rotation);
+  }
+
+  function set_from_matrix_position(mat4) {
+    return new THREE.Vector3().setFromMatrixPosition(mat4);
+  }
+
+  function multiply_matrices(m1, m2) {
+    new THREE.Matrix4().multiplyMatrices(m1, m2);
+  }
+
+  var rotate = function(x, y, z, rx, ry) {
+    var pos = set_from_matrix_position(multiply_matrices(
+        multiply_matrices(
+          make_rotation_axis({x: 0, y: 1, z: 0}, - ry * PI / 180),
+          make_rotation_axis({x: 1, y: 0, z: 0}, - rx * PI / 180)
         ),
-        new THREE.Matrix4().setPosition({x:x,y:y,z:z})
+        new THREE.Matrix4().setPosition({x: x, y: y, z: z})
     ));
-    return ([-pos.x,-pos.y,-pos.z]);
+    return ([- pos.x, - pos.y, - pos.z]);
   }
 
   var addSpriteByRotation = function(element, rx, ry) {
-    var rotation = rotate(x,y,z,rx,ry);
-    addSpriteByPosition(element,rotation[0],rotation[1],rotation[2]);
+    var rotation = rotate(x, y, z, rx, ry);
+    addSpriteByPosition(element, rotation[0], rotation[1], rotation[2]);
   }
 
-  var addSpriteByPosition=function(element,x,y,z){
+  var addSpriteByPosition = function(element, x, y, z) {
 
-    z=-z;
-    y=-y;
+    z = -z;
+    y = -y;
 
     var spriteContainer = document.createElement('div');
-    spriteContainer.style.display='inline-block';
-    spriteContainer.style.position='absolute';
-    spriteContainer.className="sprite-container";
+    spriteContainer.style.display = 'inline-block';
+    spriteContainer.style.position = 'absolute';
+    spriteContainer.className = 'sprite-container';
     spriteContainer.id = element.data.id;
 
-    spriteContainer.style['-webkit-transform-origin-x']='0';
-    spriteContainer.style['-webkit-transform-origin-y']='0';
+    spriteContainer.style['-webkit-transform-origin-x'] = '0';
+    spriteContainer.style['-webkit-transform-origin-y'] = '0';
 
-    var arc=x==0&&z==0?0:Math.acos(z/Math.pow(x*x+z*z,0.5));
+    var arc = x == 0 && z == 0 ? 0 : acos( z / pow(x * x + z * z, 0.5));
 
-    arc=x<0?2*Math.PI-arc:arc;
-    arc=arc*180/Math.PI;
+    arc = x < 0 ? 2 * PI - arc : arc;
+    arc = arc * 180 / PI;
 
-    var r=distance3D(x,y,z,0,0,0);
-    x+=snot.cubeSize/2;
-    y+=snot.cubeSize/2;
+    var r = distance3D(x, y, z, 0, 0, 0);
+    x += snot.cubeSize / 2;
+    y += snot.cubeSize / 2;
 
-    spriteContainer.style['-webkit-transform']='translate3d('+epsilon(x)+'px,'+epsilon(y)+'px,'+epsilon(z)+'px) rotateY('+epsilon(arc)+'deg) rotateX('+epsilon((y-snot.cubeSize/2)/r*-90)+'deg) rotateY(180deg)';
+    spriteContainer.style['-webkit-transform'] = 'translate3d(' + epsilon(x) + 'px,' + epsilon(y) + 'px,' + epsilon(z) + 'px) rotateY(' + epsilon(arc) + 'deg) rotateX(' + epsilon(- (y - snot.cubeSize / 2) / r * 90)+'deg) rotateY(180deg)';
 
     var spriteWrap = document.createElement('div');
     spriteWrap.className='sprite-wrap';
     spriteWrap.appendChild(element);
-    spriteWrap.setAttribute('data-visibility', element.data.visibility ? true : false);
+    spriteWrap.setAttribute('data-visible', element.data.visible == false ? false : true);
 
     spriteContainer.appendChild(spriteWrap);
     snot.camera.appendChild(spriteContainer);
   }
 
-  var update_sprite_visibility = function(id, visibility) {
+  var update_sprite_visibility = function(id, visible) {
     var spriteContainer = document.getElementById(id);
-    spriteContainer.firstChild.setAttribute('data-visibility', visibility ? true : false);
+    spriteContainer.firstChild.setAttribute('data-visible', visible ? true : false);
   }
 
   var update_sprite_position = function(id, x, y, z) {
@@ -257,18 +268,18 @@
     snot.sprites[id].z = z;
     z=-z;
     y=-y;
-    var arc=x==0&&z==0?0:Math.acos(z/Math.pow(x*x+z*z,0.5));
+    var arc = x == 0 && z == 0 ? 0 : acos( z / pow(x * x + z * z, 0.5));
 
-    arc=x<0?2*Math.PI-arc:arc;
-    arc=arc*180/Math.PI;
+    arc = x < 0 ? 2 * PI - arc : arc;
+    arc = arc * 180/ PI;
 
-    var r=distance3D(x,y,z,0,0,0);
-    x+=snot.cubeSize/2;
-    y+=snot.cubeSize/2;
+    var r = distance3D(x, y, z, 0, 0, 0);
+    x += snot.cubeSize / 2;
+    y += snot.cubeSize / 2;
 
     var spriteContainer = document.getElementById(id);
 
-    spriteContainer.style['-webkit-transform']='translate3d('+epsilon(x)+'px,'+epsilon(y)+'px,'+epsilon(z)+'px) rotateY('+epsilon(arc)+'deg) rotateX('+epsilon((y-snot.cubeSize/2)/r*-90)+'deg) rotateY(180deg)';
+    spriteContainer.style['-webkit-transform'] = 'translate3d(' + epsilon(x) + 'px,' + epsilon(y) + 'px,' + epsilon(z) + 'px) rotateY(' + epsilon(arc) + 'deg) rotateX(' + epsilon(- (y - snot.cubeSize / 2) / r * 90) + 'deg) rotateY(180deg)';
   }
 
   var mouseMove = function (event) {
@@ -276,53 +287,47 @@
     event.preventDefault();
     event.stopPropagation();
 
-    var x=Math.floor(event.clientX>=0?event.clientX:event.touches[0].pageX);
-    var y=Math.floor(event.clientY>=0?event.clientY:event.touches[0].pageY);
-    x-=dom_offset_left;
-    y-=dom_offset_top;
+    var x = Math.floor(event.clientX >= 0 ? event.clientX : event.touches[0].pageX);
+    var y = Math.floor(event.clientY >= 0 ? event.clientY : event.touches[0].pageY);
+    x -= dom_offset_left;
+    y -= dom_offset_top;
 
-    touches.click=false;
+    touches.click = false;
 
-    if(!touches.onTouching){
-
+    if (!touches.onTouching) {
       return false;
-
     }
 
-    if(event.touches&&event.touches.length>1){
+    if (event.touches && event.touches.length > 1) {
 
-      var cfx=x;                          // Current frist  finger x
-      var cfy=y;                          // Current first  finger y
-      var csx=event.touches[1].pageX;     // Current second finger x
-      var csy=event.touches[1].pageY;     // Current second finger y
+      var cfx = x;                          // Current frist  finger x
+      var cfy = y;                          // Current first  finger y
+      var csx = event.touches[1].pageX;     // Current second finger x
+      var csy = event.touches[1].pageY;     // Current second finger y
 
-      var dis= distance2D(touches.fx,touches.fy,touches.sx,touches.sy)-distance2D(cfx,cfy,csx,csy);
+      var dis = distance2D(touches.fx, touches.fy, touches.sx, touches.sy) - distance2D(cfx, cfy, csx, csy);
 
-      var ratio=0.12;
-      snot.setFov(snot.fov+dis*ratio);
+      var ratio = 0.12;
+      snot.setFov(snot.fov + dis * ratio);
 
-      touches.fx=cfx;
-      touches.fy=cfy;
-      touches.sx=csx;
-      touches.sy=csy;
+      touches.fx = cfx;
+      touches.fy = cfy;
+      touches.sx = csx;
+      touches.sy = csy;
 
       return false;
-
     }
 
-    var ratio=snot.moving_ratio;
+    var ratio = snot.moving_ratio;
 
-    _ry=_ry+(touches.fx-x)*ratio;
-    _rx=_rx-(touches.fy-y)*ratio;
+    _ry = _ry + (touches.fx - x) * ratio;
+    _rx = _rx - (touches.fy - y) * ratio;
 
-    touches.fx=x;
-    touches.fy=y;
+    touches.fx = x;
+    touches.fy = y;
 
-    _rx=_rx>90?90  :_rx;
-    _rx=_rx<-90?-90:_rx;
-
-
-    //TODO
+    _rx = _rx > 90 ? 90 :_rx;
+    _rx = _rx < -90 ? -90 : _rx;
 
   };
 
@@ -333,19 +338,19 @@
     event.preventDefault();
     event.stopPropagation();
 
-    var x=Math.floor(event.clientX>=0?event.clientX:event.touches[0].clientX);
-    var y=Math.floor(event.clientY>=0?event.clientY:event.touches[0].clientY);
-    x-=dom_offset_left;
-    y-=dom_offset_top;
+    var x = floor(event.clientX >= 0 ? event.clientX : event.touches[0].clientX);
+    var y = floor(event.clientY >= 0 ? event.clientY : event.touches[0].clientY);
+    x -= dom_offset_left;
+    y -= dom_offset_top;
 
-    mouseDownX=x;
-    mouseDownY=y;
+    mouseDownX = x;
+    mouseDownY = y;
 
-    touches.fx=x;
-    touches.fy=y;
-    touches.click=true;
+    touches.fx = x;
+    touches.fy = y;
+    touches.click = true;
 
-    if (event.touches&&event.touches.length>1) {
+    if (event.touches && event.touches.length > 1) {
 
       touches.sx = event.touches[1].pageX;
       touches.sy = event.touches[1].pageY;
@@ -353,7 +358,6 @@
     }
 
     touches.onTouching = true;
-
   }
 
   var mouseWheel = function (event) {
@@ -361,12 +365,12 @@
     event.preventDefault();
     event.stopPropagation();
 
-    var offset=event.deltaY;
-    snot.setFov(snot.fov+offset*0.06);
+    var offset = event.deltaY;
+    snot.setFov(snot.fov + offset * 0.06);
 
   }
 
-  function multiply(mats){
+  function multiply(mats) {
     if (mats.length == 2) {
       return new THREE.Matrix4().multiplyMatrices(
         mats[0],
@@ -385,36 +389,36 @@
     }
   }
 
-  function on_click (x, y) {
-    var R=100;
+  function on_click(x, y) {
+    var R = 100;
     var fov = snot.fov;
     var cubeSize = snot.cubeSize;
-    var arcFactor = Math.PI/180;
-    var rz = snot.rz*arcFactor;
+    var arcFactor = Math.PI / 180;
+    var rz = snot.rz * arcFactor;
     var width = snot.width;
     var height = snot.height;
 
-    var ry=(x/width-0.5)*fov;
-    var rx=(y/height-0.5)*fov*height/width;
-    var r=Math.cos(fov/2*arcFactor)*cubeSize;
-    var ratiox=(x-width/2)/width*2;
-    var ratioy=(y-height/2)/width*2;
-    var P=Math.sin(fov/2*arcFactor)*cubeSize;
+    var ry = (x / width - 0.5) * fov;
+    var rx = (y / height-0.5) * fov * height / width;
+    var r = cos(fov / 2 * arcFactor) * cubeSize;
+    var ratiox = (x - width / 2) / width * 2;
+    var ratioy = (y - height / 2) / width * 2;
+    var P = sin(fov / 2 * arcFactor) * cubeSize;
 
-    ry=Math.atan(ratiox*P/r);
-    rx=Math.atan(ratioy*P/r);
+    ry = atan(ratiox * P / r);
+    rx = atan(ratioy * P / r);
 
-    ry*=180/Math.PI;
-    rx*=180/Math.PI;
+    ry *= 180 / PI;
+    rx *= 180 / PI;
 
-    var xyz2=rotation2Position(R,rx,0);
+    var xyz2 = rotation2Position(R, rx, 0);
 
-    var rr=distance3D(-Math.tan(ry*arcFactor)*xyz2[2],-xyz2[1],xyz2[2],0,0,0);
-    var ratio=R/rr;
+    var rr = distance3D(- tan(ry * arcFactor) * xyz2[2], - xyz2[1], xyz2[2], 0, 0, 0);
+    var ratio = R / rr;
 
-    var new_x = -Math.tan(ry*Math.PI/180)*xyz2[2]*ratio;
-    var new_y = -xyz2[1]*ratio;
-    var new_z = xyz2[2]*ratio;
+    var new_x = - tan(ry * PI / 180) * xyz2[2] * ratio;
+    var new_y = -xyz2[1] * ratio;
+    var new_z = xyz2[2] * ratio;
 
     var pos = new THREE.Vector3().setFromMatrixPosition(multiply([
       new THREE.Matrix4().makeRotationAxis({x:0,y:1,z:0},-snot.ry*Math.PI/180),
@@ -586,7 +590,7 @@
   }
 
   extend(snot, {
-    setFov: _setFov,
+    setFov: set_fov,
     setRx: _setRx,
     setRy: _setRy,
     init: _init,
