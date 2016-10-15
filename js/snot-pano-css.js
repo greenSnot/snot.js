@@ -38,6 +38,7 @@
   var atan = Math.atan;
   var pow = Math.pow;
   var floor = Math.floor;
+  var sqrt = Math.sqrt;
 
   var _rx;
   var _ry;
@@ -421,18 +422,18 @@
     var new_z = xyz2[2] * ratio;
 
     var pos = new THREE.Vector3().setFromMatrixPosition(multiply([
-      new THREE.Matrix4().makeRotationAxis({x:0,y:1,z:0},-snot.ry*Math.PI/180),
-      new THREE.Matrix4().makeRotationAxis({x:0,y:0,z:1},-snot.rz*Math.PI/180),
-      new THREE.Matrix4().makeRotationAxis({x:1,y:0,z:0},-snot.rx*Math.PI/180),
-      new THREE.Matrix4().setPosition({x:new_x,y:new_y,z:new_z})
+      make_rotation_axis({x: 0, y: 1, z: 0}, - snot.ry * PI / 180),
+      make_rotation_axis({x: 0, y: 0, z: 1}, - snot.rz * PI / 180),
+      make_rotation_axis({x: 1, y: 0, z: 0}, - snot.rx * PI / 180),
+      new THREE.Matrix4().setPosition({x: new_x, y: new_y, z: new_z})
     ]));
 
-    ax = -pos.x;
+    ax = - pos.x;
     ay = pos.y;
     az = pos.z;
 
-    var min_offset=0.4;
-    var min_distance=snot.min_detect_distance;
+    var min_offset = 0.4;
+    var min_distance = snot.min_detect_distance;
     var nearest;
 
     var spriteContainers = document.getElementsByClassName('sprite-container');
@@ -441,18 +442,18 @@
       var matrix = text2Matrix(self.style.webkitTransform);
       var rate_ = 100 / distance3D(0, 0, 0, snot.cubeSize / 2 - matrix[12], matrix[13] - snot.cubeSize / 2, - matrix[14]);
 
-      var distance = distance3D(-ax, -ay, az, (snot.cubeSize / 2 - matrix[12]) * rate_, rate_ * (matrix[13] - snot.cubeSize / 2), rate_ * ( - matrix[14]));
+      var distance = distance3D(- ax, - ay, az, (snot.cubeSize / 2 - matrix[12]) * rate_, rate_ * (matrix[13] - snot.cubeSize / 2), rate_ * ( - matrix[14]));
       if (distance < min_distance) {
         min_distance = distance;
         nearest = self.children[0];
       }
-    };
+    }
 
-    var rotation=position2rotation(ax,az,ay);
-    if(nearest){
-      snot.onSpriteClick(snot.sprites[nearest.parentElement.id],nearest);
-    }else{
-      snot.on_click(ax,ay,az,rotation[0],rotation[1]);
+    var rotation = position2rotation(ax, az, ay);
+    if (nearest) {
+      snot.onSpriteClick(snot.sprites[nearest.parentElement.id], nearest);
+    } else {
+      snot.on_click(ax, ay, az, rotation[0], rotation[1]);
     }
   }
 
@@ -460,21 +461,21 @@
     event.preventDefault();
     event.stopPropagation();
 
-    var x=Math.floor(event.clientX>=0?event.clientX:event.changedTouches[0].pageX);
-    var y=Math.floor(event.clientY>=0?event.clientY:event.changedTouches[0].pageY);
-    x-=dom_offset_left;
-    y-=dom_offset_top;
+    var x = floor(event.clientX >= 0 ? event.clientX : event.changedTouches[0].pageX);
+    var y = floor(event.clientY >= 0 ? event.clientY : event.changedTouches[0].pageY);
+    x -= dom_offset_left;
+    y -= dom_offset_top;
 
     //Screen coordinate to Sphere 3d coordinate
-    if (distance2D(mouseDownX,mouseDownY,x,y)<5) {
+    if (distance2D(mouseDownX, mouseDownY, x, y) < 5) {
       on_click(x, y);
     }
-    touches.onTouching=false;
+    touches.onTouching = false;
   }
 
   function _run() {
-    snot._animateId=requestAnimationFrame( _run );
-    if(!snot.pause_animation){
+    snot._animateId = requestAnimationFrame(_run);
+    if (!snot.pause_animation) {
       _update();
     }
   }
@@ -482,9 +483,9 @@
   function toMat(q) {
 
     var w = q['w'];
-    var x = -q['x'];
+    var x = - q['x'];
     var y = q['y'];
-    var z = -q['z'];
+    var z = - q['z'];
 
     var n = w * w + x * x + y * y + z * z;
     var s = n === 0 ? 0 : 2 / n;
@@ -502,59 +503,61 @@
   function _update() {
     snot.frames++;
 
-    if (vars.alpha === -1 && vars.beta === -1 && vars.gamma === -1)
+    if (vars.alpha === -1 && vars.beta === -1 && vars.gamma === - 1) {
       return;
+    }
+
     var zee = new THREE.Vector3( 0, 0, 1 );
 
     var euler = new THREE.Euler();
 
     var q0 = new THREE.Quaternion();
 
-    var q1 = new THREE.Quaternion( - Math.sqrt( 0.5 ), 0, 0, Math.sqrt( 0.5 ) ); // - PI/2 around the x-axis
+    var q1 = new THREE.Quaternion(- sqrt( 0.5 ), 0, 0, sqrt( 0.5 )); // - PI/2 around the x-axis
     var quaternion = new THREE.Quaternion();
     euler.set( vars.beta, vars.alpha, - vars.gamma, 'YXZ' ); // 'ZXY' for the device, but 'YXZ' for us
 
-    quaternion.setFromEuler( euler ); // orient the device
+    quaternion.setFromEuler(euler); // orient the device
 
-    quaternion.multiply( q1 ); // camera looks out the back of the device, not the top
+    quaternion.multiply(q1); // camera looks out the back of the device, not the top
 
-    quaternion.multiply( q0.setFromAxisAngle( zee, - screen_orientation) ); // adjust for screen orientation
+    quaternion.multiply(q0.setFromAxisAngle(zee, - screen_orientation)); // adjust for screen orientation
     var newQuaternion = new THREE.Quaternion();
-    THREE.Quaternion.slerp( quaternion, previous_quat , newQuaternion, 1 - snot.smooth);
+    THREE.Quaternion.slerp(quaternion, previous_quat , newQuaternion, 1 - snot.smooth);
     previous_quat = newQuaternion;
     var mat = toMat(newQuaternion);
-    var mat4= {elements:mat};
-    var a=new THREE.Euler().setFromRotationMatrix(mat4,'XZY');
+    var mat4= {elements: mat};
+    var a=new THREE.Euler().setFromRotationMatrix(mat4, 'XZY');
 
-    snot.rx = a._x*180/Math.PI;
-    snot.ry = a._y*180/Math.PI;
-    snot.rz = a._z*180/Math.PI;
+    snot.rx = a._x * 180 / PI;
+    snot.ry = a._y * 180 / PI;
+    snot.rz = a._z * 180 / PI;
 
     var camera_look_at = new THREE.Vector3().setFromMatrixPosition(multiply([
-      new THREE.Matrix4().makeRotationAxis({x:0,y:1,z:0},-snot.ry*Math.PI/180),
-      new THREE.Matrix4().makeRotationAxis({x:0,y:0,z:1},-snot.rz*Math.PI/180),
-      new THREE.Matrix4().makeRotationAxis({x:1,y:0,z:0},-snot.rx*Math.PI/180),
+      make_rotation_axis({x: 0, y: 1, z: 0}, - snot.ry * PI / 180),
+      make_rotation_axis({x: 0, y: 0, z: 1}, - snot.rz * PI / 180),
+      make_rotation_axis({x: 1, y: 0, z: 0}, - snot.rx * PI / 180),
       new THREE.Matrix4().setPosition({x: 0, y: 0,z: 1})
     ]));
 
-    snot.camera_look_at.x = -camera_look_at.x;
+    snot.camera_look_at.x = - camera_look_at.x;
     snot.camera_look_at.y = camera_look_at.y;
     snot.camera_look_at.z = camera_look_at.z;
 
     //$('#logger').html(Math.floor(snot.rx)+','+ Math.floor(snot.ry) +','+ Math.floor(snot.rz));
-    snot.camera.style.transform = 'translateZ('+epsilon(snot.perspective)+'px)'+" matrix3d(" + mat + ")"+ snot.cameraBaseTransform;
+    snot.camera.style.transform = 'translateZ(' + epsilon(snot.perspective) + 'px)' + " matrix3d(" + mat + ")"+ snot.cameraBaseTransform;
 
   }
   var previous_quat = new THREE.Quaternion();
 
   var screen_orientation = 0;
-  window.addEventListener( 'orientationchange', function(ev) {
+  window.addEventListener('orientationchange', function(ev) {
     screen_orientation = window.orientation || 0;
   }, false );
 
   var vars = {
     alpha: 0,
-    beta: 90 * Math.PI/180,
+    beta: 90 * PI / 180,
     gamma: 0
   };
 
@@ -564,18 +567,18 @@
     gamma: 0
   };
 
-  window.addEventListener("deviceorientation", function(ev) {
+  window.addEventListener('deviceorientation', function(ev) {
     if (ev.alpha !== null) {
-      vars.beta = ev.beta  * Math.PI/ 180 ;
-      vars.gamma = ev.gamma  * Math.PI/ 180;
-      vars.alpha = ev.alpha  * Math.PI/ 180;
+      vars.beta = ev.beta  * Math.PI / 180 ;
+      vars.gamma = ev.gamma  * Math.PI / 180;
+      vars.alpha = ev.alpha  * Math.PI / 180;
     } else {
       vars.beta = vars.gamma = vars.alpha = -1;
     }
   }, true);
 
 
-  var _setRx=function(rx,smooth){
+  var _setRx = function(rx, smooth) {
     //TODO
   }
 
