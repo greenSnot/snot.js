@@ -64,7 +64,10 @@ var sprites = {
 
 var bullets_pool = [];
 var bullets_running = [];
-for (var i = 0 ;i < 5; ++i) {
+var bullet_shooting_range = 400;
+var bullet_pool_size = 100;
+var max_bullets = 35;
+for (var i = 0 ;i < bullet_pool_size; ++i) {
   var id = 'bullet' + i;
   sprites[id] = {
     template:'template-bullet',
@@ -75,11 +78,11 @@ for (var i = 0 ;i < 5; ++i) {
 
     dist_x: 0,
     dist_y: 0,
-    dist_z: 40,
+    dist_z: bullet_shooting_range,
     status: -1,
     visibility: false,
 
-    velocity:1, // 1 px per frame
+    velocity:15, // 1 px per frame
   };
   bullets_pool.push(id);
 }
@@ -118,8 +121,7 @@ snot.init({
 });
 
 let last_shoot_time = 0;
-let shoot_interval = 300; //ms
-let max_bullets = 4;
+let shoot_interval = 80; //ms
 function shoot() {
   let now = new Date().valueOf();
   if (now - last_shoot_time > shoot_interval) {
@@ -137,6 +139,7 @@ function destory_bullet(id) {
   }
 }
 
+var bullet_offset_y = 50;
 function update() {
   requestAnimationFrame(update);
   snot.update();
@@ -147,10 +150,8 @@ function update() {
     var id = bullets_running[i];
     var bullet = snot.sprites[id];
     if (bullet.status == -1) {
+      bullet.y = - bullet_offset_y;
       // init or reset
-      if (snot.frames <= i * 8) {
-        continue;
-      }
       bullet.distanceToOrigin = distance3D(bullet.dist_x, bullet.dist_y, bullet.dist_z, 0, 0, 0);
       bullet.steps = Math.floor(bullet.distanceToOrigin / bullet.velocity);
       bullet.step_x = (bullet.dist_x - bullet.x) * bullet.velocity / bullet.distanceToOrigin;
@@ -160,12 +161,12 @@ function update() {
       bullet.status = 0;
     }
     if (!bullet.steps) {
-      snot.sprites[id].dist_x = snot.camera_look_at.x * 30;
-      snot.sprites[id].dist_y = snot.camera_look_at.y * 30;
-      snot.sprites[id].dist_z = snot.camera_look_at.z * 30;
+      snot.sprites[id].dist_x = snot.camera_look_at.x * bullet_shooting_range;
+      snot.sprites[id].dist_y = snot.camera_look_at.y * bullet_shooting_range;
+      snot.sprites[id].dist_z = snot.camera_look_at.z * bullet_shooting_range;
       bullet.x = snot.camera_look_at.x,
-      bullet.y = snot.camera_look_at.y,
-      bullet.z = - snot.camera_look_at.z -3;
+      bullet.y = snot.camera_look_at.y - bullet_offset_y,
+      bullet.z = - snot.camera_look_at.z;
       bullet.status = -1;
       bullet.visibility = false;
       destory_bullet(id);
