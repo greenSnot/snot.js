@@ -6,7 +6,7 @@ html, body {
   overflow: hidden;
 }
 
-#snot-pano {
+#snot-wrap {
   width: 100%;
   height: 100%;
   margin: 0;
@@ -14,18 +14,18 @@ html, body {
   overflow: hidden;
 }
 
-#container {
+#snot-container {
   width: 100%;
   height: 100%;
   -webkit-transform: scale(1);
 }
-#camera {
+#snot-camera {
   width: 100%;
   height: 100%;
   -webkit-transform-style: preserve-3d;
 }
 
-.cube {
+.snot-bg {
   position: absolute;
   background-size: 100%;
   z-index: 1;

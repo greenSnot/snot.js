@@ -16,9 +16,9 @@
 
     pause_animation: false,
 
-    dom      : document.getElementById('snot-pano'),
-    camera   : document.getElementById('camera'),
-    container: document.getElementById('container'),
+    dom      : document.getElementById('snot-wrap'),
+    camera   : document.getElementById('snot-camera'),
+    container: document.getElementById('snot-container'),
 
     bg_size: 1024,
 
@@ -155,7 +155,7 @@
     var bg_dom;
     var count = 0;
     for (var i in bg_config) {
-      bg_dom = document.getElementsByClassName('cube ' + i)[0];
+      bg_dom = document.getElementsByClassName('snot-bg ' + i)[0];
       bg_dom.style['-webkit-transform'] = bg_config[i];
       bg_dom.style['width'] = snot.bg_size + 2 + 'px';        // 2 more pixels for overlapping gaps ( chrome's bug )
       bg_dom.style['height'] = snot.bg_size + 2 + 'px';        // 2 more pixels for overlapping gaps ( chrome's bug )
