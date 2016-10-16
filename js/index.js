@@ -1,7 +1,3 @@
-function random(arr){
-  return arr[parseInt(Math.random() * (arr.length))]
-}
-
 function onSpriteClick(data){
   console.log(data);
   alert('onSpriteClick');
@@ -14,7 +10,7 @@ function on_click(x, y, z, rx, ry) {
 
     spriteType: 'spot',
 
-    spotType: random(['straight', 'left', 'right']),
+    spotType: 'right',
     id: 'spot-' + 123,
     text: 'haha',
     x: x * 4,
@@ -27,7 +23,7 @@ var sprites = {
   'spot1': {
     template: 'template-spot',
     spriteType: 'spot',
-    spotType: random(['straight','left','right']),
+    spotType: 'left',
     id: 'spot1',
     text: 'Home',
     x: 4,
@@ -36,26 +32,8 @@ var sprites = {
   }, 'spot2': {
     template: 'template-spot',
     spriteType: 'spot',
-    spotType: random(['straight','left','right']),
+    spotType: 'straight',
     id: 'spot2',
-    text: 'Market',
-    x: 329,
-    y: 0,
-    z: 240
-  }, 'spot3': {
-    template: 'template-spot',
-    spriteType: 'spot',
-    spotType: random(['straight','left','right']),
-    id: 'spot3',
-    text: 'Bridge',
-    x: 320,
-    y: 0,
-    z: -230
-  }, 'spot2': {
-    template: 'template-spot',
-    spriteType: 'spot2',
-    spotType: random(['straight','left','right']),
-    id: 'spot4',
     text: 'Garage',
     x: 400,
     y: 0,
@@ -152,6 +130,7 @@ function update() {
       bullet.step_z = (bullet.dist_z - bullet.z) * bullet.velocity / bullet.distanceToOrigin;
       bullet.visible = true;
       bullet.status = 0;
+      bullet.need_update_visibility = true;
     }
     if (!bullet.steps) {
       snot.sprites[id].dist_x = snot.camera_look_at.x * bullet_shooting_range;
@@ -162,12 +141,17 @@ function update() {
       bullet.z = - snot.camera_look_at.z;
       bullet.status = -1;
       bullet.visible = false;
+      bullet.need_update_visibility = true;
+      bullet.need_update_position = true;
       destory_bullet(id);
+      continue;
     } else {
-      snot.update_sprite_position(id, bullet.x + bullet.step_x, bullet.y + bullet.step_y, bullet.z + bullet.step_z);
+      bullet.x = bullet.x + bullet.step_x;
+      bullet.y = bullet.y + bullet.step_y;
+      bullet.z = bullet.z + bullet.step_z;
       bullet.steps --;
     }
-    snot.update_sprite_visibility(bullet.id, bullet.visible);
+    bullet.need_update_position = true;
   }
 }
 update();

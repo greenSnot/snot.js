@@ -40,8 +40,8 @@
   var floor = Math.floor;
   var sqrt = Math.sqrt;
 
-  var _rx;
-  var _ry;
+  var dist_rx;
+  var dist_ry;
 
   function _pointStandardlization(x, y, z) {
     var ratio = 200 / distance3D(x, y, z, 0, 0, 0);
@@ -89,8 +89,8 @@
     dom_offset_left = util.left_pos(snot.dom);
     dom_offset_top = util.top_pos(snot.dom);
 
-    _rx = snot.rx;
-    _ry = snot.ry;
+    dist_rx = snot.rx;
+    dist_ry = snot.ry;
 
     //First init
     if (!ajax) {
@@ -253,15 +253,16 @@
     snot.camera.appendChild(spriteContainer);
   }
 
-  var update_sprite_visibility = function(id, visible) {
+  var update_sprite_visibility = function(id) {
+    var visible = snot.sprites[id].visible;
     var spriteContainer = document.getElementById(id);
     spriteContainer.firstChild.setAttribute('data-visible', visible ? true : false);
   }
 
-  var update_sprite_position = function(id, x, y, z) {
-    snot.sprites[id].x = x;
-    snot.sprites[id].y = y;
-    snot.sprites[id].z = z;
+  var update_sprite_position = function(id) {
+    var x = snot.sprites[id].x;
+    var y = snot.sprites[id].y;
+    var z = snot.sprites[id].z;
     z=-z;
     y=-y;
     var arc = x == 0 && z == 0 ? 0 : acos( z / pow(x * x + z * z, 0.5));
@@ -316,14 +317,14 @@
 
     var ratio = snot.moving_ratio;
 
-    _ry = _ry + (touches.fx - x) * ratio;
-    _rx = _rx - (touches.fy - y) * ratio;
+    dist_ry = dist_ry + (touches.fx - x) * ratio;
+    dist_rx = dist_rx - (touches.fy - y) * ratio;
 
     touches.fx = x;
     touches.fy = y;
 
-    _rx = _rx > 90 ? 90 :_rx;
-    _rx = _rx < -90 ? -90 : _rx;
+    dist_rx = dist_rx > 90 ? 90 : dist_rx;
+    dist_rx = dist_rx < -90 ? -90 : dist_rx;
 
   };
 
@@ -542,6 +543,17 @@
     //$('#logger').html(Math.floor(snot.rx)+','+ Math.floor(snot.ry) +','+ Math.floor(snot.rz));
     snot.camera.style.transform = 'translateZ(' + epsilon(snot.perspective) + 'px)' + " matrix3d(" + mat + ")"+ snot.cameraBaseTransform;
 
+    for (var i in snot.sprites) {
+      var sprite = snot.sprites[i];
+      if (sprite.need_update_position) {
+        sprite.need_update_position = false;
+        update_sprite_position(sprite.id);
+      }
+      if (sprite.need_update_visibility) {
+        sprite.need_update_visibility = false;
+        update_sprite_visibility(sprite.id);
+      }
+    }
   }
   var previous_quat = new THREE.Quaternion();
 
@@ -595,7 +607,5 @@
     run: _run,
     update: _update,
     load_sprites: _load_sprites,
-    update_sprite_position: update_sprite_position,
-    update_sprite_visibility: update_sprite_visibility
   });
 }(window);
