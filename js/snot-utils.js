@@ -24,7 +24,7 @@
     var curtop = 0;
     if (elem.offsetParent) {
       do { 
-          curtop +=elem.offsetTop; 
+          curtop += elem.offsetTop; 
       } while (elem = elem.offsetParent);
     }
     return curtop;

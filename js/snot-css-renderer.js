@@ -191,23 +191,36 @@
     }
   }
 
-  function make_rotation_axis(point, rotation) {
+  function m_make_rotation_axis(point, rotation) {
     return new THREE.Matrix4().makeRotationAxis(point, rotation);
   }
 
-  function set_from_matrix_position(mat4) {
+
+  function m_multiply() {
+    var mats = arguments;
+
+    var l = mats.length;
+    while (l > 1) {
+      var last2 = mats[l - 2];
+      var last1 = mats[l - 1];
+      mats[l - 2] = new THREE.Matrix4().multiplyMatrices(
+        last2,
+        last1
+      );
+      l--;
+    }
+    return mats[0];
+  }
+
+  function v_set_from_matrix_position(mat4) {
     return new THREE.Vector3().setFromMatrixPosition(mat4);
   }
 
-  function multiply_matrices(m1, m2) {
-    new THREE.Matrix4().multiplyMatrices(m1, m2);
-  }
-
   var rotate = function(x, y, z, rx, ry) {
-    var pos = set_from_matrix_position(multiply_matrices(
-        multiply_matrices(
-          make_rotation_axis({x: 0, y: 1, z: 0}, - ry * PI / 180),
-          make_rotation_axis({x: 1, y: 0, z: 0}, - rx * PI / 180)
+    var pos = v_set_from_matrix_position(m_multiply(
+        m_multiply(
+          m_make_rotation_axis({x: 0, y: 1, z: 0}, - ry * PI / 180),
+          m_make_rotation_axis({x: 1, y: 0, z: 0}, - rx * PI / 180)
         ),
         new THREE.Matrix4().setPosition({x: x, y: y, z: z})
     ));
@@ -367,25 +380,6 @@
 
   }
 
-  function multiply(mats) {
-    if (mats.length == 2) {
-      return new THREE.Matrix4().multiplyMatrices(
-        mats[0],
-        mats[1]
-      );
-    }
-    for (var i in mats) {
-      var last2 = mats[mats.length - 2];
-      var last1 = mats[mats.length - 1];
-      mats[mats.length - 2] = new THREE.Matrix4().multiplyMatrices(
-        last2,
-        last1
-      );
-      mats.pop();
-      return multiply(mats);
-    }
-  }
-
   function on_click(x, y) {
     var R = 100;
     var fov = snot.fov;
@@ -414,15 +408,15 @@
     var ratio = R / rr;
 
     var new_x = - tan(ry * PI / 180) * xyz2[2] * ratio;
-    var new_y = -xyz2[1] * ratio;
+    var new_y = - xyz2[1] * ratio;
     var new_z = xyz2[2] * ratio;
 
-    var pos = new THREE.Vector3().setFromMatrixPosition(multiply([
-      make_rotation_axis({x: 0, y: 1, z: 0}, - snot.ry * PI / 180),
-      make_rotation_axis({x: 0, y: 0, z: 1}, - snot.rz * PI / 180),
-      make_rotation_axis({x: 1, y: 0, z: 0}, - snot.rx * PI / 180),
+    var pos = new THREE.Vector3().setFromMatrixPosition(m_multiply(
+      m_make_rotation_axis({x: 0, y: 1, z: 0}, - snot.ry * PI / 180),
+      m_make_rotation_axis({x: 0, y: 0, z: 1}, - snot.rz * PI / 180),
+      m_make_rotation_axis({x: 1, y: 0, z: 0}, - snot.rx * PI / 180),
       new THREE.Matrix4().setPosition({x: new_x, y: new_y, z: new_z})
-    ]));
+    ));
 
     ax = - pos.x;
     ay = pos.y;
@@ -511,7 +505,7 @@
 
     var q1 = new THREE.Quaternion(- sqrt( 0.5 ), 0, 0, sqrt( 0.5 )); // - PI/2 around the x-axis
     var quaternion = new THREE.Quaternion();
-    euler.set( vars.beta, vars.alpha, - vars.gamma, 'YXZ' ); // 'ZXY' for the device, but 'YXZ' for us
+    euler.set(vars.beta, vars.alpha, - vars.gamma, 'YXZ'); // 'ZXY' for the device, but 'YXZ' for us
 
     quaternion.setFromEuler(euler); // orient the device
 
@@ -522,19 +516,19 @@
     THREE.Quaternion.slerp(quaternion, previous_quat , newQuaternion, 1 - snot.smooth);
     previous_quat = newQuaternion;
     var mat = toMat(newQuaternion);
-    var mat4= {elements: mat};
-    var a=new THREE.Euler().setFromRotationMatrix(mat4, 'XZY');
+    var mat4 = {elements: mat};
+    var a = new THREE.Euler().setFromRotationMatrix(mat4, 'XZY');
 
     snot.rx = a._x * 180 / PI;
     snot.ry = a._y * 180 / PI;
     snot.rz = a._z * 180 / PI;
 
-    var camera_look_at = new THREE.Vector3().setFromMatrixPosition(multiply([
-      make_rotation_axis({x: 0, y: 1, z: 0}, - snot.ry * PI / 180),
-      make_rotation_axis({x: 0, y: 0, z: 1}, - snot.rz * PI / 180),
-      make_rotation_axis({x: 1, y: 0, z: 0}, - snot.rx * PI / 180),
+    var camera_look_at = new THREE.Vector3().setFromMatrixPosition(m_multiply(
+      m_make_rotation_axis({x: 0, y: 1, z: 0}, - snot.ry * PI / 180),
+      m_make_rotation_axis({x: 0, y: 0, z: 1}, - snot.rz * PI / 180),
+      m_make_rotation_axis({x: 1, y: 0, z: 0}, - snot.rx * PI / 180),
       new THREE.Matrix4().setPosition({x: 0, y: 0,z: 1})
-    ]));
+    ));
 
     snot.camera_look_at.x = - camera_look_at.x;
     snot.camera_look_at.y = camera_look_at.y;
