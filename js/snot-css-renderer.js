@@ -469,48 +469,40 @@
       return;
     }
 
-    var zee = new THREE.Vector3( 0, 0, 1 );
-
     var euler = new THREE.Euler();
 
-    var q0 = new THREE.Quaternion();
 
-    var q1 = new THREE.Quaternion(- sqrt( 0.5 ), 0, 0, sqrt( 0.5 )); // - PI/2 around the x-axis
-    var quaternion = new THREE.Quaternion();
+    var target_quat = new THREE.Quaternion();
     euler.set(vars.beta, vars.alpha, - vars.gamma, 'YXZ'); // 'ZXY' for the device, but 'YXZ' for us
 
-    quaternion.setFromEuler(euler); // orient the device
+    target_quat.setFromEuler(euler); // orient the device
 
-    quaternion.multiply(q1); // camera looks out the back of the device, not the top
+    target_quat.multiply(new THREE.Quaternion(- sqrt( 0.5 ), 0, 0, sqrt( 0.5 ))); // camera looks out the back of the device, not the top
+// - PI/2 around the x-axis
 
-    quaternion.multiply(q0.setFromAxisAngle(zee, - screen_orientation)); // adjust for screen orientation
-    var newQuaternion = new THREE.Quaternion();
-    THREE.Quaternion.slerp(quaternion, previous_quat , newQuaternion, 1 - snot.smooth);
-    previous_quat = newQuaternion;
-    var nq = newQuaternion.clone();
-    nq.x *= -1;
-    nq.z *= -1;
-    var mat = m_make_rotation_from_quaternion(nq.normalize()).transpose().elements;
-    var mat4 = {elements: mat};
-    var a = new THREE.Euler().setFromRotationMatrix(mat4, 'XZY');
+    target_quat.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - screen_orientation)); // adjust for screen orientation
 
-    snot.rx = a._x * 180 / PI;
-    snot.ry = a._y * 180 / PI;
-    snot.rz = a._z * 180 / PI;
+    var slerp_quat = new THREE.Quaternion();
+    THREE.Quaternion.slerp(target_quat, previous_quat, slerp_quat, 1 - snot.smooth);
+    previous_quat = slerp_quat;
+    var look_at_quat = slerp_quat.clone();
+    look_at_quat.x *= -1;
+    look_at_quat.z *= -1;
+    var look_at_mat = m_make_rotation_from_quaternion(look_at_quat.normalize()).transpose();
+    var look_at_rot = new THREE.Euler().setFromRotationMatrix(look_at_mat, 'XZY');
 
-    var camera_look_at = new THREE.Vector3().setFromMatrixPosition(m_multiply(
-      m_make_rotation_axis({x: 0, y: 1, z: 0}, - snot.ry * PI / 180),
-      m_make_rotation_axis({x: 0, y: 0, z: 1}, - snot.rz * PI / 180),
-      m_make_rotation_axis({x: 1, y: 0, z: 0}, - snot.rx * PI / 180),
-      m_set_position({x: 0, y: 0,z: 1})
+    snot.rx = look_at_rot._x * 180 / PI;
+    snot.ry = look_at_rot._y * 180 / PI;
+    snot.rz = look_at_rot._z * 180 / PI;
+
+    snot.camera_look_at = v_set_from_matrix_position(m_multiply(
+      m_make_rotation_axis({x: 0, y: 1, z: 0}, look_at_rot._y),
+      m_make_rotation_axis({x: 0, y: 0, z: 1}, look_at_rot._z),
+      m_make_rotation_axis({x: 1, y: 0, z: 0}, - look_at_rot._x),
+      m_set_position({x: 0, y: 0, z: 1})
     ));
 
-    snot.camera_look_at.x = - camera_look_at.x;
-    snot.camera_look_at.y = camera_look_at.y;
-    snot.camera_look_at.z = camera_look_at.z;
-
-    //$('#logger').html(Math.floor(snot.rx)+','+ Math.floor(snot.ry) +','+ Math.floor(snot.rz));
-    snot.camera.style.transform = 'translateZ(' + epsilon(snot.perspective) + 'px)' + " matrix3d(" + mat + ")"+ snot.cameraBaseTransform;
+    snot.camera.style.transform = 'translateZ(' + epsilon(snot.perspective) + 'px)' + " matrix3d(" + look_at_mat.elements + ")"+ snot.cameraBaseTransform;
 
     for (var i in snot.sprites) {
       var sprite = snot.sprites[i];
