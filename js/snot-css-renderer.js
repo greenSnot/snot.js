@@ -187,14 +187,13 @@
       temp_wrapper.innerHTML = template(t.template, t);
       var element = temp_wrapper.firstChild;
       element.data = sprites[i];
-      addSpriteByPosition(element, t.x, t.y, t.z);
+      add_sprite_by_position(element, t);
     }
   }
 
   function m_make_rotation_axis(point, rotation) {
     return new THREE.Matrix4().makeRotationAxis(point, rotation);
   }
-
 
   function m_multiply() {
     var mats = arguments;
@@ -216,26 +215,15 @@
     return new THREE.Vector3().setFromMatrixPosition(mat4);
   }
 
-  var rotate = function(x, y, z, rx, ry) {
-    var pos = v_set_from_matrix_position(m_multiply(
-        m_multiply(
-          m_make_rotation_axis({x: 0, y: 1, z: 0}, - ry * PI / 180),
-          m_make_rotation_axis({x: 1, y: 0, z: 0}, - rx * PI / 180)
-        ),
-        new THREE.Matrix4().setPosition({x: x, y: y, z: z})
-    ));
-    return ([- pos.x, - pos.y, - pos.z]);
+  function m_set_position(p) {
+    return new THREE.Matrix4().setPosition(p);
   }
 
-  var addSpriteByRotation = function(element, rx, ry) {
-    var rotation = rotate(x, y, z, rx, ry);
-    addSpriteByPosition(element, rotation[0], rotation[1], rotation[2]);
-  }
+  function add_sprite_by_position(element, p) {
 
-  var addSpriteByPosition = function(element, x, y, z) {
-
-    z = -z;
-    y = -y;
+    var x = p.x;
+    var z = - p.z;
+    var y = - p.y;
 
     var spriteContainer = document.createElement('div');
     spriteContainer.style.display = 'inline-block';
@@ -292,7 +280,7 @@
     spriteContainer.style['-webkit-transform'] = 'translate3d(' + epsilon(x) + 'px,' + epsilon(y) + 'px,' + epsilon(z) + 'px) rotateY(' + epsilon(arc) + 'deg) rotateX(' + epsilon(- (y - snot.bg_size / 2) / r * 90) + 'deg) rotateY(180deg)';
   }
 
-  var mouseMove = function (event) {
+  var mouseMove = function(event) {
 
     event.preventDefault();
     event.stopPropagation();
@@ -411,11 +399,11 @@
     var new_y = - xyz2[1] * ratio;
     var new_z = xyz2[2] * ratio;
 
-    var pos = new THREE.Vector3().setFromMatrixPosition(m_multiply(
+    var pos = v_set_from_matrix_position(m_multiply(
       m_make_rotation_axis({x: 0, y: 1, z: 0}, - snot.ry * PI / 180),
       m_make_rotation_axis({x: 0, y: 0, z: 1}, - snot.rz * PI / 180),
       m_make_rotation_axis({x: 1, y: 0, z: 0}, - snot.rx * PI / 180),
-      new THREE.Matrix4().setPosition({x: new_x, y: new_y, z: new_z})
+      m_set_position({x: new_x, y: new_y, z: new_z})
     ));
 
     ax = - pos.x;
@@ -470,24 +458,8 @@
     }
   }
 
-  function toMat(q) {
-
-    var w = q['w'];
-    var x = - q['x'];
-    var y = q['y'];
-    var z = - q['z'];
-
-    var n = w * w + x * x + y * y + z * z;
-    var s = n === 0 ? 0 : 2 / n;
-    var wx = s * w * x, wy = s * w * y, wz = s * w * z;
-    var xx = s * x * x, xy = s * x * y, xz = s * x * z;
-    var yy = s * y * y, yz = s * y * z, zz = s * z * z;
-
-    return [
-      1 - (yy + zz), xy - wz, xz + wy, 0,
-        xy + wz, 1 - (xx + zz), yz - wx, 0,
-        xz - wy, yz + wx, 1 - (xx + yy), 0,
-        0, 0, 0, 1];
+  function m_make_rotation_from_quaternion(q) {
+    return new THREE.Matrix4().makeRotationFromQuaternion(q);
   }
 
   function _update() {
@@ -515,7 +487,10 @@
     var newQuaternion = new THREE.Quaternion();
     THREE.Quaternion.slerp(quaternion, previous_quat , newQuaternion, 1 - snot.smooth);
     previous_quat = newQuaternion;
-    var mat = toMat(newQuaternion);
+    var nq = newQuaternion.clone();
+    nq.x *= -1;
+    nq.z *= -1;
+    var mat = m_make_rotation_from_quaternion(nq.normalize()).transpose().elements;
     var mat4 = {elements: mat};
     var a = new THREE.Euler().setFromRotationMatrix(mat4, 'XZY');
 
@@ -527,7 +502,7 @@
       m_make_rotation_axis({x: 0, y: 1, z: 0}, - snot.ry * PI / 180),
       m_make_rotation_axis({x: 0, y: 0, z: 1}, - snot.rz * PI / 180),
       m_make_rotation_axis({x: 1, y: 0, z: 0}, - snot.rx * PI / 180),
-      new THREE.Matrix4().setPosition({x: 0, y: 0,z: 1})
+      m_set_position({x: 0, y: 0,z: 1})
     ));
 
     snot.camera_look_at.x = - camera_look_at.x;
