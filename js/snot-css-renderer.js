@@ -22,6 +22,7 @@
 
     bg_size: 1024,
 
+    gyro: false,
     ry: 0,        // Rotate * degree around y axis
     rx: 0,        // Rotate * degree around x axis
     max_fov: 120, // Max field of view (degree)
@@ -29,6 +30,7 @@
     fov: 90,      // Default field of view
     smooth: 0.17,
   }
+  var prev_gyro;
 
   var PI = Math.PI;
   var sin = Math.sin;
@@ -42,6 +44,20 @@
 
   var dist_rx;
   var dist_ry;
+  var previous_quat = new THREE.Quaternion();
+  var screen_orientation = 0;
+  var vars = {
+    alpha: 0,
+    beta: 90 * PI / 180,
+    gamma: 0
+  };
+
+  var varsDest = {
+    alpha: 0,
+    beta: 0,
+    gamma: 0
+  };
+
 
   function _pointStandardlization(x, y, z) {
     var ratio = 200 / distance3D(x, y, z, 0, 0, 0);
@@ -85,11 +101,12 @@
     for (var i in config) {
       snot[i] = config[i];
     }
+    prev_gyro = snot.gyro;
 
     dom_offset_left = util.left_pos(snot.dom);
     dom_offset_top = util.top_pos(snot.dom);
 
-    dist_rx = snot.rx;
+    dist_rx = snot.rx + 0.1; //unknown bug for mobile safari
     dist_ry = snot.ry;
 
     //First init
@@ -462,18 +479,11 @@
     return new THREE.Matrix4().makeRotationFromQuaternion(q);
   }
 
-  function _update() {
-    snot.frames++;
-
-    if (vars.alpha === -1 && vars.beta === -1 && vars.gamma === - 1) {
-      return;
-    }
-
+  function update_camera(x, y, z) {
     var euler = new THREE.Euler();
 
-
     var target_quat = new THREE.Quaternion();
-    euler.set(vars.beta, vars.alpha, - vars.gamma, 'YXZ'); // 'ZXY' for the device, but 'YXZ' for us
+    euler.set(y, x, z, 'YXZ'); // 'ZXY' for the device, but 'YXZ' for us
 
     target_quat.setFromEuler(euler); // orient the device
 
@@ -503,6 +513,26 @@
     ));
 
     snot.camera.style.transform = 'translateZ(' + epsilon(snot.perspective) + 'px)' + " matrix3d(" + look_at_mat.elements + ")"+ snot.cameraBaseTransform;
+  }
+
+  function _update() {
+    snot.frames++;
+
+    if (snot.gyro) {
+      if (vars.alpha === -1 && vars.beta === -1 && vars.gamma === - 1) {
+        return;
+      }
+
+      update_camera(vars.alpha, vars.beta, - vars.gamma);
+    } else {
+      if (prev_gyro) {
+        dist_rx = 0;
+        dist_ry = 0;
+      }
+      dist_ry += snot.auto_rotation;
+      update_camera( - dist_ry * PI / 180, dist_rx * PI / 180 + PI / 2, 0);
+    }
+    prev_gyro = snot.gyro;
 
     for (var i in snot.sprites) {
       var sprite = snot.sprites[i];
@@ -516,24 +546,10 @@
       }
     }
   }
-  var previous_quat = new THREE.Quaternion();
 
-  var screen_orientation = 0;
   window.addEventListener('orientationchange', function(ev) {
     screen_orientation = window.orientation || 0;
   }, false );
-
-  var vars = {
-    alpha: 0,
-    beta: 90 * PI / 180,
-    gamma: 0
-  };
-
-  var varsDest = {
-    alpha: 0,
-    beta: 0,
-    gamma: 0
-  };
 
   window.addEventListener('deviceorientation', function(ev) {
     if (ev.alpha !== null) {

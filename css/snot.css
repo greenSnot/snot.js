@@ -51,6 +51,13 @@ html, body {
   visibility:hidden;
 }
 
+.btn-gyro{
+  position:absolute;
+  top:20px;
+  left:20px;
+  z-index:40;
+}
+
 .spot-description{
   width:128px;
   margin-bottom:-30px;
