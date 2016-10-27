@@ -482,7 +482,12 @@
   var camera_euler = new THREE.Euler();
   var target_quat = new THREE.Quaternion();
   var rotate_90_quat = new THREE.Quaternion(- sqrt( 0.5 ), 0, 0, sqrt( 0.5 ))
-  var adjust_screen_quat = new THREE.Quaternion();
+  var adjust_screen_quats = {
+    0: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0),
+    90: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - 90),
+    180: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - 180),
+    '-90': new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 90),
+  };
   var look_at_euler = new THREE.Euler();
 
   function update_camera(x, y, z) {
@@ -492,9 +497,8 @@
     target_quat.setFromEuler(camera_euler); // orient the device
 
     target_quat.multiply(rotate_90_quat); // camera looks out the back of the device, not the top
-// - PI/2 around the x-axis
-    adjust_screen_quat.setFromAxisAngle(new THREE.Vector3(0, 0, 1), - screen_orientation);
-    target_quat.multiply(adjust_screen_quat); // adjust for screen orientation
+                                          // - PI/2 around the x-axis
+    target_quat.multiply(adjust_screen_quats[screen_orientation]); // adjust for screen orientation
 
     var slerp_quat = new THREE.Quaternion();
     THREE.Quaternion.slerp(target_quat, previous_quat, slerp_quat, 1 - snot.smooth);
