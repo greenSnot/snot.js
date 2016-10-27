@@ -1,0 +1,56 @@
+<html>
+  <meta charset="utf-8">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="viewport" content=" user-scalable=no, initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="author" content="greenSnot@github">
+  <meta http-equiv="pragma" content="no-cache">
+  <head>
+    <link rel="stylesheet" type="text/css" href="css/snot.css">
+  </head>
+  <body>
+    <div id="snot-wrap">
+      <div id="snot-container">
+        <div id="snot-camera">
+          <img class="snot-bg front">
+          <img class="snot-bg left">
+          <img class="snot-bg right">
+          <img class="snot-bg back">
+          <img class="snot-bg top">
+          <img class="snot-bg bottom">
+        </div>
+      </div>
+    </div>
+    <div id="logger"></div>
+  </body>
+  <script id="template-spot" type="text/html">
+    <div class="spot-<#=spotType#>">
+      <div class="spot-description"><#=text#></div>
+      <img class="spot-image" src="images/<#=spotType#>.png"/>
+    </div>
+  </script>
+  <script id="template-bullet" type="text/html">
+    <div style="width:20px;height:20px;background:rgba(255,0,0,0.4);"></div>
+  </script>
+  <script>
+    THREE = {};
+    THREE.Math = {
+      clamp: function(a, b, c) {
+        if (a >c) return c;
+        if (a <b) return b;
+        return a;
+      }
+    };
+  </script>
+  <script src="libs/Vector3.js"></script>
+  <script src="libs/Matrix4.js"></script>
+  <script src="libs/Quaternion.js"></script>
+  <script src="libs/Euler.js"></script>
+  <script src="js/template-native.js"></script>
+  <script>
+    template.config('openTag','<#');
+    template.config('closeTag','#>');
+  </script>
+  <script src="js/snot-utils.js"></script>
+  <script src="js/snot-css-renderer.js"></script>
+</html>
+<script src="js/shooting.js"></script>
