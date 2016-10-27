@@ -479,18 +479,22 @@
     return new THREE.Matrix4().makeRotationFromQuaternion(q);
   }
 
+  var camera_euler = new THREE.Euler();
+  var target_quat = new THREE.Quaternion();
+  var rotate_90_quat = new THREE.Quaternion(- sqrt( 0.5 ), 0, 0, sqrt( 0.5 ))
+  var adjust_screen_quat = new THREE.Quaternion();
+  var look_at_euler = new THREE.Euler();
+
   function update_camera(x, y, z) {
-    var euler = new THREE.Euler();
 
-    var target_quat = new THREE.Quaternion();
-    euler.set(y, x, z, 'YXZ'); // 'ZXY' for the device, but 'YXZ' for us
+    camera_euler.set(y, x, z, 'YXZ'); // 'ZXY' for the device, but 'YXZ' for us
 
-    target_quat.setFromEuler(euler); // orient the device
+    target_quat.setFromEuler(camera_euler); // orient the device
 
-    target_quat.multiply(new THREE.Quaternion(- sqrt( 0.5 ), 0, 0, sqrt( 0.5 ))); // camera looks out the back of the device, not the top
+    target_quat.multiply(rotate_90_quat); // camera looks out the back of the device, not the top
 // - PI/2 around the x-axis
-
-    target_quat.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - screen_orientation)); // adjust for screen orientation
+    adjust_screen_quat.setFromAxisAngle(new THREE.Vector3(0, 0, 1), - screen_orientation);
+    target_quat.multiply(adjust_screen_quat); // adjust for screen orientation
 
     var slerp_quat = new THREE.Quaternion();
     THREE.Quaternion.slerp(target_quat, previous_quat, slerp_quat, 1 - snot.smooth);
@@ -499,7 +503,7 @@
     look_at_quat.x *= -1;
     look_at_quat.z *= -1;
     var look_at_mat = m_make_rotation_from_quaternion(look_at_quat.normalize()).transpose();
-    var look_at_rot = new THREE.Euler().setFromRotationMatrix(look_at_mat, 'XZY');
+    var look_at_rot = look_at_euler.setFromRotationMatrix(look_at_mat, 'XZY');
 
     snot.rx = look_at_rot._x * 180 / PI;
     snot.ry = look_at_rot._y * 180 / PI;
@@ -510,7 +514,7 @@
       m_make_rotation_axis({x: 0, y: 0, z: 1}, look_at_rot._z),
       m_make_rotation_axis({x: 1, y: 0, z: 0}, - look_at_rot._x),
       m_set_position({x: 0, y: 0, z: 1})
-    ));
+    )); // bad performance here
 
     snot.camera.style.transform = 'translateZ(' + epsilon(snot.perspective) + 'px)' + " matrix3d(" + look_at_mat.elements + ")"+ snot.cameraBaseTransform;
   }
