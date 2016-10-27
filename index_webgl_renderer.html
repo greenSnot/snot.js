@@ -1,173 +1,26 @@
 <html>
-    <meta charset="utf-8">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="viewport" content=" user-scalable=no, initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0">
-    <meta name="author" content="greenSnot@github">
-    <meta http-equiv="pragma" content="no-cache">
-    <head>
-        <link rel="stylesheet" type="text/css" href="css/snot-pano.css">
-    </head>
-    <body>
-        <div id="snot-pano">
-            <div id="container">
-            </div>
+  <meta charset="utf-8">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="viewport" content=" user-scalable=no, initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="author" content="greenSnot@github">
+  <meta http-equiv="pragma" content="no-cache">
+  <head>
+    <link rel="stylesheet" type="text/css" href="css/snot.css">
+  </head>
+  <body>
+    <button class="btn-gyro" onClick="snot.gyro=!snot.gyro">gyro</button>
+    <div id="snot-wrap">
+        <div id="snot-container">
         </div>
-    </body>
-    <script>
-    function customSprites(){
-        snot.genSpot=function(spot){
-            var size=40;
-            var loader=THREE.ImageUtils;
-            var geometry = new THREE.PlaneGeometry( size, size );
-            spotType2code={
-                straight:0,
-                left:1,
-                right:2
-            };
-            
-        	var material = new THREE.MeshBasicMaterial( {
-                transparent:true,
-        		map: loader.loadTexture('http://7xiljm.com1.z0.glb.clouddn.com/images/tools/spot'+spotType2code[spot.spotType]+'.png?imageMogr2/gravity/NorthWest/crop/!128x128a0a0/interlace/0/thumbnail/!100p',THREE.UVMapping)
-        	} );
-        
-        	var mesh = new THREE.Mesh( geometry, material );
+    </div>
+  </body>
+  <script src="js/zepto.min.js"></script>
+  <script src="js/tween.min.js"></script>
+  <script src="js/snot-utils.js"></script>
 
-            var rotation=position2rotation(spot.x,spot.z,spot.y);
-
-            rotation.ry=270-rotation.ry;
-            rotation.ry=rotation.ry<0?rotation.ry+360:rotation.ry;
-            mesh.rotation.y=rotation.ry*Math.PI/180;
-            mesh.position.set(spot.x,spot.y,spot.z);
-
-            var text=snot.genText(spot.x*0.99,spot.y+12,spot.z*0.99,spot.text,180);
-            snot.scene.add(text);
-            return mesh;
-        }
-    }
-    </script>
-    <script src="js/template-native.js"></script>
-    <script>
-        template.config('openTag','<#');
-        template.config('closeTag','#>');
-    </script>
-    <script src="js/zepto.min.js"></script>
-    <script src="js/tween.min.js"></script>
-    <script src="js/snot-utils.js"></script>
-
-    <script src="js/three.min.js"></script>
-    <script src="js/three.patch.js"></script>
-    <script src="js/Projector.js"></script>
-    <script src="js/snot-pano-webgl.js"></script>
+  <script src="js/three.min.js"></script>
+  <script src="js/three.patch.js"></script>
+  <script src="js/Projector.js"></script>
+  <script src="js/snot-webgl-renderer.js"></script>
+  <script src="js/index_webgl_renderer.js"></script>
 </html>
-<script>
-    initPano(customSprites);
-
-    function random(arr){
-        return arr[parseInt(Math.random()*(arr.length))]
-    }
-    function onSpriteClick(data){
-        console.log(data);
-        alert('onSpriteClick');
-    }
-    function onClick(x,y,z,rx,ry){
-        console.log(x,y,z,rx,ry);
-        snot.loadSprites([{
-                //For CSS Renderer
-                //TemplateId for template renderer
-                template:'template-spot',
-
-                spriteType:'spot',
-
-                spotType:random(['straight','left','right']),
-                id:'spot-'+123,
-                text:'haha',
-                x:x,
-                y:y,
-                z:z
-        }]);
-    }
-
-    function initPano(callback){
-        snot.init({
-            cubeSize:1248,
-            imgs_preview:[
-                    'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a0/rotate/0/interlace/1/thumbnail/!10p',
-                    'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a1248/rotate/0/interlace/1/thumbnail/!10p',
-                    'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a2496/rotate/0/interlace/1/thumbnail/!10p',
-                    'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a3744/rotate/0/interlace/1/thumbnail/!10p',
-                    'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a4992/rotate/0/interlace/1/thumbnail/!10p',
-                    'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a6240/rotate/0/interlace/1/thumbnail/!10p',
-            ],
-            imgs_original:[
-                'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a0/rotate/0/interlace/1/thumbnail/!100p',
-                'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a1248/rotate/0/interlace/1/thumbnail/!100p',
-                'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a2496/rotate/0/interlace/1/thumbnail/!100p',
-                'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a3744/rotate/0/interlace/1/thumbnail/!100p',
-                'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a4992/rotate/0/interlace/1/thumbnail/!100p',
-                'http://7xiljm.com1.z0.glb.clouddn.com/images/scenes/0a815c3061afd8a7a5bec022c00816982b026e74/allinone.jpg?imageMogr2/gravity/NorthWest/crop/!1248x1248a0a6240/rotate/0/interlace/1/thumbnail/!100p',
-            ],
-            imgs_rotation:[0,0,0,0,0,0],
-            fov:90,
-            maxFov:110,
-            minFov:60,
-            smooth:0.8,
-            movingRatio:0.3,
-            autoRotation:0.0,
-            rx:0,
-            ry:0,
-            minDetectDistance:20,
-            callback:callback,
-            onClick:onClick,
-            onSpriteClick:onSpriteClick,
-            sprites:[{
-                    //For CSS Renderer
-                    template:'template-spot',
-
-                    spriteType:'spot',
-
-                    spotType:random(['straight','left','right']),
-                    id:'spot-'+123,
-                    text:'Home',
-                    x:1,
-                    y:30,
-                    z:90
-            },{
-                    //For CSS Renderer
-                    template:'template-spot',
-
-                    spriteType:'spot',
-
-                    spotType:random(['straight','left','right']),
-                    id:'spot-'+123,
-                    text:'Market',
-                    x:82,
-                    y:0,
-                    z:56
-            },{
-                    //For CSS Renderer
-                    template:'template-spot',
-
-                    spriteType:'spot',
-
-                    spotType:random(['straight','left','right']),
-                    id:'spot-'+123,
-                    text:'Zoo',
-                    x:83,
-                    y:0,
-                    z:-55
-            },{
-                    //For CSS Renderer
-                    template:'template-spot',
-
-                    spriteType:'spot',
-
-                    spotType:random(['straight','left','right']),
-                    id:'spot-'+123,
-                    text:'Garage',
-                    x:96,
-                    y:0,
-                    z:-27
-            }]
-        });
-    }
-</script>

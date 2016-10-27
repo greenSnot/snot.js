@@ -26,7 +26,7 @@
     ry: 0,        // Rotate * degree around y axis
     rx: 0,        // Rotate * degree around x axis
     max_fov: 120, // Max field of view (degree)
-    minfov: 60,   // Min field of view (degree)
+    min_fov: 60,   // Min field of view (degree)
     fov: 90,      // Default field of view
     smooth: 0.17,
   }
@@ -79,7 +79,7 @@
   var distance2D = util.distance2D;
 
   var set_fov = function (degree) {
-    if (degree < snot.minfov || degree > snot.max_fov) {
+    if (degree < snot.min_fov || degree > snot.max_fov) {
       return;
     }
     snot.fov = degree;
