@@ -22,7 +22,7 @@ function spot_generator(spot) {
   mesh.rotation.y = rotation.ry * Math.PI / 180;
   mesh.position.set(spot.x, spot.y, spot.z);
 
-  var text = snot.get_text_mesh(spot.x * 0.99, spot.y + 12, spot.z * 0.99, spot.text, 180);
+  var text = snot.generator.text(spot.x * 0.99, spot.y + 12, spot.z * 0.99, spot.text, 180);
   snot.scene.add(text);
   return mesh;
 }

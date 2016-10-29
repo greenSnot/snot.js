@@ -13,6 +13,9 @@
     bg_rotation: [0,0,0,0,0,0],
 
     pause_animation: false,
+    generator: {
+      text: text_generator,
+    },
 
     dom      : document.getElementById('snot-wrap'),
     camera   : document.getElementById('snot-camera'),
@@ -73,6 +76,9 @@
   //front down left back top right
   var img_index_convert = [3, 0, 4, 1, 5, 2];
   function load_bg_imgs(imgs) {
+    var size = snot.bg_size;
+    var precision = 1;
+    var geometry = new THREE.BoxGeometry(size, size, size, precision, precision, precision);
     for (var index = 0;index < 6; ++index) {
       var img_url = imgs[img_index_convert[index]];
       bg_materials.push(new THREE.MeshBasicMaterial({
@@ -80,9 +86,14 @@
         overdraw: _overdraw
       }));
     }
+    var material= new THREE.MeshFaceMaterial(bg_materials);
+    var mesh = new THREE.Mesh(geometry, material);
+    mesh.scale.x = - 1;
+
+    scene.add(mesh);
   }
 
-  function get_text_mesh(x, y, z, text, size, rotation_x, color) {
+  function text_generator(x, y, z, text, size, rotation_x, color) {
     var rate = 20;
 
     var canvas = document.createElement('canvas');
@@ -131,8 +142,14 @@
 
     return mesh;
   }
-  function _init(config) {
+  function init(config) {
     for (var i in config) {
+      if (i == 'generator') {
+        for (var j in config.generator) {
+          snot.generator[j] = config.generator[j];
+        }
+        continue;
+      }
       snot[i] = config[i];
     }
     var smooth = snot.smooth;
@@ -156,15 +173,7 @@
     if (config.callback) {
       config.callback();
     }
-    var size = snot.bg_size;
-    var precision = 1;
-    var geometry = new THREE.BoxGeometry(size, size, size, precision, precision, precision);
     load_bg_imgs(config.bg_imgs);
-    var material= new THREE.MeshFaceMaterial(bg_materials);
-    var mesh = new THREE.Mesh(geometry, material);
-    mesh.scale.x = - 1;
-
-    scene.add(mesh);
 
     var SphereGeometry = new THREE.SphereGeometry(snot.bg_size * 1.8, 32, 32);
     var SphereMaterial = new THREE.MeshBasicMaterial({color: 0xff00ff, side: THREE.DoubleSide});
@@ -310,27 +319,16 @@
     renderer.render(scene, camera);
   }
 
-  function _setFov(fov) {
+  function set_fov(fov) {
     snot.fov = fov;
     snot.fov = snot.fov > snot.max_fov ? snot.max_fov : snot.fov;
     snot.fov = snot.fov < snot.min_fov ? snot.min_fov : snot.fov;
   }
-  function _setRx(rx) {
-    snot.rx = rx;
+  function set_rx(rx) {
+    dist_rx = rx;
   }
-  function _setRy(ry) {
-    snot.ry = ry;
-  }
-  function _setRz(rz) {
-    snot.rz = rz;
-  }
-  function _setQuaternion(w, x, y, z) {
-    snot.quaternion = {
-      w: w,
-      x: x,
-      y: y,
-      z: z
-    }
+  function set_ry(ry) {
+    dist_ry = ry;
   }
   function load_sprites(sps) {
     for (var i in sps) {
@@ -344,22 +342,24 @@
 
     }
   }
-  function _run() {
-    snot._animateId = requestAnimationFrame(_run);
+  function run() {
+    snot._animateId = requestAnimationFrame(run);
     if (!snot.pause_animation) {
       update();
     }
   }
 
-  $.extend(global.snot,{
-    setFov: _setFov,
-    setRx: _setRx,
-    setRy: _setRy,
-    setRz: _setRz,
-    get_text_mesh: get_text_mesh,
-    setQuaternion:_setQuaternion,
-    init: _init,
-    run: _run,
+  function extend(obj, json) {
+    for (var i in json) {
+      obj[i] = json[i];
+    }
+  }
+  extend(global.snot,{
+    set_fov: set_fov,
+    set_rx: set_rx,
+    set_ry: set_ry,
+    init: init,
+    run: run,
     load_sprites: load_sprites
   });
 }(window);
