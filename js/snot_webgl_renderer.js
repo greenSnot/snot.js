@@ -7,8 +7,8 @@
       y: 0,
       z: 1,
     },
-    moving_ratio:0.3,
-    auto_rotation:0,
+    moving_ratio: 0.3,
+    auto_rotation: 0,
     frames:0,
     bg_rotation: [0,0,0,0,0,0],
 
@@ -25,10 +25,10 @@
 
     gyro: false,
 
-    smooth:1-0.17,
-    quaternion:{},
+    smooth: 1 - 0.17,
+    quaternion: {},
 
-    rz:0,
+    rz: 0,
     ry : 0,       // Rotate * degree around y axis
     rx : 0,       // Rotate * degree around x axis
     max_fov : 120, // Max field of view (degree)
@@ -42,7 +42,7 @@
     }
     snot = global.snot;
   } else {
-    console.error('snot-util.js is missing');
+    console.error('snot-utils.js is missing');
     return;
   }
   var util = global.snot.util;
@@ -65,11 +65,11 @@
   var mouse_down_rx;
   var mouse_down_ry;
   var mouse_down_y;
-  var is_mouse_down=false;
+  var is_mouse_down = false;
 
-  function _pointStandardlization(x,y,z){
-    var ratio=200/distance3D(x,y,z,0,0,0);
-    return [x*ratio,y*ratio,z*ratio];
+  function _pointStandardlization(x, y, z) {
+    var ratio=200/distance3D(x, y, z, 0, 0, 0);
+    return [x * ratio, y * ratio, z * ratio];
   }
   //0     1    2    3    4   5
   //front down left back top right
@@ -257,7 +257,7 @@
         if (intersects[0].object.data) {
           snot.onSpriteClick(intersects[0].object.data);
         } else {
-          standard = _pointStandardlization(point.x, point.y, point.z);
+          var standard = _pointStandardlization(point.x, point.y, point.z);
           var rotation = util.position_to_rotation(point.x, point.y, point.z);
           snot.on_click(standard[0], standard[1], standard[2], rotation.rx, rotation.ry);
         }

@@ -70,7 +70,7 @@
     }
     snot = global.snot;
   } else {
-    console.error('snot-util.js is missing');
+    console.error('snot-utils.js is missing');
     return;
   }
   var util = global.snot.util;

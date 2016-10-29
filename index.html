@@ -5,7 +5,7 @@
   <meta name="author" content="greenSnot@github">
   <meta http-equiv="pragma" content="no-cache">
   <head>
-    <link rel="stylesheet" type="text/css" href="css/snot.css">
+    <link rel="stylesheet" type="text/css" href="build/css/snot.min.css">
   </head>
   <body>
     <button class="btn-gyro" onClick="snot.gyro=!snot.gyro">gyro</button>
@@ -29,29 +29,6 @@
       <img class="spot-image" src="images/<#=spotType#>.png"/>
     </div>
   </script>
-  <script id="template-bullet" type="text/html">
-    <div style="width:20px;height:20px;background:rgba(255,0,0,0.4);"></div>
-  </script>
-  <script>
-    THREE = {};
-    THREE.Math = {
-      clamp: function(a, b, c) {
-        if (a >c) return c;
-        if (a <b) return b;
-        return a;
-      }
-    };
-  </script>
-  <script src="libs/Vector3.js"></script>
-  <script src="libs/Matrix4.js"></script>
-  <script src="libs/Quaternion.js"></script>
-  <script src="libs/Euler.js"></script>
-  <script src="js/template-native.js"></script>
-  <script>
-    template.config('openTag','<#');
-    template.config('closeTag','#>');
-  </script>
-  <script src="js/snot-utils.js"></script>
-  <script src="js/snot-css-renderer.js"></script>
+  <script src="build/js/snot_css_renderer.min.js"></script>
 </html>
-<script src="js/index.js"></script>
+<script src="examples/index.js"></script>

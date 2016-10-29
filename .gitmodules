@@ -1,9 +1,9 @@
 [submodule "libs/fastclick"]
 	path = libs/fastclick
 	url = https://github.com/ftlabs/fastclick.git
-[submodule "libs/zepto"]
-	path = libs/zepto
-	url = https://github.com/madrobby/zepto.git
-[submodule "libs/art-template"]
-	path = libs/art-template
+[submodule "libs/three.js"]
+	path = libs/three.js
+	url = https://github.com/mrdoob/three.js.git
+[submodule "libs/artTemplate"]
+	path = libs/artTemplate
 	url = https://github.com/aui/artTemplate.git

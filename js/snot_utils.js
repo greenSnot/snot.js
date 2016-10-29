@@ -1,5 +1,10 @@
 !function(global) {
 
+  if (global.template) {
+    global.template.config('openTag','<#');
+    global.template.config('closeTag','#>');
+  }
+
   global.snot = {};
 
   global.snot.util = {
