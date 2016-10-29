@@ -7,7 +7,7 @@
       y: 0,
       z: 1,
     },
-    moving_ratio: 0.3,
+    mouse_sensitivity: 0.3,
     auto_rotation: 0,
     frames:0,
     bg_rotation: [0,0,0,0,0,0],
@@ -231,8 +231,8 @@
       return;
     }
 
-    dist_ry = (mouse_down_x - x) * snot.moving_ratio + mouse_down_ry;
-    dist_rx = (y - mouse_down_y) * snot.moving_ratio + mouse_down_rx;
+    dist_ry = (mouse_down_x - x) * snot.mouse_sensitivity + mouse_down_ry;
+    dist_rx = (y - mouse_down_y) * snot.mouse_sensitivity + mouse_down_rx;
     dist_rx = dist_rx >= 90 ? 89 : dist_rx;
     dist_rx = dist_rx <= - 90 ? -89 : dist_rx;
 

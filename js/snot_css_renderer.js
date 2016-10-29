@@ -9,7 +9,7 @@
       y: 0,
       z: 1,
     },
-    moving_ratio: 0.3,
+    mouse_sensitivity: 0.3,
     auto_rotation: 0,
     frames: 0,
     bg_rotation: [0, 0, 0, 0, 0, 0],
@@ -333,7 +333,7 @@
       return false;
     }
 
-    var ratio = snot.moving_ratio;
+    var ratio = snot.mouse_sensitivity;
 
     dist_ry = dist_ry + (touches.fx - x) * ratio;
     dist_rx = dist_rx - (touches.fy - y) * ratio;
