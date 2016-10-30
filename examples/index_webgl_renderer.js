@@ -1,3 +1,44 @@
+function text_generator(data) {
+  var text = data.text;
+  var size = data.size;
+  var color = data.color;
+  var rate = 8;
+
+  var canvas = document.createElement('canvas');
+  var context = canvas.getContext('2d');
+  var ch = parseInt(canvas.height);
+  var cw = parseInt(canvas.width);
+  function drawCanvas(text, size) {
+    context = canvas.getContext('2d');
+    context.font = size + 'px STHeiti';
+    if (!color) {
+      context.shadowOffsetX = 5;
+      context.shadowOffsetY = 5;
+      context.shadowBlur = 20;
+      context.shadowColor = 'rgba(0, 0, 0, 1)';
+      context.fillStyle = '#fff';
+    } else {
+      context.fillStyle = color;
+    }
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+  }
+  drawCanvas(text, size);
+  canvas.width = parseInt(context.measureText(text).width + 10);
+  ch = parseInt(canvas.height);
+  cw = parseInt(canvas.width);
+  drawCanvas(text, size);
+  context.fillText(text, cw / 2, ch / 2);
+
+  var geom = new THREE.PlaneGeometry(cw / rate, ch / rate);
+  var cTexture = new THREE.Texture(canvas);
+  var mat = new THREE.MeshBasicMaterial({map: cTexture, transparent: true, overdraw: 1});
+  cTexture.needsUpdate = true;
+  var mesh = new THREE.Mesh(geom, mat);
+
+  return mesh;
+}
+
 function spot_generator(spot) {
   var size = 40;
   var loader = THREE.ImageUtils;
@@ -22,8 +63,17 @@ function spot_generator(spot) {
   mesh.rotation.y = rotation.ry * Math.PI / 180;
   mesh.position.set(spot.x, spot.y, spot.z);
 
-  var text = snot.generator.text(spot.x * 0.99, spot.y + 12, spot.z * 0.99, spot.text, 180);
-  //snot.scene.add(text);
+  var text = text_generator({
+    generator: 'text',
+    id: 'x',
+    text: spot.text,
+    size: 120,
+  });
+  text.position.set(1, 12, 1);
+  mesh.add(text);
+  mesh.scale.x = 2;
+  mesh.scale.y = 2;
+  // TODO rx
   return mesh;
 }
 
@@ -32,27 +82,27 @@ function on_sprite_click(data) {
   alert('on_sprite_click');
 }
 
-function on_click(x, y, z, rx, ry) {
+function on_click(point, rotation) {
+  snot.util.standardlization(point, 400);
   snot.load_sprites([{
     //For CSS Renderer
     //TemplateId for template renderer
     template: 'template-spot',
 
-    spriteType: 'spot',
+    generator: 'spot',
 
     spotType: 'right',
     id: 'spot-' + 123,
     text: 'haha',
-    x: x * 4,
-    y: y * 4,
-    z: z * 4
+    x: point.x,
+    y: point.y,
+    z: point.z
   }]);
 }
 
 var sprites = {
   'spot1': {
-    template: 'template-spot',
-    spriteType: 'spot',
+    generator: 'spot',
     spotType: 'left',
     id: 'spot1',
     text: 'Home',
@@ -60,8 +110,7 @@ var sprites = {
     y: 120,
     z: 360
   }, 'spot2': {
-    template: 'template-spot',
-    spriteType: 'spot',
+    generator: 'spot',
     spotType: 'straight',
     id: 'spot2',
     text: 'Garage',

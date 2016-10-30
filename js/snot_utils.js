@@ -10,6 +10,7 @@
   global.snot.util = {
     left_pos: left_pos,
     top_pos: top_pos,
+    standardlization: standardlization,
     is_mobile: is_mobile,
     is_wechat_login: is_wechat_login,
     get_window_width: get_window_width,
@@ -230,6 +231,14 @@
         obj[i] = json[i];
       }
     }
+  }
+
+  function standardlization(point, r) {
+    r = r || 1;
+    point.normalize();
+    point.x *= r;
+    point.y *= r;
+    point.z *= r;
   }
 
 }(window);

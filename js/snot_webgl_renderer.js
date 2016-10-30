@@ -22,9 +22,7 @@
     bg_rotation: [0, 0, 0, 0, 0, 0],
 
     pause_animation: false,
-    generator: {
-      text: text_generator,
-    },
+    generator: {},
 
     dom      : document.getElementById('snot-wrap'),
     camera   : document.getElementById('snot-camera'),
@@ -72,10 +70,6 @@
   var mouse_down_y;
   var is_mouse_down = false;
 
-  function _pointStandardlization(x, y, z) {
-    var ratio=200/distance3D(x, y, z, 0, 0, 0);
-    return [x * ratio, y * ratio, z * ratio];
-  }
   //0     1    2    3    4   5
   //front down left back top right
   //front down left back top right
@@ -96,56 +90,6 @@
     mesh.scale.x = - 1;
 
     scene.add(mesh);
-  }
-
-  function text_generator(x, y, z, text, size, rotation_x, color) {
-    var rate = 20;
-
-    var canvas = document.createElement('canvas');
-    var context = canvas.getContext('2d');
-    var ch = parseInt(canvas.height);
-    var cw = parseInt(canvas.width);
-    function drawCanvas(text, size) {
-      context = canvas.getContext('2d');
-      context.font = size + 'px STHeiti';
-      if (!color) {
-        context.shadowOffsetX = 5;
-        context.shadowOffsetY = 5;
-        context.shadowBlur = 20;
-        context.shadowColor = 'rgba(0,0,0,1)';
-        context.fillStyle = '#fff';
-      } else {
-        context.fillStyle = color;
-      }
-      context.textAlign = 'center';
-      context.textBaseline = 'middle';
-    }
-    drawCanvas(text, size);
-    canvas.width = parseInt(context.measureText(text).width + 10);
-    ch = parseInt(canvas.height);
-    cw = parseInt(canvas.width);
-    drawCanvas(text, size);
-    context.fillText(text, cw / 2, ch / 2);
-
-    var geom = new THREE.PlaneGeometry(cw / rate, ch / rate, 1, 1);
-    var cTexture = new THREE.Texture(canvas);
-    var mat = new THREE.MeshBasicMaterial({map:cTexture, transparent:true, overdraw:_overdraw});
-    cTexture.needsUpdate = true;
-    var mesh = new THREE.Mesh(geom, mat);
-
-    mesh.position.set(x, y, z);
-
-    if (rotation_x) {
-      rotation_x = rotation_x * Math.PI / 180;
-      mesh.rotation.x = rotation_x;
-    } else {
-      var rotation = util.position_to_rotation(x, z, y);
-      rotation.ry = 270 - rotation.ry;
-      rotation.ry = rotation.ry < 0 ? rotation.ry + 360 : rotation.ry;
-      mesh.rotation.y = rotation.ry * Math.PI / 180;
-    }
-
-    return mesh;
   }
   function init(config) {
     for (var i in config) {
@@ -207,9 +151,8 @@
       if (intersects[0].object.data) {
         snot.onSpriteClick(intersects[0].object.data);
       } else {
-        var standard = _pointStandardlization(point.x, point.y, point.z);
         var rotation = util.position_to_rotation(point.x, point.y, point.z);
-        snot.on_click(standard[0], standard[1], standard[2], rotation.rx, rotation.ry);
+        snot.on_click(point, rotation);
       }
     }
   };
@@ -233,7 +176,7 @@
     q = new THREE.Quaternion().multiplyQuaternions(q, new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), rz));
 
     var newQuaternion = new THREE.Quaternion();
-    THREE.Quaternion.slerp(camera.quaternion, q, newQuaternion, 1 - snot.smooth);
+    THREE.Quaternion.slerp(camera.quaternion, q, newQuaternion, snot.smooth);
     camera.quaternion.copy(newQuaternion);
     camera.quaternion.normalize();
 
@@ -255,7 +198,7 @@
   }
   function load_sprites(sps) {
     for (var i in sps) {
-      var functionName = sps[i].spriteType;
+      var functionName = sps[i].generator;
       var mesh = snot.generator[functionName](sps[i]);
 
       mesh.data = sps[i];

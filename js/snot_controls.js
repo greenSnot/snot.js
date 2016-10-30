@@ -79,7 +79,7 @@
       var dis = distance2D(touches.fx, touches.fy, touches.sx, touches.sy) - distance2D(cfx, cfy, csx, csy);
 
       var ratio = 0.12;
-      snot.setFov(snot.fov + dis * ratio);
+      snot.set_fov(snot.fov + dis * ratio);
 
       touches.fx = cfx;
       touches.fy = cfy;
@@ -134,7 +134,7 @@
     event.stopPropagation();
 
     var offset = event.deltaY;
-    snot.setFov(snot.fov + offset * 0.06);
+    snot.set_fov(snot.fov + offset * 0.06);
 
   }
 
