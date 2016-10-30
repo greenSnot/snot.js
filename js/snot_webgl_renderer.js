@@ -1,11 +1,20 @@
 !function(global) {
 
+  var PI = Math.PI;
   var snot = {
 
     camera_look_at: {
       x: 0,
       y: 0,
       z: 1,
+    },
+    controls: {
+      screen_orientation: 0,
+      gyro_data: {
+        alpha: 0,
+        beta: 90 * PI / 180,
+        gamma: 0
+      },
     },
     mouse_sensitivity: 0.3,
     auto_rotation: 0,
@@ -31,21 +40,19 @@
     rz: 0,
     ry: 0,       // Rotate * degree around y axis
     rx: 0,       // Rotate * degree around x axis
+
+    dest_rx: 0,
+    dest_ry: 0,
+    dest_rz: 0,
+
     max_fov: 120, // Max field of view (degree)
     min_fov: 60,  // Min field of view (degree)
     fov: 90,     // Default field of view
   };
 
-  if (global.snot) {
-    for (var i in snot) {
-      global.snot[i] = snot[i];
-    }
-    snot = global.snot;
-  } else {
-    console.error('snot-utils.js is missing');
-    return;
-  }
   var util = global.snot.util;
+  util.merge_json(global.snot, snot);
+  snot = global.snot;
   var epsilon = util.epsilon;
   var distance3D = util.distance3D;
   var distance2D = util.distance2D;
@@ -56,8 +63,6 @@
   var bg_materials = [];
   var suspects = [];
   var sprites = {};
-  var dist_ry;
-  var dist_rx;
   var _overdraw = 1;
   THREE.ImageUtils.crossOrigin = '*';
 
@@ -158,8 +163,6 @@
       scene.remove(scene.getObjectByName(i));
     }
     sprites = {};
-    var rx = snot.rx;
-    var ry = snot.ry;
 
     var container = snot.container;
     camera = new THREE.PerspectiveCamera(snot.fov, window.innerWidth / window.innerHeight, 1, 1100);
@@ -167,8 +170,6 @@
     snot.camera = camera;
 
     scene = new THREE.Scene();
-
-    snot.scene = scene;
 
     if (config.callback) {
       config.callback();
@@ -189,114 +190,36 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(renderer.domElement);
 
-    container.addEventListener('touchstart', onDocumentMouseDown, false);
-    container.addEventListener('touchmove', onDocumentMouseMove, false);
-    container.addEventListener('touchend', onDocumentMouseUp, false);
-
-    container.addEventListener('mousedown', onDocumentMouseDown, false);
-    container.addEventListener('mousemove', onDocumentMouseMove, false);
-    container.addEventListener('mouseup', onDocumentMouseUp, false);
-    container.addEventListener('mousewheel', onDocumentMouseWheel, false);
-    //container.addEventListener('DOMMouseScroll', onDocumentMouseWheel, false);
-
     update();
     snot.smooth = smooth;
+    snot.init_controls();
   }
 
-  function onDocumentMouseDown(event) {
-
-    event.preventDefault();
-
-    is_mouse_down = true;
-    var x = parseInt(event.clientX >= 0 ? event.clientX : event.changedTouches[0].clientX);
-    var y = parseInt(event.clientY >= 0 ? event.clientY : event.changedTouches[0].clientY);
-    mouse_down_x = x;
-    mouse_down_y = y;
-    mouse_down_ry = snot.ry;
-    mouse_down_rx = snot.rx;
-
-  }
-
-
-  function onDocumentMouseMove( event ) {
-
-    if (!is_mouse_down) {
-      return;
-    }
-
-    var x = parseInt(event.clientX >= 0 ? event.clientX : event.touches[0].pageX);
-    var y = parseInt(event.clientY >= 0 ? event.clientY : event.touches[0].pageY);
-
-    if (event.touches && event.touches.length > 1) {
-      return;
-    }
-
-    dist_ry = (mouse_down_x - x) * snot.mouse_sensitivity + mouse_down_ry;
-    dist_rx = (y - mouse_down_y) * snot.mouse_sensitivity + mouse_down_rx;
-    dist_rx = dist_rx >= 90 ? 89 : dist_rx;
-    dist_rx = dist_rx <= - 90 ? -89 : dist_rx;
-
-    snot.rx = dist_rx;
-    snot.ry = dist_ry;
-  }
-
-  function onDocumentMouseUp(event) {
-    is_mouse_down = false;
-    var x = parseInt(event.clientX >= 0 ? event.clientX : event.changedTouches[0].pageX);
-    var y = parseInt(event.clientY >= 0 ? event.clientY : event.changedTouches[0].pageY);
-
-    if (util.distance2D(x, y, mouse_down_x, mouse_down_y) < 5) {//单击
-      var raycaster = new THREE.Raycaster();
-      var mouse = new THREE.Vector2();
-      mouse.set((x / window.innerWidth) * 2 - 1, - (y / window.innerHeight) * 2 + 1);
-      raycaster.setFromCamera(mouse, camera);
-      raycaster.far = snot.bg_size * 2;
-      var intersects = raycaster.intersectObjects(suspects);
-      if (intersects.length != 0) {
-        var point = intersects[0].point;
-        if (intersects[0].object.data) {
-          snot.onSpriteClick(intersects[0].object.data);
-        } else {
-          var standard = _pointStandardlization(point.x, point.y, point.z);
-          var rotation = util.position_to_rotation(point.x, point.y, point.z);
-          snot.on_click(standard[0], standard[1], standard[2], rotation.rx, rotation.ry);
-        }
+  snot.controls.mouse_click = function(x, y) {
+    var raycaster = new THREE.Raycaster();
+    var mouse = new THREE.Vector2();
+    mouse.set((x / window.innerWidth) * 2 - 1, - (y / window.innerHeight) * 2 + 1);
+    raycaster.setFromCamera(mouse, camera);
+    raycaster.far = snot.bg_size * 2;
+    var intersects = raycaster.intersectObjects(suspects);
+    if (intersects.length != 0) {
+      var point = intersects[0].point;
+      if (intersects[0].object.data) {
+        snot.onSpriteClick(intersects[0].object.data);
+      } else {
+        var standard = _pointStandardlization(point.x, point.y, point.z);
+        var rotation = util.position_to_rotation(point.x, point.y, point.z);
+        snot.on_click(standard[0], standard[1], standard[2], rotation.rx, rotation.ry);
       }
     }
-  }
-
-  function onDocumentMouseWheel(event) {
-
-    // WebKit
-
-    if (event.wheelDeltaY) {
-
-      snot.fov -= event.wheelDeltaY * 0.05;
-
-      // Opera / Explorer 9
-
-    } else if (event.wheelDelta) {
-
-      snot.fov -= event.wheelDelta * 0.05;
-
-      // Firefox
-
-    } else if (event.detail) {
-
-      snot.fov += event.detail * 1.0;
-
-    }
-    snot.fov = snot.fov > snot.max_fov ? snot.max_fov : snot.fov;
-    snot.fov = snot.fov < snot.min_fov ? snot.min_fov : snot.fov;
-
-  }
+  };
 
   function update() {
 
     snot.ry += snot.auto_rotation;
 
-    var rx = snot.rx;
-    var ry = snot.ry;
+    var rx = snot.dest_rx;
+    var ry = snot.dest_ry;
     var rz = snot.rz * Math.PI / 180;
 
     ry = THREE.Math.degToRad(ry + 180);
@@ -325,10 +248,10 @@
     snot.fov = snot.fov < snot.min_fov ? snot.min_fov : snot.fov;
   }
   function set_rx(rx) {
-    dist_rx = rx;
+    snot.dest_rx = rx;
   }
   function set_ry(ry) {
-    dist_ry = ry;
+    snot.dest_ry = ry;
   }
   function load_sprites(sps) {
     for (var i in sps) {
@@ -349,12 +272,7 @@
     }
   }
 
-  function extend(obj, json) {
-    for (var i in json) {
-      obj[i] = json[i];
-    }
-  }
-  extend(global.snot,{
+  util.merge_json(global.snot, {
     set_fov: set_fov,
     set_rx: set_rx,
     set_ry: set_ry,

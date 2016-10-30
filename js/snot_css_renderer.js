@@ -1,13 +1,29 @@
 !function(global) {
 
-  var dom_offset_top;
-  var dom_offset_left;
+  var PI = Math.PI;
+  var sin = Math.sin;
+  var cos = Math.cos;
+  var tan = Math.tan;
+  var acos = Math.acos;
+  var atan = Math.atan;
+  var pow = Math.pow;
+  var floor = Math.floor;
+  var sqrt = Math.sqrt;
+
   var snot = {
 
     camera_look_at: {
       x: 0,
       y: 0,
       z: 1,
+    },
+    controls: {
+      screen_orientation: 0,
+      gyro_data: {
+        alpha: 0,
+        beta: 90 * PI / 180,
+        gamma: 0
+      },
     },
     mouse_sensitivity: 0.3,
     auto_rotation: 0,
@@ -26,6 +42,10 @@
     gyro: false,
     ry: 0,        // Rotate * degree around y axis
     rx: 0,        // Rotate * degree around x axis
+    dest_rx: 0,
+    dest_ry: 0,
+    dest_rz: 0,
+
     max_fov: 120, // Max field of view (degree)
     min_fov: 60,   // Min field of view (degree)
     fov: 90,      // Default field of view
@@ -36,32 +56,7 @@
   }
   var prev_gyro;
 
-  var PI = Math.PI;
-  var sin = Math.sin;
-  var cos = Math.cos;
-  var tan = Math.tan;
-  var acos = Math.acos;
-  var atan = Math.atan;
-  var pow = Math.pow;
-  var floor = Math.floor;
-  var sqrt = Math.sqrt;
-
-  var dist_rx;
-  var dist_ry;
   var previous_quat = new THREE.Quaternion();
-  var screen_orientation = 0;
-  var vars = {
-    alpha: 0,
-    beta: 90 * PI / 180,
-    gamma: 0
-  };
-
-  var varsDest = {
-    alpha: 0,
-    beta: 0,
-    gamma: 0
-  };
-
 
   function _pointStandardlization(x, y, z) {
     var ratio = 200 / distance3D(x, y, z, 0, 0, 0);
@@ -77,6 +72,12 @@
     console.error('snot-utils.js is missing');
     return;
   }
+  var m_make_rotation_axis = snot.util.m_make_rotation_axis;
+  var m_multiply = snot.util.m_multiply;
+  var m_set_position = snot.util.m_set_position;
+  var m_make_rotation_from_quaternion = snot.util.m_make_rotation_from_quaternion;
+  var v_set_from_matrix_position = snot.util.v_set_from_matrix_position;
+
   var util = global.snot.util;
   var epsilon = util.epsilon;
   var distance3D = util.distance3D;
@@ -97,24 +98,21 @@
     }
   }
 
-  var _init = function(config, ajax) {
+  var init = function(config, ajax) {
     reset();
 
     cancelAnimationFrame(snot._animateId);
 
     for (var i in config) {
       if (i == 'generator') {
-        merge_json(snot.generator, config.generator);
+        util.merge_json(snot.generator, config.generator);
       }
       snot[i] = config[i];
     }
     prev_gyro = snot.gyro;
 
-    dom_offset_left = util.left_pos(snot.dom);
-    dom_offset_top = util.top_pos(snot.dom);
-
-    dist_rx = snot.rx + 0.1; //unknown bug for mobile safari
-    dist_ry = snot.ry;
+    snot.dest_rx = snot.rx + 0.1; //unknown bug for mobile safari
+    snot.dest_ry = snot.ry;
 
     //First init
     if (!ajax) {
@@ -147,23 +145,17 @@
     }
 
     if (config) {
-      _load_sprites(config.sprites);
+      load_sprites(config.sprites);
     }
 
     if (util.is_mobile()) {
-      snot.container.addEventListener('touchstart', mouseDown, false);
-      snot.container.addEventListener('touchmove' , mouseMove, false);
-      snot.container.addEventListener('touchend'  , mouseUp  , false);
-    } else {
-      snot.container.addEventListener('mousedown' , mouseDown , false);
-      snot.container.addEventListener('mousemove' , mouseMove , false);
-      snot.container.addEventListener('mouseup'   , mouseUp   , false);
-      snot.container.addEventListener('mousewheel', mouseWheel, false);
     }
 
     if (config.callback) {
       config.callback();
     }
+    snot.init_controls();
+    update();
   }
 
   function load_bg_imgs(bg_imgs, bg_rotation) {
@@ -190,14 +182,7 @@
     }
   }
 
-  var touches = {
-    fx:0,   // First  finger x
-    fy:0,   // First  finger y
-    sx:0,   // Second finger x
-    sy:0    // Second finger y
-  };
-
-  var _load_sprites = function(sprites) {
+  var load_sprites = function(sprites) {
     for (var i in sprites) {
       var t = sprites[i];
       if (t.standardlization) {
@@ -213,34 +198,6 @@
       element.data = sprites[i];
       add_sprite_by_position(element, t);
     }
-  }
-
-  function m_make_rotation_axis(point, rotation) {
-    return new THREE.Matrix4().makeRotationAxis(point, rotation);
-  }
-
-  function m_multiply() {
-    var mats = arguments;
-
-    var l = mats.length;
-    while (l > 1) {
-      var last2 = mats[l - 2];
-      var last1 = mats[l - 1];
-      mats[l - 2] = new THREE.Matrix4().multiplyMatrices(
-        last2,
-        last1
-      );
-      l--;
-    }
-    return mats[0];
-  }
-
-  function v_set_from_matrix_position(mat4) {
-    return new THREE.Vector3().setFromMatrixPosition(mat4);
-  }
-
-  function m_set_position(p) {
-    return new THREE.Matrix4().setPosition(p);
   }
 
   function add_sprite_by_position(element, p) {
@@ -304,95 +261,99 @@
     spriteContainer.style['-webkit-transform'] = 'translate3d(' + epsilon(x) + 'px,' + epsilon(y) + 'px,' + epsilon(z) + 'px) rotateY(' + epsilon(arc) + 'deg) rotateX(' + epsilon(- (y - snot.bg_size / 2) / r * 90) + 'deg) rotateY(180deg)';
   }
 
-  var mouseMove = function(event) {
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    var x = Math.floor(event.clientX >= 0 ? event.clientX : event.touches[0].pageX);
-    var y = Math.floor(event.clientY >= 0 ? event.clientY : event.touches[0].pageY);
-    x -= dom_offset_left;
-    y -= dom_offset_top;
-
-    touches.click = false;
-
-    if (!touches.onTouching) {
-      return false;
+  function run() {
+    snot._animateId = requestAnimationFrame(run);
+    if (!snot.pause_animation) {
+      update();
     }
+  }
 
-    if (event.touches && event.touches.length > 1) {
-
-      var cfx = x;                          // Current frist  finger x
-      var cfy = y;                          // Current first  finger y
-      var csx = event.touches[1].pageX;     // Current second finger x
-      var csy = event.touches[1].pageY;     // Current second finger y
-
-      var dis = distance2D(touches.fx, touches.fy, touches.sx, touches.sy) - distance2D(cfx, cfy, csx, csy);
-
-      var ratio = 0.12;
-      snot.setFov(snot.fov + dis * ratio);
-
-      touches.fx = cfx;
-      touches.fy = cfy;
-      touches.sx = csx;
-      touches.sy = csy;
-
-      return false;
-    }
-
-    var ratio = snot.mouse_sensitivity;
-
-    dist_ry = dist_ry + (touches.fx - x) * ratio;
-    dist_rx = dist_rx - (touches.fy - y) * ratio;
-
-    touches.fx = x;
-    touches.fy = y;
-
-    dist_rx = dist_rx > 90 ? 90 : dist_rx;
-    dist_rx = dist_rx < -90 ? -90 : dist_rx;
-
+  var camera_euler = new THREE.Euler();
+  var target_quat = new THREE.Quaternion();
+  var rotate_90_quat = new THREE.Quaternion(- sqrt( 0.5 ), 0, 0, sqrt( 0.5 ))
+  var adjust_screen_quats = {
+    0: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0),
+    90: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - 90),
+    180: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - 180),
+    '-90': new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 90),
   };
+  var look_at_euler = new THREE.Euler();
 
-  var mouseDownX;
-  var mouseDownY;
-  var mouseDown = function (event) {
+  function update_camera(x, y, z) {
 
-    event.preventDefault();
-    event.stopPropagation();
+    camera_euler.set(y, x, z, 'YXZ'); // 'ZXY' for the device, but 'YXZ' for us
 
-    var x = floor(event.clientX >= 0 ? event.clientX : event.touches[0].clientX);
-    var y = floor(event.clientY >= 0 ? event.clientY : event.touches[0].clientY);
-    x -= dom_offset_left;
-    y -= dom_offset_top;
+    target_quat.setFromEuler(camera_euler); // orient the device
 
-    mouseDownX = x;
-    mouseDownY = y;
+    target_quat.multiply(rotate_90_quat); // camera looks out the back of the device, not the top
+                                          // - PI/2 around the x-axis
+    target_quat.multiply(adjust_screen_quats[snot.controls.screen_orientation]); // adjust for screen orientation
 
-    touches.fx = x;
-    touches.fy = y;
-    touches.click = true;
+    var slerp_quat = new THREE.Quaternion();
+    THREE.Quaternion.slerp(target_quat, previous_quat, slerp_quat, 1 - snot.smooth);
+    previous_quat = slerp_quat;
+    var look_at_quat = slerp_quat.clone();
+    look_at_quat.x *= -1;
+    look_at_quat.z *= -1;
+    var look_at_mat = m_make_rotation_from_quaternion(look_at_quat.normalize()).transpose();
+    var look_at_rot = look_at_euler.setFromRotationMatrix(look_at_mat, 'XZY');
 
-    if (event.touches && event.touches.length > 1) {
+    snot.rx = look_at_rot._x * 180 / PI;
+    snot.ry = look_at_rot._y * 180 / PI;
+    snot.rz = look_at_rot._z * 180 / PI;
 
-      touches.sx = event.touches[1].pageX;
-      touches.sy = event.touches[1].pageY;
+    snot.camera_look_at = v_set_from_matrix_position(m_multiply(
+      m_make_rotation_axis({x: 0, y: 1, z: 0}, look_at_rot._y),
+      m_make_rotation_axis({x: 0, y: 0, z: 1}, look_at_rot._z),
+      m_make_rotation_axis({x: 1, y: 0, z: 0}, - look_at_rot._x),
+      m_set_position({x: 0, y: 0, z: 1})
+    )); // bad performance here
 
+    snot.camera.style.transform = 'translateZ(' + epsilon(snot.perspective) + 'px)' + " matrix3d(" + look_at_mat.elements + ")"+ snot.cameraBaseTransform;
+  }
+
+  function update() {
+    snot.frames++;
+
+    if (snot.gyro) {
+      if (snot.controls.gyro_data.alpha === -1 && snot.controls.gyro_data.beta === -1 && snot.controls.gyro_data.gamma === - 1) {
+        return;
+      }
+
+      update_camera(gyro_data.alpha, snot.controls.gyro_data.beta, - snot.controls.gyro_data.gamma);
+    } else {
+      if (prev_gyro) {
+        snot.dest_rx = 0;
+        snot.dest_ry = 0;
+      }
+      snot.dest_ry += snot.auto_rotation;
+      update_camera( - snot.dest_ry * PI / 180, snot.dest_rx * PI / 180 + PI / 2, 0);
     }
+    prev_gyro = snot.gyro;
 
-    touches.onTouching = true;
+    for (var i in snot.sprites) {
+      var sprite = snot.sprites[i];
+      if (sprite.need_update_position) {
+        sprite.need_update_position = false;
+        update_sprite_position(sprite.id);
+      }
+      if (sprite.need_update_visibility) {
+        sprite.need_update_visibility = false;
+        update_sprite_visibility(sprite.id);
+      }
+    }
   }
 
-  var mouseWheel = function (event) {
 
-    event.preventDefault();
-    event.stopPropagation();
-
-    var offset = event.deltaY;
-    snot.setFov(snot.fov + offset * 0.06);
-
+  var set_rx = function(rx, smooth) {
+    //TODO
   }
 
-  function on_click(x, y) {
+  var set_ry=function(ry,smooth){
+    //TODO
+  }
+
+  snot.controls.mouse_click = function(x, y) {
     var R = 100;
     var fov = snot.fov;
     var bg_size = snot.bg_size;
@@ -459,147 +420,13 @@
     }
   }
 
-  var mouseUp = function (event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    var x = floor(event.clientX >= 0 ? event.clientX : event.changedTouches[0].pageX);
-    var y = floor(event.clientY >= 0 ? event.clientY : event.changedTouches[0].pageY);
-    x -= dom_offset_left;
-    y -= dom_offset_top;
-
-    //Screen coordinate to Sphere 3d coordinate
-    if (distance2D(mouseDownX, mouseDownY, x, y) < 5) {
-      on_click(x, y);
-    }
-    touches.onTouching = false;
-  }
-
-  function _run() {
-    snot._animateId = requestAnimationFrame(_run);
-    if (!snot.pause_animation) {
-      _update();
-    }
-  }
-
-  function m_make_rotation_from_quaternion(q) {
-    return new THREE.Matrix4().makeRotationFromQuaternion(q);
-  }
-
-  var camera_euler = new THREE.Euler();
-  var target_quat = new THREE.Quaternion();
-  var rotate_90_quat = new THREE.Quaternion(- sqrt( 0.5 ), 0, 0, sqrt( 0.5 ))
-  var adjust_screen_quats = {
-    0: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0),
-    90: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - 90),
-    180: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - 180),
-    '-90': new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 90),
-  };
-  var look_at_euler = new THREE.Euler();
-
-  function update_camera(x, y, z) {
-
-    camera_euler.set(y, x, z, 'YXZ'); // 'ZXY' for the device, but 'YXZ' for us
-
-    target_quat.setFromEuler(camera_euler); // orient the device
-
-    target_quat.multiply(rotate_90_quat); // camera looks out the back of the device, not the top
-                                          // - PI/2 around the x-axis
-    target_quat.multiply(adjust_screen_quats[screen_orientation]); // adjust for screen orientation
-
-    var slerp_quat = new THREE.Quaternion();
-    THREE.Quaternion.slerp(target_quat, previous_quat, slerp_quat, 1 - snot.smooth);
-    previous_quat = slerp_quat;
-    var look_at_quat = slerp_quat.clone();
-    look_at_quat.x *= -1;
-    look_at_quat.z *= -1;
-    var look_at_mat = m_make_rotation_from_quaternion(look_at_quat.normalize()).transpose();
-    var look_at_rot = look_at_euler.setFromRotationMatrix(look_at_mat, 'XZY');
-
-    snot.rx = look_at_rot._x * 180 / PI;
-    snot.ry = look_at_rot._y * 180 / PI;
-    snot.rz = look_at_rot._z * 180 / PI;
-
-    snot.camera_look_at = v_set_from_matrix_position(m_multiply(
-      m_make_rotation_axis({x: 0, y: 1, z: 0}, look_at_rot._y),
-      m_make_rotation_axis({x: 0, y: 0, z: 1}, look_at_rot._z),
-      m_make_rotation_axis({x: 1, y: 0, z: 0}, - look_at_rot._x),
-      m_set_position({x: 0, y: 0, z: 1})
-    )); // bad performance here
-
-    snot.camera.style.transform = 'translateZ(' + epsilon(snot.perspective) + 'px)' + " matrix3d(" + look_at_mat.elements + ")"+ snot.cameraBaseTransform;
-  }
-
-  function _update() {
-    snot.frames++;
-
-    if (snot.gyro) {
-      if (vars.alpha === -1 && vars.beta === -1 && vars.gamma === - 1) {
-        return;
-      }
-
-      update_camera(vars.alpha, vars.beta, - vars.gamma);
-    } else {
-      if (prev_gyro) {
-        dist_rx = 0;
-        dist_ry = 0;
-      }
-      dist_ry += snot.auto_rotation;
-      update_camera( - dist_ry * PI / 180, dist_rx * PI / 180 + PI / 2, 0);
-    }
-    prev_gyro = snot.gyro;
-
-    for (var i in snot.sprites) {
-      var sprite = snot.sprites[i];
-      if (sprite.need_update_position) {
-        sprite.need_update_position = false;
-        update_sprite_position(sprite.id);
-      }
-      if (sprite.need_update_visibility) {
-        sprite.need_update_visibility = false;
-        update_sprite_visibility(sprite.id);
-      }
-    }
-  }
-
-  window.addEventListener('orientationchange', function(ev) {
-    screen_orientation = window.orientation || 0;
-  }, false );
-
-  window.addEventListener('deviceorientation', function(ev) {
-    if (ev.alpha !== null) {
-      vars.beta = ev.beta  * Math.PI / 180 ;
-      vars.gamma = ev.gamma  * Math.PI / 180;
-      vars.alpha = ev.alpha  * Math.PI / 180;
-    } else {
-      vars.beta = vars.gamma = vars.alpha = -1;
-    }
-  }, true);
-
-
-  var _setRx = function(rx, smooth) {
-    //TODO
-  }
-
-  var _setRy=function(ry,smooth){
-    //TODO
-  }
-
-  function merge_json(obj, json) {
-    for (var i in json) {
-      if (obj[i] == undefined) {
-        obj[i] = json[i];
-      }
-    }
-  }
-
-  merge_json(snot, {
+  util.merge_json(snot, {
     setFov: set_fov,
-    setRx: _setRx,
-    setRy: _setRy,
-    init: _init,
-    run: _run,
-    update: _update,
-    load_sprites: _load_sprites,
+    set_rx: set_rx,
+    set_ry: set_ry,
+    init: init,
+    run: run,
+    update: update,
+    load_sprites: load_sprites,
   });
 }(window);

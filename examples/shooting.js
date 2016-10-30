@@ -1,28 +1,25 @@
-function onSpriteClick(data){
+function on_sprite_click(data){
   console.log(data);
-  alert('onSpriteClick');
+  alert('on_sprite_click');
 }
 function on_click(x, y, z, rx, ry) {
   snot.load_sprites([{
-    //For CSS Renderer
-    //TemplateId for template renderer
-    template: 'template-spot',
+    generator: 'spot',
 
-    spriteType: 'spot',
-
-    spotType: 'right',
     id: 'spot-' + 123,
-    text: 'haha',
     x: x * 4,
     y: y * 4,
-    z: z * 4
+    z: z * 4,
+
+    spotType: 'right',
+    text: 'haha',
   }]);
 }
 
 var sprites = {
   'spot1': {
     template: 'template-spot',
-    spriteType: 'spot',
+    generator: 'spot',
     spotType: 'left',
     id: 'spot1',
     text: 'Home',
@@ -31,7 +28,7 @@ var sprites = {
     z: 360
   }, 'spot2': {
     template: 'template-spot',
-    spriteType: 'spot',
+    generator: 'spot',
     spotType: 'straight',
     id: 'spot2',
     text: 'Garage',
@@ -49,7 +46,7 @@ var max_bullets = 35;
 for (var i = 0 ;i < bullet_pool_size; ++i) {
   var id = 'bullet' + i;
   sprites[id] = {
-    template:'template-bullet',
+    generator:'bullet',
     id:id,
     x:0,
     y:-1,
@@ -77,6 +74,10 @@ snot.init({
     'images/test.png',
   ],
   bg_rotation: [0,0,0,0,0,0],
+  generator: {
+    bullet: 'template-bullet',
+    spot: 'template-spot',
+  },
   fov: 90,
   max_fov: 110,
   min_fov: 60,
@@ -87,7 +88,7 @@ snot.init({
   ry: 0,
   min_detect_distance: 20,
   on_click: on_click,
-  onSpriteClick: onSpriteClick,
+  on_sprite_click: on_sprite_click,
   sprites: sprites
 });
 

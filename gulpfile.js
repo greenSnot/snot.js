@@ -43,14 +43,16 @@ let css_renderer_js_files = _.flatten([
   './build/js/three_math.min.js',
   './libs/artTemplate/dist/template-native.js',
   './js/snot_utils.js',
-  './js/snot_css_renderer.js'
+  './js/snot_css_renderer.js',
+  './js/snot_controls.js',
 ]);
 
 let webgl_renderer_js_files = _.flatten([
   './libs/three.js/build/three.min.js',
   './libs/three.js/examples/js/renderers/Projector.js',
   './js/snot_utils.js',
-  './js/snot_webgl_renderer.js'
+  './js/snot_webgl_renderer.js',
+  './js/snot_controls.js',
 ]);
 
 let both_renderer_js_files = _.flatten([
@@ -59,7 +61,8 @@ let both_renderer_js_files = _.flatten([
   './libs/artTemplate/dist/template-native.js',
   './js/snot_utils.js',
   './js/snot_css_renderer.js',
-  './js/snot_webgl_renderer.js'
+  './js/snot_webgl_renderer.js',
+  './js/snot_controls.js',
 ]);
 
 function concat_js() {

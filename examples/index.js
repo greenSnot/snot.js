@@ -13,7 +13,6 @@ function on_click(x, y, z, rx, ry) {
 
     text: 'haha',
     spotType: 'right',
-    spriteType: 'spot',
   }]);
 }
 
@@ -40,8 +39,8 @@ var sprites = {
 };
 
 snot.init({
-  bg_size:1248,
-  bg_imgs:[
+  bg_size: 1248,
+  bg_imgs: [
     'images/test.png',
     'images/test.png',
     'images/test.png',

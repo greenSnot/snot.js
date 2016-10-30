@@ -20,9 +20,19 @@
     epsilon: epsilon,
     css_text_to_matrix: css_text_to_matrix,
     matrix_to_css_text: matrix_to_css_text,
-    webgl_check: webgl_check,
+    webgl_detect: webgl_detect,
+    webgl_enabled: webgl_detect(),
     load_js: load_js,
-    rotation_to_position: rotation_to_position
+    rotation_to_position: rotation_to_position,
+
+    v_set_from_matrix_position: v_set_from_matrix_position,
+    m_make_rotation_axis: m_make_rotation_axis,
+    m_multiply: m_multiply,
+    m_set_position: m_set_position,
+    m_make_rotation_from_quaternion: m_make_rotation_from_quaternion,
+
+    merge_json: merge_json,
+
   };
 
   function top_pos(elem) {
@@ -118,7 +128,7 @@
     }; 
   })(); 
   
-  function webgl_check(return_context) {
+  function webgl_detect(return_context) {
     if (!!window.WebGLRenderingContext) {
       var canvas = document.createElement("canvas");
       var names = ['webgl', 'experimental-webgl', 'moz-webgl', 'webkit-3d'];
@@ -181,4 +191,45 @@
     var transform = css_text_to_matrix('translate3d(' + x + 'px,' + y + 'px,0) rotateY(' + (0) + 'deg) rotateX(' + (0) + 'deg) rotateY(' + (ry ? - ry : 0) + 'deg) rotateX(' + (rx ? - rx : 0) + 'deg) rotateZ(' + (rz ? rz : 0) +'deg) translateZ(' + z + 'px)' );
     return [ - transform[12] + snot.bg_size / 2, transform[13] - snot.bg_size / 2, - transform[14]];
   }
+
+  function m_make_rotation_axis(point, rotation) {
+    return new THREE.Matrix4().makeRotationAxis(point, rotation);
+  }
+
+  function m_multiply() {
+    var mats = arguments;
+
+    var l = mats.length;
+    while (l > 1) {
+      var last2 = mats[l - 2];
+      var last1 = mats[l - 1];
+      mats[l - 2] = new THREE.Matrix4().multiplyMatrices(
+        last2,
+        last1
+      );
+      l--;
+    }
+    return mats[0];
+  }
+
+  function v_set_from_matrix_position(mat4) {
+    return new THREE.Vector3().setFromMatrixPosition(mat4);
+  }
+
+  function m_set_position(p) {
+    return new THREE.Matrix4().setPosition(p);
+  }
+
+  function m_make_rotation_from_quaternion(q) {
+    return new THREE.Matrix4().makeRotationFromQuaternion(q);
+  }
+
+  function merge_json(obj, json) {
+    for (var i in json) {
+      if (obj[i] == undefined) {
+        obj[i] = json[i];
+      }
+    }
+  }
+
 }(window);

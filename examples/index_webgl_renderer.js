@@ -23,13 +23,13 @@ function spot_generator(spot) {
   mesh.position.set(spot.x, spot.y, spot.z);
 
   var text = snot.generator.text(spot.x * 0.99, spot.y + 12, spot.z * 0.99, spot.text, 180);
-  snot.scene.add(text);
+  //snot.scene.add(text);
   return mesh;
 }
 
-function onSpriteClick(data) {
+function on_sprite_click(data) {
   console.log(data);
-  alert('onSpriteClick');
+  alert('on_sprite_click');
 }
 
 function on_click(x, y, z, rx, ry) {
@@ -95,7 +95,7 @@ snot.init({
   ry: 0,
   min_detect_distance: 20,
   on_click: on_click,
-  onSpriteClick: onSpriteClick,
+  on_sprite_click: on_sprite_click,
   sprites: sprites
 });
 
