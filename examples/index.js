@@ -1,44 +1,41 @@
-function onSpriteClick(data){
+function on_sprite_click(data) {
   console.log(data);
-  alert('onSpriteClick');
+  alert('on_sprite_click');
 }
 
 function on_click(x, y, z, rx, ry) {
   snot.load_sprites([{
-    //For CSS Renderer
-    //TemplateId for template renderer
-    template: 'template-spot',
-
-    spriteType: 'spot',
-
-    spotType: 'right',
+    generator: 'spot',
     id: 'spot-' + 123,
-    text: 'haha',
     x: x * 4,
     y: y * 4,
-    z: z * 4
+    z: z * 4,
+
+    text: 'haha',
+    spotType: 'right',
+    spriteType: 'spot',
   }]);
 }
 
 var sprites = {
   'spot1': {
-    template: 'template-spot',
-    spriteType: 'spot',
-    spotType: 'left',
+    generator: 'spot',
     id: 'spot1',
-    text: 'Home',
     x: 4,
     y: 120,
-    z: 360
+    z: 360,
+
+    spotType: 'left',
+    text: 'Home',
   }, 'spot2': {
-    template: 'template-spot',
-    spriteType: 'spot',
-    spotType: 'straight',
+    generator: 'spot',
     id: 'spot2',
-    text: 'Garage',
     x: 400,
     y: 0,
-    z: -110
+    z: -110,
+
+    text: 'Garage',
+    spotType: 'straight',
   }
 };
 
@@ -52,20 +49,14 @@ snot.init({
     'images/test.png',
     'images/test.png',
   ],
-  bg_rotation: [0,0,0,0,0,0],
-  fov: 90,
-  max_fov: 110,
-  min_fov: 60,
-  smooth: 0.17,
-  mouse_sensitivity: 0.3,
-  auto_rotation: 0.0,
+  generator: {
+    spot: 'template-spot'
+  },
   rx: 0,
   ry: 0,
-  min_detect_distance: 20,
   on_click: on_click,
-  onSpriteClick: onSpriteClick,
+  on_sprite_click: on_sprite_click,
   sprites: sprites
 });
-
 
 snot.run();

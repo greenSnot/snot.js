@@ -22,6 +22,7 @@
 
     bg_size: 1024,
 
+    generator: {},
     gyro: false,
     ry: 0,        // Rotate * degree around y axis
     rx: 0,        // Rotate * degree around x axis
@@ -29,6 +30,9 @@
     min_fov: 60,   // Min field of view (degree)
     fov: 90,      // Default field of view
     smooth: 0.17,
+    min_detect_distance: 20,
+    on_click: function() {},
+    on_sprite_click: function() {},
   }
   var prev_gyro;
 
@@ -99,6 +103,9 @@
     cancelAnimationFrame(snot._animateId);
 
     for (var i in config) {
+      if (i == 'generator') {
+        merge_json(snot.generator, config.generator);
+      }
       snot[i] = config[i];
     }
     prev_gyro = snot.gyro;
@@ -136,7 +143,7 @@
     set_fov(snot.fov);
 
     if (config.bg_imgs) {
-      load_bg_imgs(config.bg_imgs, config.bg_rotation);
+      load_bg_imgs(config.bg_imgs, config.bg_rotation || snot.bg_rotation);
     }
 
     if (config) {
@@ -201,7 +208,7 @@
       }
 
       var temp_wrapper = document.createElement('div');
-      temp_wrapper.innerHTML = template(t.template, t);
+      temp_wrapper.innerHTML = template(snot.generator[t.generator], t);
       var element = temp_wrapper.firstChild;
       element.data = sprites[i];
       add_sprite_by_position(element, t);
@@ -446,7 +453,7 @@
 
     var rotation = util.position_to_rotation(ax, az, ay);
     if (nearest) {
-      snot.onSpriteClick(snot.sprites[nearest.parentElement.id], nearest);
+      snot.on_sprite_click(snot.sprites[nearest.parentElement.id], nearest);
     } else {
       snot.on_click(ax, ay, az, rotation[0], rotation[1]);
     }
@@ -578,13 +585,15 @@
     //TODO
   }
 
-  function extend(obj, json) {
+  function merge_json(obj, json) {
     for (var i in json) {
-      obj[i] = json[i];
+      if (obj[i] == undefined) {
+        obj[i] = json[i];
+      }
     }
   }
 
-  extend(snot, {
+  merge_json(snot, {
     setFov: set_fov,
     setRx: _setRx,
     setRy: _setRy,

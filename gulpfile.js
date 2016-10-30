@@ -62,7 +62,7 @@ let both_renderer_js_files = _.flatten([
   './js/snot_webgl_renderer.js'
 ]);
 
-function concat_js(){
+function concat_js() {
   do_watch('concat_js');
 
   function make_stream(js_files, output_name) {
