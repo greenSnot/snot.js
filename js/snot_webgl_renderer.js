@@ -102,7 +102,7 @@
       snot[i] = config[i];
     }
     var smooth = snot.smooth;
-    snot.smooth = 0;
+    snot.smooth = 1;
     for (var i in sprites) {
       scene.remove(scene.getObjectByName(i));
     }
@@ -157,28 +157,50 @@
     }
   };
 
+  var sqrt = Math.sqrt;
+  var camera_euler = new THREE.Euler();
+  var target_quat = new THREE.Quaternion();
+  var rotate_90_quat = new THREE.Quaternion(- sqrt( 0.5 ), 0, 0, sqrt( 0.5 ))
+  var adjust_screen_quats = {
+    0: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0),
+    90: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - 90),
+    180: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - 180),
+    '-90': new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 90),
+  };
+
   function update() {
 
     snot.ry += snot.auto_rotation;
 
-    var rx = snot.dest_rx;
-    var ry = snot.dest_ry;
-    var rz = snot.rz * Math.PI / 180;
+    var ry = snot.dest_rx * Math.PI / 180 + Math.PI / 2;
+    var rx = - snot.dest_ry * Math.PI / 180 - Math.PI / 2;
+    var rz = 0;
 
-    ry = THREE.Math.degToRad(ry + 180);
-    rx = THREE.Math.degToRad(rx - 90);
+    if (snot.gyro) {
+      ry = snot.controls.gyro_data.beta;
+      rx = snot.controls.gyro_data.alpha;
+      rz = - snot.controls.gyro_data.gamma;
+    }
 
     camera.autoUpdateMatrix = false;
 
-    var q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, - 1, 0), ry);
-    rx += Math.PI / 2;
-    q = new THREE.Quaternion().multiplyQuaternions(q, new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), rx));
-    q = new THREE.Quaternion().multiplyQuaternions(q, new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), rz));
+    camera_euler.set(ry, rx, rz, 'YXZ'); // 'ZXY' for the device, but 'YXZ' for us
 
-    var newQuaternion = new THREE.Quaternion();
-    THREE.Quaternion.slerp(camera.quaternion, q, newQuaternion, snot.smooth);
-    camera.quaternion.copy(newQuaternion);
+    target_quat.setFromEuler(camera_euler); // orient the device
+    target_quat.multiply(rotate_90_quat); // camera looks out the back of the device, not the top
+                                          // - PI/2 around the x-axis
+    target_quat.multiply(adjust_screen_quats[snot.controls.screen_orientation]); // adjust for screen orientation
+
+    var new_quat = new THREE.Quaternion();
+    THREE.Quaternion.slerp(camera.quaternion, target_quat, new_quat, snot.smooth);
+    camera.quaternion.copy(new_quat);
     camera.quaternion.normalize();
+
+    var euler = new THREE.Euler();
+    euler.setFromQuaternion(camera.quaternion)
+    snot.rx = euler.x * 180 / Math.PI;
+    snot.ry = euler.y * 180 / Math.PI;
+    snot.rz = euler.z * 180 / Math.PI;
 
     camera.fov = snot.fov;
     camera.updateProjectionMatrix();
@@ -190,12 +212,15 @@
     snot.fov = snot.fov > snot.max_fov ? snot.max_fov : snot.fov;
     snot.fov = snot.fov < snot.min_fov ? snot.min_fov : snot.fov;
   }
+
   function set_rx(rx) {
     snot.dest_rx = rx;
   }
+
   function set_ry(ry) {
     snot.dest_ry = ry;
   }
+
   function load_sprites(sps) {
     for (var i in sps) {
       var functionName = sps[i].generator;
@@ -208,6 +233,7 @@
 
     }
   }
+
   function run() {
     snot._animateId = requestAnimationFrame(run);
     if (!snot.pause_animation) {

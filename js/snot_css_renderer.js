@@ -320,7 +320,7 @@
         return;
       }
 
-      update_camera(gyro_data.alpha, snot.controls.gyro_data.beta, - snot.controls.gyro_data.gamma);
+      update_camera(snot.controls.gyro_data.alpha, snot.controls.gyro_data.beta, - snot.controls.gyro_data.gamma);
     } else {
       if (prev_gyro) {
         snot.dest_rx = 0;
