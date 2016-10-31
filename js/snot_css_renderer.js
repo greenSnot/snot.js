@@ -421,7 +421,7 @@
   }
 
   util.merge_json(snot, {
-    setFov: set_fov,
+    set_fov: set_fov,
     set_rx: set_rx,
     set_ry: set_ry,
     init: init,

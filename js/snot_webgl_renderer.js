@@ -75,21 +75,31 @@
   //front down left back top right
   var img_index_convert = [3, 0, 4, 1, 5, 2];
   function load_bg_imgs(imgs) {
-    var size = snot.bg_size;
-    var precision = 1;
-    var geometry = new THREE.BoxGeometry(size, size, size, precision, precision, precision);
-    for (var index = 0;index < 6; ++index) {
-      var img_url = imgs[img_index_convert[index]];
-      bg_materials.push(new THREE.MeshBasicMaterial({
-        map: THREE.ImageUtils.loadTexture(img_url, THREE.UVMapping),
-        overdraw: _overdraw
-      }));
-    }
-    var material= new THREE.MeshFaceMaterial(bg_materials);
-    var mesh = new THREE.Mesh(geometry, material);
-    mesh.scale.x = - 1;
+    if (imgs.length == 1) {
+      var SphereGeometry = new THREE.SphereGeometry(snot.bg_size, 32, 32);
+      SphereGeometry.scale(- 1, 1, 1);
+      var SphereMaterial = new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load(imgs[0])
+      });
+      var SphereMesh = new THREE.Mesh(SphereGeometry, SphereMaterial);
+      scene.add(SphereMesh);
+    } else if (img.length == 6) {
+      var size = snot.bg_size;
+      var precision = 1;
+      var geometry = new THREE.BoxGeometry(size, size, size, precision, precision, precision);
+      for (var index = 0;index < 6; ++index) {
+        var img_url = imgs[img_index_convert[index]];
+        bg_materials.push(new THREE.MeshBasicMaterial({
+          map: THREE.ImageUtils.loadTexture(img_url, THREE.UVMapping),
+          overdraw: _overdraw
+        }));
+      }
+      var material= new THREE.MeshFaceMaterial(bg_materials);
+      var mesh = new THREE.Mesh(geometry, material);
+      mesh.scale.x = - 1;
 
-    scene.add(mesh);
+      scene.add(mesh);
+    }
   }
   function init(config) {
     for (var i in config) {
@@ -109,7 +119,7 @@
     sprites = {};
 
     var container = snot.container;
-    camera = new THREE.PerspectiveCamera(snot.fov, window.innerWidth / window.innerHeight, 1, 1100);
+    camera = new THREE.PerspectiveCamera(snot.fov, window.innerWidth / window.innerHeight, 1, snot.bg_size);
     camera.target = new THREE.Vector3(0, 0, 0);
     snot.camera = camera;
 
@@ -120,8 +130,8 @@
     }
     load_bg_imgs(config.bg_imgs);
 
-    var SphereGeometry = new THREE.SphereGeometry(snot.bg_size * 1.8, 32, 32);
-    var SphereMaterial = new THREE.MeshBasicMaterial({color: 0xff00ff, side: THREE.DoubleSide});
+    var SphereGeometry = new THREE.SphereGeometry(snot.bg_size * 2, 32, 32);
+    var SphereMaterial = new THREE.MeshBasicMaterial({side: THREE.DoubleSide});
     var SphereMesh = new THREE.Mesh(SphereGeometry, SphereMaterial);
     scene.add(SphereMesh);
     suspects.push(SphereMesh);
@@ -149,7 +159,7 @@
     if (intersects.length != 0) {
       var point = intersects[0].point;
       if (intersects[0].object.data) {
-        snot.onSpriteClick(intersects[0].object.data);
+        snot.on_sprite_click(intersects[0].object.data);
       } else {
         var rotation = util.position_to_rotation(point.x, point.y, point.z);
         snot.on_click(point, rotation);

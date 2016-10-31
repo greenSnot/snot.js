@@ -121,16 +121,19 @@ var sprites = {
 };
 
 snot.init({
-  bg_size:1248,
-  bg_imgs:[
-    'images/test.png',
-    'images/test.png',
-    'images/test.png',
-    'images/test.png',
-    'images/test.png',
-    'images/test.png',
+  bg_size: 1248,
+  //bg_imgs: [
+  //  'images/test.png',
+  //  'images/test.png',
+  //  'images/test.png',
+  //  'images/test.png',
+  //  'images/test.png',
+  //  'images/test.png',
+  //],
+  bg_imgs: [
+    'images/forrest.jpg',
   ],
-  generator:{
+  generator: {
     spot: spot_generator
   },
   bg_rotation: [0, 0, 0, 0, 0, 0],
