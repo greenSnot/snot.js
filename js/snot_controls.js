@@ -25,7 +25,7 @@
         snot.controls.gyro_data.gamma = ev.gamma  * Math.PI / 180;
         snot.controls.gyro_data.alpha = ev.alpha  * Math.PI / 180;
       } else {
-        snot.controls.gyro_data.beta = gyro_data.gamma = gyro_data.alpha = -1;
+        snot.controls.gyro_data.beta = snot.controls.gyro_data.gamma = snot.controls.gyro_data.alpha = -1;
       }
     }, true);
   }

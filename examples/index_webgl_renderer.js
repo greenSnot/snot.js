@@ -85,10 +85,6 @@ function on_sprite_click(data) {
 function on_click(point, rotation) {
   snot.util.standardlization(point, 400);
   snot.load_sprites([{
-    //For CSS Renderer
-    //TemplateId for template renderer
-    template: 'template-spot',
-
     generator: 'spot',
 
     spotType: 'right',
