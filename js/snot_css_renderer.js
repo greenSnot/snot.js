@@ -111,7 +111,7 @@
     }
     prev_gyro = snot.gyro;
 
-    snot.dest_rx = snot.rx + 0.1; //unknown bug for mobile safari
+    snot.dest_rx = snot.rx;
     snot.dest_ry = snot.ry;
 
     //First init
@@ -136,7 +136,7 @@
       // translateX translate the Camera to center
       // translateY
       snot.cameraBaseTransform = 'translateX(' + epsilon(- (snot.bg_size - snot.width) / 2) + 'px) translateY(' + epsilon(- (snot.bg_size - snot.height) / 2) + 'px)';
-      snot.camera.style['-webkit-transform'] = 'translateZ(-' + snot.perspective + 'px) rotateX(' + snot.rx + 'deg) rotateY(' + snot.ry + 'deg)' + snot.cameraBaseTransform;
+      snot.camera.style['-webkit-transform'] = 'translateZ(-' + snot.perspective + 'px) rotateX(' + epsilon(snot.rx) + 'deg) rotateY(' + epsilon(snot.ry) + 'deg)' + snot.cameraBaseTransform;
     }
     set_fov(snot.fov);
 
@@ -296,6 +296,9 @@
     look_at_quat.x *= -1;
     look_at_quat.z *= -1;
     var look_at_mat = m_make_rotation_from_quaternion(look_at_quat.normalize()).transpose();
+    for (var i = 0; i < look_at_mat.elements.length; ++i) {
+      look_at_mat.elements[i] = epsilon(look_at_mat.elements[i]);
+    }
     var look_at_rot = look_at_euler.setFromRotationMatrix(look_at_mat, 'XZY');
 
     snot.rx = look_at_rot._x * 180 / PI;
