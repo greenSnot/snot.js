@@ -183,7 +183,7 @@
     snot.ry += snot.auto_rotation;
 
     var ry = snot.dest_rx * Math.PI / 180 + Math.PI / 2;
-    var rx = - snot.dest_ry * Math.PI / 180 - Math.PI / 2;
+    var rx = - snot.dest_ry * Math.PI / 180 + Math.PI;
     var rz = 0;
 
     if (snot.gyro) {
@@ -207,14 +207,21 @@
     camera.quaternion.normalize();
 
     var euler = new THREE.Euler();
+    euler.order = 'YXZ';
     euler.setFromQuaternion(camera.quaternion)
     snot.rx = euler.x * 180 / Math.PI;
-    snot.ry = euler.y * 180 / Math.PI;
+    snot.ry = euler.y * 180 / Math.PI - 180;
     snot.rz = euler.z * 180 / Math.PI;
 
     camera.fov = snot.fov;
     camera.updateProjectionMatrix();
     renderer.render(scene, camera);
+
+    if (snot.debug) {
+      document.getElementById('logger').innerHTML = 'rx:' + parseInt(snot.rx) + ' ' +
+                        'ry:' + parseInt(snot.ry) + ' ' +
+                        'rz:' + parseInt(snot.rz);
+    }
   }
 
   function set_fov(fov) {

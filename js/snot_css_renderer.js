@@ -11,6 +11,9 @@
   var sqrt = Math.sqrt;
 
   var snot = {
+    debug: false,
+    container: document.getElementById('snot-container'),
+    dom: document.getElementById('snot-wrap'),
 
     camera_look_at: {
       x: 0,
@@ -32,9 +35,6 @@
 
     pause_animation: false,
 
-    dom      : document.getElementById('snot-wrap'),
-    camera   : document.getElementById('snot-camera'),
-    container: document.getElementById('snot-container'),
 
     bg_size: 1024,
 
@@ -53,9 +53,11 @@
     min_detect_distance: 20,
     on_click: function() {},
     on_sprite_click: function() {},
-  }
+  };
+  var camera_dom = document.getElementById('snot-camera');
   var prev_gyro;
 
+  var camera_base_transform;
   var previous_quat = new THREE.Quaternion();
 
   function _pointStandardlization(x, y, z) {
@@ -98,7 +100,7 @@
     }
   }
 
-  var init = function(config, ajax) {
+  var init = function(config) {
     reset();
 
     cancelAnimationFrame(snot._animateId);
@@ -114,30 +116,27 @@
     snot.dest_rx = snot.rx;
     snot.dest_ry = snot.ry;
 
-    //First init
-    if (!ajax) {
+    snot.width = snot.dom.offsetWidth;
+    snot.height = snot.dom.offsetHeight;
 
-      snot.width = snot.dom.offsetWidth;
-      snot.height = snot.dom.offsetHeight;
+    //compute the max Horizontal Field of view
+    //perspective= projectiveScreenWidth/2
+    //           = width/2/tan(max_fov/2)
+    snot.perspective = snot.width / 2 / tan(snot.max_fov / 2 * PI / 180);
 
-      //compute the max Horizontal Field of view
-      //perspective= projectiveScreenWidth/2
-      //           = width/2/tan(max_fov/2)
-      snot.perspective = snot.width / 2 / tan(snot.max_fov / 2 * PI / 180);
+    snot.container.style['-webkit-perspective'] = snot.perspective + 'px';
 
-      snot.container.style['-webkit-perspective'] = snot.perspective + 'px';
+    //camera offset
+    // Z is depth(front) Y is height X is right
+    //
+    // translateZ setFOV
+    // rotateX rotate around X axis
+    // rotateY rotate around Y axis
+    // translateX translate the Camera to center
+    // translateY
+    camera_base_transform = 'translateX(' + epsilon(- (snot.bg_size - snot.width) / 2) + 'px) translateY(' + epsilon(- (snot.bg_size - snot.height) / 2) + 'px)';
+    camera_dom.style['-webkit-transform'] = 'translateZ(-' + snot.perspective + 'px) rotateY(' + epsilon(snot.rx) + 'deg) rotateX(' + epsilon(snot.ry) + 'deg)' + camera_base_transform;
 
-      //camera offset
-      // Z is depth(front) Y is height X is right
-      //
-      // translateZ setFOV
-      // rotateX rotate around X axis
-      // rotateY rotate around Y axis
-      // translateX translate the Camera to center
-      // translateY
-      snot.cameraBaseTransform = 'translateX(' + epsilon(- (snot.bg_size - snot.width) / 2) + 'px) translateY(' + epsilon(- (snot.bg_size - snot.height) / 2) + 'px)';
-      snot.camera.style['-webkit-transform'] = 'translateZ(-' + snot.perspective + 'px) rotateX(' + epsilon(snot.rx) + 'deg) rotateY(' + epsilon(snot.ry) + 'deg)' + snot.cameraBaseTransform;
-    }
     set_fov(snot.fov);
 
     if (config.bg_imgs) {
@@ -174,7 +173,7 @@
       bg_dom = document.getElementsByClassName('snot-bg ' + i)[0];
       bg_dom.style['-webkit-transform'] = bg_config[i];
       bg_dom.style['width'] = snot.bg_size + 2 + 'px';        // 2 more pixels for overlapping gaps ( chrome's bug )
-      bg_dom.style['height'] = snot.bg_size + 2 + 'px';        // 2 more pixels for overlapping gaps ( chrome's bug )
+      bg_dom.style['height'] = snot.bg_size + 2 + 'px';       // 2 more pixels for overlapping gaps ( chrome's bug )
 
       bg_dom.setAttribute('src', bg_imgs[count]);
       bg_dom.setAttribute('data-index', count);
@@ -202,7 +201,7 @@
 
   function add_sprite_by_position(element, p) {
 
-    var x = p.x;
+    var x = - p.x;
     var z = - p.z;
     var y = - p.y;
 
@@ -232,7 +231,7 @@
     spriteWrap.setAttribute('data-visible', element.data.visible == false ? false : true);
 
     spriteContainer.appendChild(spriteWrap);
-    snot.camera.appendChild(spriteContainer);
+    camera_dom.appendChild(spriteContainer);
   }
 
   var update_sprite_visibility = function(id) {
@@ -302,7 +301,7 @@
     var look_at_rot = look_at_euler.setFromRotationMatrix(look_at_mat, 'XZY');
 
     snot.rx = look_at_rot._x * 180 / PI;
-    snot.ry = look_at_rot._y * 180 / PI;
+    snot.ry = - look_at_rot._y * 180 / PI;
     snot.rz = look_at_rot._z * 180 / PI;
 
     snot.camera_look_at = v_set_from_matrix_position(m_multiply(
@@ -312,7 +311,7 @@
       m_set_position({x: 0, y: 0, z: 1})
     )); // bad performance here
 
-    snot.camera.style.transform = 'translateZ(' + epsilon(snot.perspective) + 'px)' + " matrix3d(" + look_at_mat.elements + ")"+ snot.cameraBaseTransform;
+    camera_dom.style.transform = 'translateZ(' + epsilon(snot.perspective) + 'px)' + " matrix3d(" + look_at_mat.elements + ")"+ camera_base_transform;
   }
 
   function update() {
@@ -329,8 +328,8 @@
         snot.dest_rx = 0;
         snot.dest_ry = 0;
       }
-      snot.dest_ry += snot.auto_rotation;
-      update_camera( - snot.dest_ry * PI / 180, snot.dest_rx * PI / 180 + PI / 2, 0);
+      snot.dest_ry -= snot.auto_rotation;
+      update_camera(- snot.dest_ry * PI / 180, snot.dest_rx * PI / 180 + PI/2, 0);
     }
     prev_gyro = snot.gyro;
 
@@ -344,6 +343,11 @@
         sprite.need_update_visibility = false;
         update_sprite_visibility(sprite.id);
       }
+    }
+    if (snot.debug) {
+      document.getElementById('logger').innerHTML = 'rx:' + parseInt(snot.rx) + ' ' +
+                        'ry:' + parseInt(snot.ry) + ' ' +
+                        'rz:' + parseInt(snot.rz);
     }
   }
 
@@ -388,13 +392,13 @@
     var new_z = xyz2[2] * ratio;
 
     var pos = v_set_from_matrix_position(m_multiply(
-      m_make_rotation_axis({x: 0, y: 1, z: 0}, - snot.ry * PI / 180),
+      m_make_rotation_axis({x: 0, y: 1, z: 0}, snot.ry * PI / 180),
       m_make_rotation_axis({x: 0, y: 0, z: 1}, - snot.rz * PI / 180),
       m_make_rotation_axis({x: 1, y: 0, z: 0}, - snot.rx * PI / 180),
       m_set_position({x: new_x, y: new_y, z: new_z})
     ));
 
-    ax = - pos.x;
+    ax = pos.x;
     ay = pos.y;
     az = pos.z;
 
@@ -408,7 +412,7 @@
       var matrix = util.css_text_to_matrix(self.style.webkitTransform);
       var rate_ = 100 / distance3D(0, 0, 0, snot.bg_size / 2 - matrix[12], matrix[13] - snot.bg_size / 2, - matrix[14]);
 
-      var distance = distance3D(- ax, - ay, az, (snot.bg_size / 2 - matrix[12]) * rate_, rate_ * (matrix[13] - snot.bg_size / 2), rate_ * ( - matrix[14]));
+      var distance = distance3D(ax, - ay, az, (snot.bg_size / 2 - matrix[12]) * rate_, rate_ * (matrix[13] - snot.bg_size / 2), rate_ * ( - matrix[14]));
       if (distance < min_distance) {
         min_distance = distance;
         nearest = self.children[0];
@@ -419,7 +423,14 @@
     if (nearest) {
       snot.on_sprite_click(snot.sprites[nearest.parentElement.id], nearest);
     } else {
-      snot.on_click(ax, ay, az, rotation[0], rotation[1]);
+      snot.on_click({
+        x: ax,
+        y: ay,
+        z: az,
+      }, {
+        rx: rotation[0],
+        ry: rotation[1]
+      });
     }
   }
 

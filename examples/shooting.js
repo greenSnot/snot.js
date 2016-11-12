@@ -2,17 +2,16 @@ function on_sprite_click(data){
   console.log(data);
   alert('on_sprite_click');
 }
-function on_click(x, y, z, rx, ry) {
+function on_click(point, rotation) {
   snot.load_sprites([{
     generator: 'spot',
-
     id: 'spot-' + 123,
-    x: x * 4,
-    y: y * 4,
-    z: z * 4,
+    x: point.x * 4,
+    y: point.y * 4,
+    z: point.z * 4,
 
-    spotType: 'right',
     text: 'haha',
+    spotType: 'right',
   }]);
 }
 

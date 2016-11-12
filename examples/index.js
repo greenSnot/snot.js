@@ -3,13 +3,13 @@ function on_sprite_click(data) {
   alert('on_sprite_click');
 }
 
-function on_click(x, y, z, rx, ry) {
+function on_click(point, rotation) {
   snot.load_sprites([{
     generator: 'spot',
     id: 'spot-' + 123,
-    x: x * 4,
-    y: y * 4,
-    z: z * 4,
+    x: point.x * 4,
+    y: point.y * 4,
+    z: point.z * 4,
 
     text: 'haha',
     spotType: 'right',
@@ -17,6 +17,66 @@ function on_click(x, y, z, rx, ry) {
 }
 
 var sprites = {
+  '-x-axis': {
+    generator: 'spot',
+    id: '-x',
+    x: - 360,
+    y: 0,
+    z: 0,
+
+    spotType: 'left',
+    text: '-x',
+  },
+  '-z-axis': {
+    generator: 'spot',
+    id: '-z',
+    z: - 360,
+    x: 0,
+    y: 0,
+
+    spotType: 'left',
+    text: '-z',
+  },
+  '-y-axis': {
+    generator: 'spot',
+    id: '-y',
+    y: - 360,
+    x: 0,
+    z: 0,
+
+    spotType: 'left',
+    text: '-y',
+  },
+  'x-axis': {
+    generator: 'spot',
+    id: 'x',
+    x: 360,
+    y: 0,
+    z: 0,
+
+    spotType: 'left',
+    text: 'x',
+  },
+  'y-axis': {
+    generator: 'spot',
+    id: 'y',
+    x: 0,
+    y: 360,
+    z: 0,
+
+    spotType: 'left',
+    text: 'y',
+  },
+  'z-axis': {
+    generator: 'spot',
+    id: 'z',
+    x: 0,
+    y: 0,
+    z: 360,
+
+    spotType: 'left',
+    text: 'z',
+  },
   'spot1': {
     generator: 'spot',
     id: 'spot1',
@@ -39,6 +99,7 @@ var sprites = {
 };
 
 snot.init({
+  debug: true,
   bg_size: 1248,
   bg_imgs: [
     'images/test.png',
