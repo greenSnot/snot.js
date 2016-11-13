@@ -33,6 +33,7 @@
     m_make_rotation_from_quaternion: m_make_rotation_from_quaternion,
 
     merge_json: merge_json,
+    octree_collision: octree_collision,
 
   };
 
@@ -235,10 +236,146 @@
 
   function standardlization(point, r) {
     r = r || 1;
-    point.normalize();
-    point.x *= r;
-    point.y *= r;
-    point.z *= r;
+    var distance_to_origin = distance3D(0, 0, 0, point.x, point.y, point.z);
+    point.x *= r / distance_to_origin;
+    point.y *= r / distance_to_origin;
+    point.z *= r / distance_to_origin;
+  }
+
+  function is_point_inside(point, a, b) {
+    if (point.x >= b.x && point.y >= b.y && point.z >= b.z &&
+        point.x < a.x && point.y < a.y && point.z < a.z) {
+      return true;
+    }
+    return false;
+  }
+  function get_inside_points(points, a, b) {
+    let candidates = [];
+    for (let i in points) {
+      if (is_point_inside(points[i], a, b)) {
+        candidates.push(points[i]);
+      }
+    }
+    return candidates;
+  }
+  /*
+   * see ../images/octree.png
+   *
+   * a.x > b.x
+   * a.y > b.y
+   * a.z > b.z
+   */
+  function octree_collision(a, b, points_a, points_b, res, depth = 1) {
+    if (!points_a.length || !points_b.length) {
+      return false;
+    }
+    if (depth > 7) {
+      res.push({
+        points_a: points_a,
+        points_b: points_b,
+      });
+      return true;
+    }
+
+    // random split
+    let half = {
+      x: (a.x - b.x) / (Math.random() * 0.2 - 0.1 + 2),
+      y: (a.y - b.y) / (Math.random() * 0.2 - 0.1 + 2),
+      z: (a.z - b.z) / (Math.random() * 0.2 - 0.1 + 2),
+    };
+    let b_xyz = {
+      x: b.x + half.x,
+      y: b.y + half.y,
+      z: b.z + half.z,
+    };
+    let b_x = {
+      x: b_xyz.x,
+      y: b.y,
+      z: b.z,
+    };
+    let b_y = {
+      x: b.x,
+      y: b_xyz.y,
+      z: b.z,
+    };
+    let b_z = {
+      x: b.x,
+      y: b.y,
+      z: b_xyz.z,
+    };
+    let b_xz = {
+      x: b_xyz.x,
+      y: b.y,
+      z: b_xyz.z,
+    };
+    let b_xy = {
+      x: b_xyz.x,
+      y: b_xyz.y,
+      z: b.z,
+    };
+    let b_yz = {
+      x: b.x,
+      y: b_xyz.y,
+      z: b_xyz.z,
+    };
+
+    let a_z = {
+      x: a.x,
+      y: a.y,
+      z: a.z - half.z,
+    };
+    let a_x = {
+      x: a.x - half.x,
+      y: a.y,
+      z: a.z,
+    };
+    let a_y = {
+      x: a.x,
+      y: a.y - half.y,
+      z: a.z,
+    };
+    let a_xy = {
+      x: a_x.x,
+      y: a_y.y,
+      z: a.z,
+    };
+    let a_yz = {
+      x: a.x,
+      y: a_y.y,
+      z: a_z.z,
+    };
+    let a_xz = {
+      x: a_x.x,
+      y: a.y,
+      z: a_z.z,
+    };
+
+    function sub_collision(a, b) {
+      let candidates_a = get_inside_points(points_a, a, b);
+      let candidates_b = get_inside_points(points_b, a, b);
+      return octree_collision(a, b, candidates_a, candidates_b, res, depth + 1);
+    }
+
+    let pairs = [
+      [a_x, b_yz],
+      [a, b_xyz],
+      [a_xy, b_z],
+      [a_y, b_xz],
+
+      [a_xz, b_y],
+      [a_z, b_xy],
+      [b_xyz, b],
+      [a_yz, b_x],
+    ];
+
+    let found = false;
+    for (let i in pairs) {
+      if (sub_collision(pairs[i][0], pairs[i][1])) {
+        found = true;
+      }
+    }
+
+    return found;
   }
 
 }(window);
