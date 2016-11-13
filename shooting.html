@@ -6,6 +6,7 @@
   <meta http-equiv="pragma" content="no-cache">
   <head>
     <link rel="stylesheet" type="text/css" href="build/css/snot.min.css">
+    <link rel="stylesheet" type="text/css" href="css/shooting.css">
   </head>
   <body>
     <button class="btn-gyro" onClick="snot.gyro=!snot.gyro">gyro</button>
@@ -22,6 +23,7 @@
       </div>
     </div>
     <div id="logger"></div>
+    <div class="crosshair"></div>
   </body>
   <script id="template-spot" type="text/html">
     <div class="spot-<#=spotType#>">
@@ -30,10 +32,10 @@
     </div>
   </script>
   <script id="template-enemy" type="text/html">
-    <div style="width:30px;height:30px;background:rgba(255,0,0,0.5);"></div>
+    <div class="enemy"></div>
   </script>
   <script id="template-bullet" type="text/html">
-    <div style="width:20px;height:20px;">😂</div>
+    <div class="bullet">😂</div>
   </script>
   <script src="build/js/snot_css_renderer.min.js"></script>
 </html>
