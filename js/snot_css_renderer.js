@@ -49,7 +49,7 @@
     max_fov: 120, // Max field of view (degree)
     min_fov: 60,   // Min field of view (degree)
     fov: 90,      // Default field of view
-    smooth: 0.17,
+    smooth: 0.83,
     min_detect_distance: 20,
     on_click: function() {},
     on_sprite_click: function() {},
@@ -289,7 +289,7 @@
     target_quat.multiply(adjust_screen_quats[snot.controls.screen_orientation]); // adjust for screen orientation
 
     var slerp_quat = new THREE.Quaternion();
-    THREE.Quaternion.slerp(target_quat, previous_quat, slerp_quat, 1 - snot.smooth);
+    THREE.Quaternion.slerp(target_quat, previous_quat, slerp_quat, snot.smooth);
     previous_quat = slerp_quat;
     var look_at_quat = slerp_quat.clone();
     look_at_quat.x *= -1;
@@ -351,14 +351,6 @@
     }
   }
 
-
-  var set_rx = function(rx, smooth) {
-    //TODO
-  }
-
-  var set_ry=function(ry,smooth){
-    //TODO
-  }
 
   snot.controls.mouse_click = function(x, y) {
     var R = 100;
@@ -436,8 +428,6 @@
 
   util.merge_json(snot, {
     set_fov: set_fov,
-    set_rx: set_rx,
-    set_ry: set_ry,
     init: init,
     run: run,
     update: update,

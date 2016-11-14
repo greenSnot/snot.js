@@ -32,7 +32,7 @@
 
     gyro: false,
 
-    smooth: 0.17,
+    smooth: 0.83,
     quaternion: {},
 
     rz: 0,
@@ -112,7 +112,7 @@
       snot[i] = config[i];
     }
     var smooth = snot.smooth;
-    snot.smooth = 1;
+    snot.smooth = 0;
     for (var i in sprites) {
       scene.remove(scene.getObjectByName(i));
     }
@@ -202,7 +202,7 @@
     target_quat.multiply(adjust_screen_quats[snot.controls.screen_orientation]); // adjust for screen orientation
 
     var new_quat = new THREE.Quaternion();
-    THREE.Quaternion.slerp(camera.quaternion, target_quat, new_quat, snot.smooth);
+    THREE.Quaternion.slerp(camera.quaternion, target_quat, new_quat, 1 - snot.smooth);
     camera.quaternion.copy(new_quat);
     camera.quaternion.normalize();
 

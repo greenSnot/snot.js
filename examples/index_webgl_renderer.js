@@ -197,7 +197,6 @@ snot.init({
   fov: 90,
   max_fov: 110,
   min_fov: 60,
-  smooth: 0.17,
   mouse_sensitivity: 0.3,
   auto_rotation: 0.0,
   rx: 0,

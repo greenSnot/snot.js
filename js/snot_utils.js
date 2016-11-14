@@ -250,8 +250,8 @@
     return false;
   }
   function get_inside_points(points, a, b) {
-    let candidates = [];
-    for (let i in points) {
+    var candidates = [];
+    for (var i in points) {
       if (is_point_inside(points[i], a, b)) {
         candidates.push(points[i]);
       }
@@ -278,85 +278,85 @@
     }
 
     // random split
-    let half = {
+    var half = {
       x: (a.x - b.x) / (Math.random() * 0.2 - 0.1 + 2),
       y: (a.y - b.y) / (Math.random() * 0.2 - 0.1 + 2),
       z: (a.z - b.z) / (Math.random() * 0.2 - 0.1 + 2),
     };
-    let b_xyz = {
+    var b_xyz = {
       x: b.x + half.x,
       y: b.y + half.y,
       z: b.z + half.z,
     };
-    let b_x = {
+    var b_x = {
       x: b_xyz.x,
       y: b.y,
       z: b.z,
     };
-    let b_y = {
+    var b_y = {
       x: b.x,
       y: b_xyz.y,
       z: b.z,
     };
-    let b_z = {
+    var b_z = {
       x: b.x,
       y: b.y,
       z: b_xyz.z,
     };
-    let b_xz = {
+    var b_xz = {
       x: b_xyz.x,
       y: b.y,
       z: b_xyz.z,
     };
-    let b_xy = {
+    var b_xy = {
       x: b_xyz.x,
       y: b_xyz.y,
       z: b.z,
     };
-    let b_yz = {
+    var b_yz = {
       x: b.x,
       y: b_xyz.y,
       z: b_xyz.z,
     };
 
-    let a_z = {
+    var a_z = {
       x: a.x,
       y: a.y,
       z: a.z - half.z,
     };
-    let a_x = {
+    var a_x = {
       x: a.x - half.x,
       y: a.y,
       z: a.z,
     };
-    let a_y = {
+    var a_y = {
       x: a.x,
       y: a.y - half.y,
       z: a.z,
     };
-    let a_xy = {
+    var a_xy = {
       x: a_x.x,
       y: a_y.y,
       z: a.z,
     };
-    let a_yz = {
+    var a_yz = {
       x: a.x,
       y: a_y.y,
       z: a_z.z,
     };
-    let a_xz = {
+    var a_xz = {
       x: a_x.x,
       y: a.y,
       z: a_z.z,
     };
 
     function sub_collision(a, b) {
-      let candidates_a = get_inside_points(points_a, a, b);
-      let candidates_b = get_inside_points(points_b, a, b);
+      var candidates_a = get_inside_points(points_a, a, b);
+      var candidates_b = get_inside_points(points_b, a, b);
       return octree_collision(a, b, candidates_a, candidates_b, res, depth + 1);
     }
 
-    let pairs = [
+    var pairs = [
       [a_x, b_yz],
       [a, b_xyz],
       [a_xy, b_z],
@@ -368,8 +368,8 @@
       [a_yz, b_x],
     ];
 
-    let found = false;
-    for (let i in pairs) {
+    var found = false;
+    for (var i in pairs) {
       if (sub_collision(pairs[i][0], pairs[i][1])) {
         found = true;
       }
