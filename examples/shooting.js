@@ -1,3 +1,7 @@
+var util = snot.util;
+document.getElementsByClassName('btn-gyro')[0].addEventListener('click', function() {
+  snot.gyro = !snot.gyro;
+});
 function on_sprite_click(data){
   console.log(data);
   alert('on_sprite_click');
@@ -97,10 +101,10 @@ snot.init({
   sprites: sprites
 });
 
-let last_shoot_time = 0;
-let shoot_interval = 80; //ms
+var last_shoot_time = 0;
+var shoot_interval = 80; //ms
 function shoot() {
-  let now = new Date().valueOf();
+  var now = new Date().valueOf();
   if (now - last_shoot_time > shoot_interval) {
     bullets_running.push(bullets_pool.pop());
     last_shoot_time = now;
@@ -123,7 +127,7 @@ function update() {
   if (bullets_running.length != max_bullets) {
     shoot();
   }
-  let points_a = [];
+  var points_a = [];
   for (var i in bullets_running) {
     var id = bullets_running[i];
     var bullet = snot.sprites[id];
@@ -131,7 +135,7 @@ function update() {
     if (bullet.status == -1) {
       bullet.y = - bullet_offset_y;
       // init or reset
-      bullet.distance_to_origin = snot.util.distance3D(bullet.dest_x, bullet.dest_y, bullet.dest_z, 0, 0, 0);
+      bullet.distance_to_origin = util.distance3D(bullet.dest_x, bullet.dest_y, bullet.dest_z, 0, 0, 0);
       bullet.steps = Math.floor(bullet.distance_to_origin / bullet.velocity);
       bullet.step_x = (bullet.dest_x - bullet.x) * bullet.velocity / bullet.distance_to_origin;
       bullet.step_y = (bullet.dest_y - bullet.y) * bullet.velocity / bullet.distance_to_origin;
@@ -162,7 +166,7 @@ function update() {
     bullet.need_update_position = true;
   }
 
-  let points_b = [];
+  var points_b = [];
   for (var i in enemies_running) {
     var id = enemies_running[i];
     var enemy = snot.sprites[id];
@@ -173,7 +177,7 @@ function update() {
       enemy.x = Math.random() - 0.5;
       enemy.y = Math.random() - 0.5;
       enemy.z = Math.random() - 0.5;
-      snot.util.standardlization(enemy, 300);
+      util.standardlization(enemy, 300);
       enemy.need_update_visibility = true;
     }
     if (enemy.health) {
@@ -182,8 +186,8 @@ function update() {
     enemy.need_update_position = true;
   }
 
-  let collision = [];
-  snot.util.octree_collision({
+  var collision = [];
+  util.octree_collision({
     x: snot.bg_size * 1.5,
     y: snot.bg_size * 1.5,
     z: snot.bg_size * 1.5,

@@ -1,269 +1,281 @@
-!function(global) {
+var THREE = require('three');
+var util = require('./snot_util.js');
+var controls = require('./snot_controls.js');
+var PI = Math.PI;
+var snot = {
+  camera_look_at: {
+    x: 0,
+    y: 0,
+    z: 1,
+  },
 
-  var PI = Math.PI;
-  var snot = {
+  util: util,
+  THREE: THREE,
 
-    camera_look_at: {
-      x: 0,
-      y: 0,
-      z: 1,
+  controls: {
+    screen_orientation: 0,
+    gyro_data: {
+      alpha: 0,
+      beta: 90 * PI / 180,
+      gamma: 0
     },
-    controls: {
-      screen_orientation: 0,
-      gyro_data: {
-        alpha: 0,
-        beta: 90 * PI / 180,
-        gamma: 0
-      },
-    },
-    mouse_sensitivity: 0.3,
-    auto_rotation: 0,
-    frames:0,
-    bg_rotation: [0, 0, 0, 0, 0, 0],
+  },
+  mouse_sensitivity: 0.3,
+  auto_rotation: 0,
+  frames:0,
+  bg_rotation: [0, 0, 0, 0, 0, 0],
 
-    pause_animation: false,
-    generator: {},
+  pause_animation: false,
+  generator: {},
 
-    dom      : document.getElementById('snot-wrap'),
-    camera   : document.getElementById('snot-camera'),
-    container: document.getElementById('snot-container'),
+  dom      : document.getElementById('snot-wrap'),
+  camera   : document.getElementById('snot-camera'),
+  container: document.getElementById('snot-container'),
 
-    bg_size: 1024,
+  bg_size: 1024,
 
-    gyro: false,
+  gyro: false,
 
-    smooth: 0.83,
-    quaternion: {},
+  smooth: 0.83,
+  quaternion: {},
 
-    rz: 0,
-    ry: 0,       // Rotate * degree around y axis
-    rx: 0,       // Rotate * degree around x axis
+  rz: 0,
+  ry: 0,       // Rotate * degree around y axis
+  rx: 0,       // Rotate * degree around x axis
 
-    dest_rx: 0,
-    dest_ry: 0,
-    dest_rz: 0,
+  dest_rx: 0,
+  dest_ry: 0,
+  dest_rz: 0,
 
-    max_fov: 120, // Max field of view (degree)
-    min_fov: 60,  // Min field of view (degree)
-    fov: 90,     // Default field of view
-  };
+  max_fov: 120, // Max field of view (degree)
+  min_fov: 60,  // Min field of view (degree)
+  fov: 90,     // Default field of view
+};
 
-  var util = global.snot.util;
-  util.merge_json(global.snot, snot);
-  snot = global.snot;
-  var epsilon = util.epsilon;
-  var distance3D = util.distance3D;
-  var distance2D = util.distance2D;
+var epsilon = util.epsilon;
+var distance3D = util.distance3D;
+var distance2D = util.distance2D;
 
-  var camera;
-  var scene;
-  var renderer;
-  var bg_materials = [];
-  var suspects = [];
-  var sprites = {};
-  var _overdraw = 1;
-  THREE.ImageUtils.crossOrigin = '*';
+var camera;
+var scene;
+var renderer;
+var bg_materials = [];
+var suspects = [];
+var sprites = {};
+var _overdraw = 1;
+THREE.ImageUtils.crossOrigin = '*';
 
-  var mouse_down_x;
-  var mouse_down_rx;
-  var mouse_down_ry;
-  var mouse_down_y;
-  var is_mouse_down = false;
+var mouse_down_x;
+var mouse_down_rx;
+var mouse_down_ry;
+var mouse_down_y;
+var is_mouse_down = false;
 
-  //0     1    2    3    4   5
-  //front down left back top right
-  //front down left back top right
-  var img_index_convert = [3, 0, 4, 1, 5, 2];
-  function load_bg_imgs(imgs) {
-    if (imgs.length == 1) {
-      var SphereGeometry = new THREE.SphereGeometry(snot.bg_size, 32, 32);
-      SphereGeometry.scale(- 1, 1, 1);
-      var SphereMaterial = new THREE.MeshBasicMaterial({
-        map: new THREE.TextureLoader().load(imgs[0])
-      });
-      var SphereMesh = new THREE.Mesh(SphereGeometry, SphereMaterial);
-      scene.add(SphereMesh);
-    } else if (img.length == 6) {
-      var size = snot.bg_size;
-      var precision = 1;
-      var geometry = new THREE.BoxGeometry(size, size, size, precision, precision, precision);
-      for (var index = 0;index < 6; ++index) {
-        var img_url = imgs[img_index_convert[index]];
-        bg_materials.push(new THREE.MeshBasicMaterial({
-          map: THREE.ImageUtils.loadTexture(img_url, THREE.UVMapping),
-          overdraw: _overdraw
-        }));
-      }
-      var material= new THREE.MeshFaceMaterial(bg_materials);
-      var mesh = new THREE.Mesh(geometry, material);
-      mesh.scale.x = - 1;
-
-      scene.add(mesh);
-    }
-  }
-  function init(config) {
-    for (var i in config) {
-      if (i == 'generator') {
-        for (var j in config.generator) {
-          snot.generator[j] = config.generator[j];
-        }
-        continue;
-      }
-      snot[i] = config[i];
-    }
-    var smooth = snot.smooth;
-    snot.smooth = 0;
-    for (var i in sprites) {
-      scene.remove(scene.getObjectByName(i));
-    }
-    sprites = {};
-
-    var container = snot.container;
-    camera = new THREE.PerspectiveCamera(snot.fov, window.innerWidth / window.innerHeight, 1, snot.bg_size);
-    camera.target = new THREE.Vector3(0, 0, 0);
-    snot.camera = camera;
-
-    scene = new THREE.Scene();
-
-    if (config.callback) {
-      config.callback();
-    }
-    load_bg_imgs(config.bg_imgs);
-
-    var SphereGeometry = new THREE.SphereGeometry(snot.bg_size * 2, 32, 32);
-    var SphereMaterial = new THREE.MeshBasicMaterial({side: THREE.DoubleSide});
+//0     1    2    3    4   5
+//front down left back top right
+//front down left back top right
+var img_index_convert = [3, 0, 4, 1, 5, 2];
+function load_bg_imgs(imgs) {
+  if (imgs.length == 1) {
+    var SphereGeometry = new THREE.SphereGeometry(snot.bg_size, 32, 32);
+    SphereGeometry.scale(- 1, 1, 1);
+    var SphereMaterial = new THREE.MeshBasicMaterial({
+      map: new THREE.TextureLoader().load(imgs[0])
+    });
     var SphereMesh = new THREE.Mesh(SphereGeometry, SphereMaterial);
     scene.add(SphereMesh);
-    suspects.push(SphereMesh);
+  } else if (img.length == 6) {
+    var size = snot.bg_size;
+    var precision = 1;
+    var geometry = new THREE.BoxGeometry(size, size, size, precision, precision, precision);
+    for (var index = 0;index < 6; ++index) {
+      var img_url = imgs[img_index_convert[index]];
+      bg_materials.push(new THREE.MeshBasicMaterial({
+        map: THREE.ImageUtils.loadTexture(img_url, THREE.UVMapping),
+        overdraw: _overdraw
+      }));
+    }
+    var material= new THREE.MeshFaceMaterial(bg_materials);
+    var mesh = new THREE.Mesh(geometry, material);
+    mesh.scale.x = - 1;
 
-    load_sprites(config.sprites);
-
-    renderer = new THREE.WebGLRenderer();
-
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    container.appendChild(renderer.domElement);
-
-    update();
-    snot.smooth = smooth;
-    snot.init_controls();
+    scene.add(mesh);
   }
-
-  snot.controls.mouse_click = function(x, y) {
-    var raycaster = new THREE.Raycaster();
-    var mouse = new THREE.Vector2();
-    mouse.set((x / window.innerWidth) * 2 - 1, - (y / window.innerHeight) * 2 + 1);
-    raycaster.setFromCamera(mouse, camera);
-    raycaster.far = snot.bg_size * 2;
-    var intersects = raycaster.intersectObjects(suspects);
-    if (intersects.length != 0) {
-      var point = intersects[0].point;
-      if (intersects[0].object.data) {
-        snot.on_sprite_click(intersects[0].object.data);
-      } else {
-        var rotation = util.position_to_rotation(point.x, point.y, point.z);
-        snot.on_click(point, rotation);
+}
+function init(config) {
+  var i;
+  for (i in config) {
+    if (i == 'generator') {
+      for (var j in config.generator) {
+        snot.generator[j] = config.generator[j];
       }
+      continue;
     }
-  };
-
-  var sqrt = Math.sqrt;
-  var camera_euler = new THREE.Euler();
-  var target_quat = new THREE.Quaternion();
-  var rotate_90_quat = new THREE.Quaternion(- sqrt( 0.5 ), 0, 0, sqrt( 0.5 ))
-  var adjust_screen_quats = {
-    0: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0),
-    90: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - 90),
-    180: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - 180),
-    '-90': new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 90),
-  };
-
-  function update() {
-
-    snot.ry += snot.auto_rotation;
-
-    var ry = snot.dest_rx * Math.PI / 180 + Math.PI / 2;
-    var rx = - snot.dest_ry * Math.PI / 180 + Math.PI;
-    var rz = 0;
-
-    if (snot.gyro) {
-      ry = snot.controls.gyro_data.beta;
-      rx = snot.controls.gyro_data.alpha;
-      rz = - snot.controls.gyro_data.gamma;
-    }
-
-    camera.autoUpdateMatrix = false;
-
-    camera_euler.set(ry, rx, rz, 'YXZ'); // 'ZXY' for the device, but 'YXZ' for us
-
-    target_quat.setFromEuler(camera_euler); // orient the device
-    target_quat.multiply(rotate_90_quat); // camera looks out the back of the device, not the top
-                                          // - PI/2 around the x-axis
-    target_quat.multiply(adjust_screen_quats[snot.controls.screen_orientation]); // adjust for screen orientation
-
-    var new_quat = new THREE.Quaternion();
-    THREE.Quaternion.slerp(camera.quaternion, target_quat, new_quat, 1 - snot.smooth);
-    camera.quaternion.copy(new_quat);
-    camera.quaternion.normalize();
-
-    var euler = new THREE.Euler();
-    euler.order = 'YXZ';
-    euler.setFromQuaternion(camera.quaternion)
-    snot.rx = euler.x * 180 / Math.PI;
-    snot.ry = euler.y * 180 / Math.PI - 180;
-    snot.rz = euler.z * 180 / Math.PI;
-
-    camera.fov = snot.fov;
-    camera.updateProjectionMatrix();
-    renderer.render(scene, camera);
-
-    if (snot.debug) {
-      document.getElementById('logger').innerHTML = 'rx:' + parseInt(snot.rx) + ' ' +
-                        'ry:' + parseInt(snot.ry) + ' ' +
-                        'rz:' + parseInt(snot.rz);
-    }
+    snot[i] = config[i];
   }
-
-  function set_fov(fov) {
-    snot.fov = fov;
-    snot.fov = snot.fov > snot.max_fov ? snot.max_fov : snot.fov;
-    snot.fov = snot.fov < snot.min_fov ? snot.min_fov : snot.fov;
+  var smooth = snot.smooth;
+  snot.smooth = 0;
+  for (i in sprites) {
+    scene.remove(scene.getObjectByName(i));
   }
+  sprites = {};
 
-  function set_rx(rx) {
-    snot.dest_rx = rx;
+  var container = snot.container;
+  camera = new THREE.PerspectiveCamera(snot.fov, window.innerWidth / window.innerHeight, 1, snot.bg_size);
+  camera.target = new THREE.Vector3(0, 0, 0);
+  snot.camera = camera;
+
+  scene = new THREE.Scene();
+
+  if (config.callback) {
+    config.callback();
   }
+  load_bg_imgs(config.bg_imgs);
 
-  function set_ry(ry) {
-    snot.dest_ry = ry;
-  }
+  var SphereGeometry = new THREE.SphereGeometry(snot.bg_size * 2, 32, 32);
+  var SphereMaterial = new THREE.MeshBasicMaterial({side: THREE.DoubleSide});
+  var SphereMesh = new THREE.Mesh(SphereGeometry, SphereMaterial);
+  scene.add(SphereMesh);
+  suspects.push(SphereMesh);
 
-  function load_sprites(sps) {
-    for (var i in sps) {
-      var functionName = sps[i].generator;
-      var mesh = snot.generator[functionName](sps[i]);
+  load_sprites(config.sprites);
 
-      mesh.data = sps[i];
-      sprites[mesh.name] = true;
-      suspects.push(mesh);
-      scene.add(mesh);
+  renderer = new THREE.WebGLRenderer();
 
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  container.appendChild(renderer.domElement);
+
+  update();
+  snot.smooth = smooth;
+
+  snot.container.addEventListener('touchstart', controls.on_mouse_down, false);
+  snot.container.addEventListener('touchmove' , controls.on_mouse_move, false);
+  snot.container.addEventListener('touchend'  , controls.on_mouse_up  , false);
+
+  snot.container.addEventListener('mousedown' , controls.on_mouse_down , false);
+  snot.container.addEventListener('mousemove' , controls.on_mouse_move , false);
+  snot.container.addEventListener('mouseup'   , controls.on_mouse_up   , false);
+  snot.container.addEventListener('mousewheel', controls.on_mouse_wheel, false);
+  controls.init(snot);
+}
+
+snot.controls.mouse_click = function(x, y) {
+  var raycaster = new THREE.Raycaster();
+  var mouse = new THREE.Vector2();
+  mouse.set((x / window.innerWidth) * 2 - 1, - (y / window.innerHeight) * 2 + 1);
+  raycaster.setFromCamera(mouse, camera);
+  raycaster.far = snot.bg_size * 2;
+  var intersects = raycaster.intersectObjects(suspects);
+  if (intersects.length !== 0) {
+    var point = intersects[0].point;
+    if (intersects[0].object.data) {
+      snot.on_sprite_click(intersects[0].object.data);
+    } else {
+      var rotation = util.position_to_rotation(point.x, point.y, point.z);
+      snot.on_click(point, rotation);
     }
   }
+};
 
-  function run() {
-    snot._animateId = requestAnimationFrame(run);
-    if (!snot.pause_animation) {
-      update();
-    }
+var sqrt = Math.sqrt;
+var camera_euler = new THREE.Euler();
+var target_quat = new THREE.Quaternion();
+var rotate_90_quat = new THREE.Quaternion(- sqrt( 0.5 ), 0, 0, sqrt( 0.5 ));
+var adjust_screen_quats = {
+  0: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0),
+  90: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - 90),
+  180: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - 180),
+  '-90': new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 90),
+};
+
+function update() {
+
+  snot.ry += snot.auto_rotation;
+
+  var ry = snot.dest_rx * Math.PI / 180 + Math.PI / 2;
+  var rx = - snot.dest_ry * Math.PI / 180 + Math.PI;
+  var rz = 0;
+
+  if (snot.gyro) {
+    ry = snot.controls.gyro_data.beta;
+    rx = snot.controls.gyro_data.alpha;
+    rz = - snot.controls.gyro_data.gamma;
   }
 
-  util.merge_json(global.snot, {
-    set_fov: set_fov,
-    set_rx: set_rx,
-    set_ry: set_ry,
-    init: init,
-    run: run,
-    load_sprites: load_sprites
-  });
-}(window);
+  camera.autoUpdateMatrix = false;
+
+  camera_euler.set(ry, rx, rz, 'YXZ'); // 'ZXY' for the device, but 'YXZ' for us
+
+  target_quat.setFromEuler(camera_euler); // orient the device
+  target_quat.multiply(rotate_90_quat); // camera looks out the back of the device, not the top
+                                        // - PI/2 around the x-axis
+  target_quat.multiply(adjust_screen_quats[snot.controls.screen_orientation]); // adjust for screen orientation
+
+  var new_quat = new THREE.Quaternion();
+  THREE.Quaternion.slerp(camera.quaternion, target_quat, new_quat, 1 - snot.smooth);
+  camera.quaternion.copy(new_quat);
+  camera.quaternion.normalize();
+
+  var euler = new THREE.Euler();
+  euler.order = 'YXZ';
+  euler.setFromQuaternion(camera.quaternion);
+  snot.rx = euler.x * 180 / Math.PI;
+  snot.ry = euler.y * 180 / Math.PI - 180;
+  snot.rz = euler.z * 180 / Math.PI;
+
+  camera.fov = snot.fov;
+  camera.updateProjectionMatrix();
+  renderer.render(scene, camera);
+
+  if (snot.debug) {
+    document.getElementById('logger').innerHTML = 'rx:' + parseInt(snot.rx) + ' ' +
+                      'ry:' + parseInt(snot.ry) + ' ' +
+                      'rz:' + parseInt(snot.rz);
+  }
+}
+
+function set_fov(fov) {
+  snot.fov = fov;
+  snot.fov = snot.fov > snot.max_fov ? snot.max_fov : snot.fov;
+  snot.fov = snot.fov < snot.min_fov ? snot.min_fov : snot.fov;
+}
+
+function set_rx(rx) {
+  snot.dest_rx = rx;
+}
+
+function set_ry(ry) {
+  snot.dest_ry = ry;
+}
+
+function load_sprites(sps) {
+  for (var i in sps) {
+    var functionName = sps[i].generator;
+    var mesh = snot.generator[functionName](sps[i]);
+
+    mesh.data = sps[i];
+    sprites[mesh.name] = true;
+    suspects.push(mesh);
+    scene.add(mesh);
+
+  }
+}
+
+function run() {
+  snot._animateId = requestAnimationFrame(run);
+  if (!snot.pause_animation) {
+    update();
+  }
+}
+
+util.merge_json(snot, {
+  set_fov: set_fov,
+  set_rx: set_rx,
+  set_ry: set_ry,
+  init: init,
+  run: run,
+  load_sprites: load_sprites
+});
+
+module.exports = snot;

@@ -1,3 +1,10 @@
+var util = snot.util;
+var THREE = snot.THREE;
+
+document.getElementsByClassName('btn-gyro')[0].addEventListener('click', function() {
+  snot.gyro = !snot.gyro;
+});
+
 function text_generator(data) {
   var text = data.text;
   var size = data.size;
@@ -56,7 +63,7 @@ function spot_generator(spot) {
 
   var mesh = new THREE.Mesh( geometry, material );
 
-  var rotation = snot.util.position_to_rotation(spot.x, spot.z, spot.y);
+  var rotation = util.position_to_rotation(spot.x, spot.z, spot.y);
 
   rotation.ry = 270 - rotation.ry;
   rotation.ry = rotation.ry < 0 ? rotation.ry + 360 : rotation.ry;
@@ -83,7 +90,7 @@ function on_sprite_click(data) {
 }
 
 function on_click(point, rotation) {
-  snot.util.standardlization(point, 400);
+  util.standardlization(point, 400);
   snot.load_sprites([{
     generator: 'spot',
 

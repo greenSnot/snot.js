@@ -3,6 +3,10 @@ function on_sprite_click(data) {
   alert('on_sprite_click');
 }
 
+document.getElementsByClassName('btn-gyro')[0].addEventListener('click', function() {
+  snot.gyro = !snot.gyro;
+});
+
 function on_click(point, rotation) {
   snot.load_sprites([{
     generator: 'spot',

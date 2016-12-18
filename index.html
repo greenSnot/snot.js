@@ -8,7 +8,7 @@
     <link rel="stylesheet" type="text/css" href="build/css/snot.min.css">
   </head>
   <body>
-    <button class="btn-gyro" onClick="snot.gyro=!snot.gyro">gyro</button>
+    <button class="btn-gyro">gyro</button>
     <div id="snot-wrap">
       <div id="snot-container">
         <div id="snot-camera">
@@ -24,11 +24,11 @@
     <div id="logger"></div>
   </body>
   <script id="template-spot" type="text/html">
-    <div class="spot-<#=spotType#>">
-      <div class="spot-description"><#=text#></div>
-      <img class="spot-image" src="images/<#=spotType#>.png"/>
+    <div class="spot-{{spotType}}">
+      <div class="spot-description">{{text}}</div>
+      <img class="spot-image" src="images/{{spotType}}.png"/>
     </div>
   </script>
-  <script src="build/js/snot_css_renderer.min.js"></script>
+  <script src="./build/js/snot_css_renderer.min.js"></script>
 </html>
-<script src="examples/index.js"></script>
+<script src="./examples/index.js"></script>

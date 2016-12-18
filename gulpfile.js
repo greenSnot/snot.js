@@ -4,7 +4,10 @@
 let _ = require('lodash');
 let gulp = require('gulp');
 let yargs = require('yargs');
-var uglify = require('gulp-uglify');
+let uglify = require('gulp-uglify');
+let jshint = require('gulp-jshint');
+let minify = require('gulp-minify');
+let stylish = require('jshint-stylish');
 
 // Stream tools
 let combiner = require('stream-combiner2')
@@ -15,9 +18,12 @@ let rename = require('gulp-rename');
 let clean_css = require('gulp-clean-css');
 let concat = require('gulp-concat');
 let htmlmin = require('gulp-htmlmin')
-let sourcemaps = require('gulp-sourcemaps');
 let postcss = require('gulp-postcss');
 let cssnext = require('postcss-cssnext');
+let browserify = require('browserify');
+
+let source = require('vinyl-source-stream');
+let buffer = require('vinyl-buffer');
 
 let options = yargs
   .alias('w', 'watch')
@@ -39,62 +45,50 @@ function taskify_stream(stream) {
   return task;
 }
 
-let css_renderer_js_files = _.flatten([
-  './build/js/three_math.min.js',
-  './libs/artTemplate/dist/template-native.js',
-  './js/snot_utils.js',
-  './js/snot_css_renderer.js',
-  './js/snot_controls.js',
-]);
-
-let webgl_renderer_js_files = _.flatten([
-  './libs/three.js/build/three.min.js',
-  './libs/three.js/examples/js/renderers/Projector.js',
-  './js/snot_utils.js',
-  './js/snot_webgl_renderer.js',
-  './js/snot_controls.js',
-]);
-
-let both_renderer_js_files = _.flatten([
-  './libs/three.js/build/three.min.js',
-  './libs/three.js/examples/js/renderers/Projector.js',
-  './libs/artTemplate/dist/template-native.js',
-  './js/snot_utils.js',
-  './js/snot_css_renderer.js',
-  './js/snot_webgl_renderer.js',
-  './js/snot_controls.js',
-]);
-
-function concat_js() {
-  do_watch('concat_js');
-
-  function make_stream(js_files, output_name) {
-    let s = [];
-    s.push(gulp.src(js_files));
-    if (options.d) {
-      s.push(sourcemaps.init({loadMaps: true}));
-    } else {
-      s.push(uglify());
-    }
-    s.push(concat(output_name));
-
-    if (options.d) {
-      s.push(sourcemaps.write());
-    }
-
-    s.push(gulp.dest('./build/js'));
-    return taskify_stream(s);
+function browserify_file(file, dest_name, dest, standalone, external) {
+  let cfg = {
+    debug: options.debug,
+  };
+  if (standalone) {
+    cfg.standalone = standalone;
   }
+  return browserify(file, cfg)
+    .external(external || [])
+    .bundle()
+    .pipe(source(dest_name))
+    .pipe(buffer())
+    //.pipe(minify())
+    .pipe(uglify())
+    .pipe(gulp.dest(dest));
+}
 
-  return es.merge(make_stream(both_renderer_js_files, 'snot.min.js'),
-                  make_stream(css_renderer_js_files, 'snot_css_renderer.min.js'),
-                  make_stream(webgl_renderer_js_files, 'snot_webgl_renderer.min.js'));
+function hint() {
+  do_watch('hint');
+  return gulp.src(['./js/**/*.js'])
+    .pipe(jshint())
+    .pipe(jshint.reporter(stylish));
+}
+
+function css_renderer() {
+  do_watch('css_renderer');
+  return browserify_file('./js/snot_css_renderer.js', 'snot_css_renderer.min.js', './build/js', 'snot');
+}
+
+function webgl_renderer() {
+  do_watch('webgl_renderer');
+  return browserify_file('./js/snot_webgl_renderer.js', 'snot_webgl_renderer.min.js', './build/js', 'snot');
+}
+
+function both_renderer() {
 }
 
 let task_2_files = {
-  concat_js: ['./js/**/*.js'],
+  css_renderer: ['./js/**/*.js'],
+  hint: ['./js/**/*.js'],
+  webgl_renderer: ['./js/**/*.js'],
   css: ['./css/*.css'],
 };
+
 let is_watching = [];
 function do_watch(task_name) {
   if (options.watch && !_.includes(is_watching, task_name)) {
@@ -131,32 +125,10 @@ function css() {
   return make_css_stream(css_files, 'snot.css');
 }
 
-function three_math() {
-  let js_files = [
-    './js/three_math.js',
-    './libs/three.js/src/math/Vector3.js',
-    './libs/three.js/src/math/Matrix4.js',
-    './libs/three.js/src/math/Quaternion.js',
-    './libs/three.js/src/math/Euler.js',
-  ];
-  let s = [];
-  s.push(gulp.src(js_files));
-  s.push(uglify());
-  if (options.d) {
-    s.push(sourcemaps.init({loadMaps: true}));
-  }
-  s.push(concat('three_math.min.js'));
-
-  if (options.d) {
-    s.push(sourcemaps.write());
-  }
-
-  s.push(gulp.dest('./build/js'));
-  return taskify_stream(s);
-}
-
 gulp.task('css', css);
-gulp.task('three_math', three_math);
-gulp.task('concat_js', ['three_math'], concat_js);
+gulp.task('hint', hint);
+gulp.task('css_renderer', css_renderer);
+gulp.task('webgl_renderer', webgl_renderer);
+gulp.task('both_renderer', ['css_renderer', 'webgl_renderer'], both_renderer);
 
-gulp.task('default', ['css', 'concat_js']);
+gulp.task('default', ['hint', 'css', 'both_renderer']);
