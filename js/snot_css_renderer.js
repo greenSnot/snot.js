@@ -384,12 +384,12 @@ snot.controls.mouse_click = function(x, y) {
 
   var xyz2 = util.rotation_to_position(R, rx, 0);
 
-  var rr = distance3D(- tan(ry * arcFactor) * xyz2[2], - xyz2[1], xyz2[2], 0, 0, 0);
+  var rr = distance3D(- tan(ry * arcFactor) * xyz2.z, - xyz2.y, xyz2.z, 0, 0, 0);
   var ratio = R / rr;
 
-  var new_x = - tan(ry * PI / 180) * xyz2[2] * ratio;
-  var new_y = - xyz2[1] * ratio;
-  var new_z = xyz2[2] * ratio;
+  var new_x = - tan(ry * PI / 180) * xyz2.z * ratio;
+  var new_y = - xyz2.y * ratio;
+  var new_z = xyz2.z * ratio;
 
   var pos = v_set_from_matrix_position(m_multiply(
     m_make_rotation_axis({x: 0, y: 1, z: 0}, snot.ry * PI / 180),

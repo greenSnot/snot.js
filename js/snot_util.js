@@ -182,14 +182,11 @@ function load_js(file, callback) {
 }
 
 function rotation_to_position(z, rx, ry, rz) {
-  z = - z;
-  rx = - rx;
-
-  var x = bg_size / 2;
-  var y = bg_size / 2;
-
-  var transform = css_text_to_matrix('translate3d(' + x + 'px,' + y + 'px,0) rotateY(' + (0) + 'deg) rotateX(' + (0) + 'deg) rotateY(' + (ry ? - ry : 0) + 'deg) rotateX(' + (rx ? - rx : 0) + 'deg) rotateZ(' + (rz ? rz : 0) +'deg) translateZ(' + z + 'px)' );
-  return [ - transform[12] + bg_size / 2, transform[13] - bg_size / 2, - transform[14]];
+  return v_set_from_matrix_position(m_multiply(
+    m_make_rotation_axis({x: 1, y: 0, z: 0}, - rx * Math.PI / 180),
+    m_make_rotation_axis({x: 0, y: 1, z: 0}, - ry * Math.PI / 180),
+    new THREE.Matrix4().setPosition({x: 0, y: 0, z: z})
+  ));
 }
 
 function m_make_rotation_axis(point, rotation) {
