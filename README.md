@@ -13,22 +13,23 @@ HTML5/Webgl panorama viewer
 <head>
   <link rel="stylesheet" type="text/css" href="build/css/snot.min.css">
 </head>
-<div id="snot-pano">
-  <div id="container">
-    <div id="camera">
-      <img class="cube front">
-      <img class="cube left">
-      <img class="cube right">
-      <img class="cube back">
-      <img class="cube top">
-      <img class="cube bottom">
+<div id="snot-wrap">
+  <div id="snot-container">
+    <div id="snot-camera">
+      <img class="snot-bg front">
+      <img class="snot-bg left">
+      <img class="snot-bg right">
+      <img class="snot-bg back">
+      <img class="snot-bg top">
+      <img class="snot-bg bottom">
     </div>
   </div>
 </div>
 <script src="build/js/snot_css_renderer.min.js"></script>
 <script>
   snot.init({
-    bg_size:1248, // usually it is the width of background image
+    size: 1248, // usually it is the width of the background image
+    quality: 0.9, // between 0 to 1, higher quality needs more computation
     bg_imgs:[
       'http://front.jpg',
       'http://down.jpg',
@@ -37,7 +38,7 @@ HTML5/Webgl panorama viewer
       'http://top.jpg',
       'http://right.jpg'
     ],
-    bg_rotation: [0,0,0,0,0,0],
+    bg_rotation: [0, 0, 0, 0, 0, 0],
     fov: 90,
     max_fov: 110,
     min_fov: 60,
@@ -90,16 +91,16 @@ HTML5/Webgl panorama viewer
 
 ##Interaction
 ```
-function onClick(x, y, z, rx, ry) {
+function on_click(x, y, z, rx, ry) {
 }
 
-function onSpriteClick(data){
+function onSpriteClick(data) {
   console.log(data);
 }
 sti.init({
   //...
-  on_click: on_click, // when you clicking the empty space from backgrounds
-  on_sprite_click: on_sprite_click
+  on_click: on_click, // when you are clicking the backgrounds
+  sprite_on_click: sprite_on_click
 });
 ```
 
@@ -119,5 +120,36 @@ sti.init({
 * Android-QQbrowser-x5(微信浏览器）
 * Android-original-browser(webkit) 
 
-#To do list:
-* Compatibility
+###Options
+
+{
+  debug: false, // show rotation infomation
+  container: document.getElementById('snot-container'),
+  dom: document.getElementById('snot-wrap'),
+  quality: 1, // between 0 to 1, higher quality needs more computation
+  mouse_sensitivity: 0.3, // ratio of moving n pixels to change m degrees rotationX
+  auto_rotation: 0, //anticlockwise auto rotate * degrees per frame
+  frames: 0, // counter
+  bg_rotation: [0, 0, 0, 0, 0, 0], // front, down, left, back, top, right
+
+  pause_animation: false,
+
+  size: 1024,
+  clicks_depth: 1024 / 2.5,
+
+  generator: {},
+  gyro: false,
+  ry: 0,        // Rotate * degrees around y axis
+  rx: 0,        // Rotate * degrees around x axis
+  dest_rx: 0,   // Destination of rotationX
+  dest_ry: 0,   // Destination of rotationY
+  dest_rz: 0,   // Destination of rotationY
+
+  max_fov: 120,
+  min_fov: 60,
+  fov: 90,
+  smooth: 0.83, // between 0 to 1, from rigid to smooth
+  min_detect_distance: 20, // click nearest sprite
+  on_click: function() {}, // background on click
+  sprite_on_click: function() {},
+}

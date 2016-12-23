@@ -52,14 +52,19 @@ function browserify_file(file, dest_name, dest, standalone, external) {
   if (standalone) {
     cfg.standalone = standalone;
   }
-  return browserify(file, cfg)
+  let r = browserify(file, cfg)
     .external(external || [])
     .bundle()
     .pipe(source(dest_name))
-    .pipe(buffer())
+    .pipe(buffer());
     //.pipe(minify())
-    .pipe(uglify())
-    .pipe(gulp.dest(dest));
+
+  if (options.debug) {
+    return r.pipe(gulp.dest(dest));
+  } else {
+    return r.pipe(uglify())
+      .pipe(gulp.dest(dest));
+  }
 }
 
 function hint() {

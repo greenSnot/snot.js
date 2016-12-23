@@ -1,9 +1,5 @@
 var THREE = require('three');
-var bg_size;
 var util = {
-  init: function(size) {
-    bg_size = size;
-  },
   left_pos: left_pos,
   top_pos: top_pos,
   standardlization: standardlization,
@@ -29,6 +25,8 @@ var util = {
   m_make_rotation_from_quaternion: m_make_rotation_from_quaternion,
 
   merge_json: merge_json,
+
+  octree_collision_depth: 7,
   octree_collision: octree_collision,
 };
 module.exports = util;
@@ -36,8 +34,8 @@ module.exports = util;
 function top_pos(elem) {
   var curtop = 0;
   if (elem.offsetParent) {
-    do { 
-      curtop += elem.offsetTop; 
+    do {
+      curtop += elem.offsetTop;
       elem = elem.offsetParent;
     } while (elem);
   }
@@ -47,8 +45,8 @@ function top_pos(elem) {
 function left_pos(elem) {
   var curleft = 0;
   if (elem.offsetParent) {
-    do { 
-      curleft += elem.offsetLeft; 
+    do {
+      curleft += elem.offsetLeft;
       elem = elem.offsetParent;
     } while (elem);
   }
@@ -56,6 +54,7 @@ function left_pos(elem) {
 }
 
 function is_mobile() {
+  //TODO
   return get_window_width() < 500;
 }
 
@@ -235,6 +234,7 @@ function standardlization(point, r) {
   point.x *= r / distance_to_origin;
   point.y *= r / distance_to_origin;
   point.z *= r / distance_to_origin;
+  return point;
 }
 
 function is_point_inside(point, a, b) {
@@ -265,7 +265,7 @@ function octree_collision(a, b, points_a, points_b, res, depth) {
   if (!points_a.length || !points_b.length) {
     return false;
   }
-  if (depth > 7) {
+  if (depth > util.octree_collision_depth) {
     res.push({
       points_a: points_a,
       points_b: points_b,

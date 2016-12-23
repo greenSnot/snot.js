@@ -3,11 +3,14 @@ var util = require('./snot_util.js');
 var controls = require('./snot_controls.js');
 var PI = Math.PI;
 var snot = {
+  version: 1.0,
+  renderer: 'webgl',
   camera_look_at: {
     x: 0,
     y: 0,
     z: 1,
   },
+  quality: 1,
 
   util: util,
   THREE: THREE,
@@ -32,7 +35,8 @@ var snot = {
   camera   : document.getElementById('snot-camera'),
   container: document.getElementById('snot-container'),
 
-  bg_size: 1024,
+  size: 1024,
+  clicks_depth: 1024 / 2.5,
 
   gyro: false,
 
@@ -77,7 +81,7 @@ var is_mouse_down = false;
 var img_index_convert = [3, 0, 4, 1, 5, 2];
 function load_bg_imgs(imgs) {
   if (imgs.length == 1) {
-    var SphereGeometry = new THREE.SphereGeometry(snot.bg_size, 32, 32);
+    var SphereGeometry = new THREE.SphereGeometry(snot.size, 32, 32);
     SphereGeometry.scale(- 1, 1, 1);
     var SphereMaterial = new THREE.MeshBasicMaterial({
       map: new THREE.TextureLoader().load(imgs[0])
@@ -85,7 +89,7 @@ function load_bg_imgs(imgs) {
     var SphereMesh = new THREE.Mesh(SphereGeometry, SphereMaterial);
     scene.add(SphereMesh);
   } else if (img.length == 6) {
-    var size = snot.bg_size;
+    var size = snot.size;
     var precision = 1;
     var geometry = new THREE.BoxGeometry(size, size, size, precision, precision, precision);
     for (var index = 0;index < 6; ++index) {
@@ -121,7 +125,7 @@ function init(config) {
   sprites = {};
 
   var container = snot.container;
-  camera = new THREE.PerspectiveCamera(snot.fov, window.innerWidth / window.innerHeight, 1, snot.bg_size);
+  camera = new THREE.PerspectiveCamera(snot.fov, window.innerWidth / window.innerHeight, 1, snot.size);
   camera.target = new THREE.Vector3(0, 0, 0);
   snot.camera = camera;
 
@@ -132,7 +136,7 @@ function init(config) {
   }
   load_bg_imgs(config.bg_imgs);
 
-  var SphereGeometry = new THREE.SphereGeometry(snot.bg_size * 2, 32, 32);
+  var SphereGeometry = new THREE.SphereGeometry(snot.size * 2, 32, 32);
   var SphereMaterial = new THREE.MeshBasicMaterial({side: THREE.DoubleSide});
   var SphereMesh = new THREE.Mesh(SphereGeometry, SphereMaterial);
   scene.add(SphereMesh);
@@ -165,13 +169,14 @@ snot.controls.mouse_click = function(x, y) {
   var mouse = new THREE.Vector2();
   mouse.set((x / window.innerWidth) * 2 - 1, - (y / window.innerHeight) * 2 + 1);
   raycaster.setFromCamera(mouse, camera);
-  raycaster.far = snot.bg_size * 2;
+  raycaster.far = snot.size * 2;
   var intersects = raycaster.intersectObjects(suspects);
   if (intersects.length !== 0) {
     var point = intersects[0].point;
     if (intersects[0].object.data) {
-      snot.on_sprite_click(intersects[0].object.data);
+      snot.sprite_on_click(intersects[0].object.data);
     } else {
+      point = util.standardlization(point, snot.clicks_depth);
       var rotation = util.position_to_rotation(point.x, point.y, point.z);
       snot.on_click(point, rotation);
     }

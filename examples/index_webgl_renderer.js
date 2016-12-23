@@ -84,18 +84,17 @@ function spot_generator(spot) {
   return mesh;
 }
 
-function on_sprite_click(data) {
+function sprite_on_click(data) {
   console.log(data);
-  alert('on_sprite_click');
+  alert('sprite_on_click');
 }
 
 function on_click(point, rotation) {
-  util.standardlization(point, 400);
   snot.load_sprites([{
     generator: 'spot',
 
     spotType: 'right',
-    id: 'spot-' + 123,
+    id: 'spot-' + Math.random(),
     text: 'haha',
     x: point.x,
     y: point.y,
@@ -185,7 +184,8 @@ var sprites = {
 
 snot.init({
   debug: true,
-  bg_size: 1248,
+  size: 1248,
+  clicks_depth: 1248 / 2.5,
   //bg_imgs: [
   //  'images/test.png',
   //  'images/test.png',
@@ -210,7 +210,7 @@ snot.init({
   ry: 0,
   min_detect_distance: 20,
   on_click: on_click,
-  on_sprite_click: on_sprite_click,
+  sprite_on_click: sprite_on_click,
   sprites: sprites
 });
 

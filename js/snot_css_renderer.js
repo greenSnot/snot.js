@@ -14,6 +14,8 @@ var floor = Math.floor;
 var sqrt = Math.sqrt;
 
 var snot = {
+  renderer: 'css',
+  version: 1.0,
   debug: false,
   container: document.getElementById('snot-container'),
   dom: document.getElementById('snot-wrap'),
@@ -21,6 +23,7 @@ var snot = {
   util: util,
   THREE: THREE,
 
+  quality: 1, // between 0 to 1, higher quality needs more computation
   camera_look_at: {
     x: 0,
     y: 0,
@@ -35,30 +38,30 @@ var snot = {
     },
   },
   mouse_sensitivity: 0.3,
-  auto_rotation: 0,
-  frames: 0,
-  bg_rotation: [0, 0, 0, 0, 0, 0],
+  auto_rotation: 0, //anticlockwise auto rotate * degrees per frame
+  frames: 0, // counter
+  bg_rotation: [0, 0, 0, 0, 0, 0], // front, down, left, back, top, right
 
   pause_animation: false,
 
-
-  bg_size: 1024,
+  size: 1024,
+  clicks_depth: 1024 / 2.5,
 
   generator: {},
   gyro: false,
-  ry: 0,        // Rotate * degree around y axis
-  rx: 0,        // Rotate * degree around x axis
-  dest_rx: 0,
-  dest_ry: 0,
-  dest_rz: 0,
+  ry: 0,        // Rotate * degrees around y axis
+  rx: 0,        // Rotate * degrees around x axis
+  dest_rx: 0,   // Destination of rotationX
+  dest_ry: 0,   // Destination of rotationY
+  dest_rz: 0,   // Destination of rotationY
 
   max_fov: 120, // Max field of view (degree)
-  min_fov: 60,   // Min field of view (degree)
+  min_fov: 60,  // Min field of view (degree)
   fov: 90,      // Default field of view
-  smooth: 0.83,
-  min_detect_distance: 20,
-  on_click: function() {},
-  on_sprite_click: function() {},
+  smooth: 0.83, // between 0 to 1, from rigid to smooth
+  min_detect_distance: 20, // click nearest sprite
+  on_click: function() {}, // background on click
+  sprite_on_click: function() {},
 };
 
 var camera_dom = document.getElementById('snot-camera');
@@ -66,11 +69,6 @@ var prev_gyro;
 
 var camera_base_transform;
 var previous_quat = new THREE.Quaternion();
-
-function _pointStandardlization(x, y, z) {
-  var ratio = 200 / distance3D(x, y, z, 0, 0, 0);
-  return [x * ratio, y * ratio, z * ratio];
-}
 
 var m_make_rotation_axis = util.m_make_rotation_axis;
 var m_multiply = util.m_multiply;
@@ -108,7 +106,13 @@ var init = function(config) {
     }
     snot[i] = config[i];
   }
-  util.init(snot.bg_size);
+
+  snot._size = snot.size * snot.quality; // actual size
+
+  var sprite_wrap_style_dom = document.createElement('style');
+  sprite_wrap_style_dom.innerHTML = '.sprite-wrap{-webkit-transform: translateY(-50%) translateX(-50%) scale(' + snot.quality + ');}';
+  document.getElementsByTagName('head')[0].appendChild(sprite_wrap_style_dom);
+
   prev_gyro = snot.gyro;
 
   snot.dest_rx = snot.rx;
@@ -132,7 +136,7 @@ var init = function(config) {
   // rotateY rotate around Y axis
   // translateX translate the Camera to center
   // translateY
-  camera_base_transform = 'translateX(' + epsilon(- (snot.bg_size - snot.width) / 2) + 'px) translateY(' + epsilon(- (snot.bg_size - snot.height) / 2) + 'px)';
+  camera_base_transform = 'translateX(' + epsilon(- (snot._size - snot.width) / 2) + 'px) translateY(' + epsilon(- (snot._size - snot.height) / 2) + 'px)';
   camera_dom.style['-webkit-transform'] = 'translateZ(-' + snot.perspective + 'px) rotateY(' + epsilon(snot.rx) + 'deg) rotateX(' + epsilon(snot.ry) + 'deg)' + camera_base_transform;
 
   set_fov(snot.fov);
@@ -165,12 +169,12 @@ var init = function(config) {
 
 function load_bg_imgs(bg_imgs, bg_rotation) {
   var bg_config = {
-    front : 'rotateY(90deg)' + '                rotateZ(' + bg_rotation[0] + 'deg)  translateZ(-' + (snot.bg_size / 2) + 'px)',
-    bottom: 'rotateY(90deg)' + 'rotateX(90deg)  rotateZ(' + bg_rotation[1] + 'deg)  translateZ(-' + (snot.bg_size / 2) + 'px) rotateZ(90deg)',
-    left  : 'rotateY(90deg)' + 'rotateY(90deg)  rotateZ(' + bg_rotation[2] + 'deg)  translateZ(-' + (snot.bg_size / 2) + 'px)',
-    back  : 'rotateY(90deg)' + 'rotateY(180deg) rotateZ(' + bg_rotation[3] + 'deg)  translateZ(-' + (snot.bg_size / 2) + 'px)',
-    top   : 'rotateY(90deg)' + 'rotateX(-90deg) rotateZ(' + bg_rotation[4] + 'deg)  translateZ(-' + (snot.bg_size / 2) + 'px) rotateZ(-90deg)',
-    right : 'rotateY(90deg)' + 'rotateY(-90deg) rotateZ(' + bg_rotation[5] + 'deg)  translateZ(-' + (snot.bg_size / 2) + 'px)'
+    front : 'rotateY(90deg)' + '                rotateZ(' + bg_rotation[0] + 'deg)  translateZ(-' + (snot._size / 2) + 'px)',
+    bottom: 'rotateY(90deg)' + 'rotateX(90deg)  rotateZ(' + bg_rotation[1] + 'deg)  translateZ(-' + (snot._size / 2) + 'px) rotateZ(90deg)',
+    left  : 'rotateY(90deg)' + 'rotateY(90deg)  rotateZ(' + bg_rotation[2] + 'deg)  translateZ(-' + (snot._size / 2) + 'px)',
+    back  : 'rotateY(90deg)' + 'rotateY(180deg) rotateZ(' + bg_rotation[3] + 'deg)  translateZ(-' + (snot._size / 2) + 'px)',
+    top   : 'rotateY(90deg)' + 'rotateX(-90deg) rotateZ(' + bg_rotation[4] + 'deg)  translateZ(-' + (snot._size / 2) + 'px) rotateZ(-90deg)',
+    right : 'rotateY(90deg)' + 'rotateY(-90deg) rotateZ(' + bg_rotation[5] + 'deg)  translateZ(-' + (snot._size / 2) + 'px)'
   };
 
   var bg_dom;
@@ -178,8 +182,8 @@ function load_bg_imgs(bg_imgs, bg_rotation) {
   for (var i in bg_config) {
     bg_dom = document.getElementsByClassName('snot-bg ' + i)[0];
     bg_dom.style['-webkit-transform'] = bg_config[i];
-    bg_dom.style.width = snot.bg_size + 2 + 'px';        // 2 more pixels for overlapping gaps ( chrome's bug )
-    bg_dom.style.height = snot.bg_size + 2 + 'px';       // 2 more pixels for overlapping gaps ( chrome's bug )
+    bg_dom.style.width = snot._size + 2 + 'px';        // 2 more pixels for overlapping gaps ( chrome's bug )
+    bg_dom.style.height = snot._size + 2 + 'px';       // 2 more pixels for overlapping gaps ( chrome's bug )
 
     bg_dom.setAttribute('src', bg_imgs[count]);
     bg_dom.setAttribute('data-index', count);
@@ -189,14 +193,10 @@ function load_bg_imgs(bg_imgs, bg_rotation) {
 
 var load_sprites = function(sprites) {
   for (var i in sprites) {
-    var t = sprites[i];
-    if (t.standardlization) {
-      var standard = _pointStandardlization(t.x,t.y,t.z);
-      t.x=standard[0];
-      t.y=standard[1];
-      t.z=standard[2];
+    if (!snot.sprites[sprites[i].id]) {
+      snot.sprites[sprites[i].id] = sprites[i];
     }
-
+    var t = sprites[i];
     var temp_wrapper = document.createElement('div');
     var inner_html = document.getElementById(snot.generator[t.generator]).innerHTML;
     temp_wrapper.innerHTML = template.render(inner_html)(t);
@@ -208,9 +208,9 @@ var load_sprites = function(sprites) {
 
 function add_sprite_by_position(element, p) {
 
-  var x = - p.x;
-  var z = - p.z;
-  var y = - p.y;
+  var x = - p.x * snot.quality;
+  var z = - p.z * snot.quality;
+  var y = - p.y * snot.quality;
 
   var spriteContainer = document.createElement('div');
   spriteContainer.style.display = 'inline-block';
@@ -227,10 +227,10 @@ function add_sprite_by_position(element, p) {
   arc = arc * 180 / PI;
 
   var r = distance3D(x, y, z, 0, 0, 0);
-  x += snot.bg_size / 2;
-  y += snot.bg_size / 2;
+  x += snot._size / 2;
+  y += snot._size / 2;
 
-  spriteContainer.style['-webkit-transform'] = 'translate3d(' + epsilon(x) + 'px,' + epsilon(y) + 'px,' + epsilon(z) + 'px) rotateY(' + epsilon(arc) + 'deg) rotateX(' + epsilon(- (y - snot.bg_size / 2) / r * 90)+'deg) rotateY(180deg)';
+  spriteContainer.style['-webkit-transform'] = 'translate3d(' + epsilon(x) + 'px,' + epsilon(y) + 'px,' + epsilon(z) + 'px) rotateY(' + epsilon(arc) + 'deg) rotateX(' + epsilon(- (y - snot._size / 2) / r * 90)+'deg) rotateY(180deg)';
 
   var spriteWrap = document.createElement('div');
   spriteWrap.className='sprite-wrap';
@@ -248,23 +248,23 @@ var update_sprite_visibility = function(id) {
 };
 
 var update_sprite_position = function(id) {
-  var x = snot.sprites[id].x;
-  var y = snot.sprites[id].y;
-  var z = snot.sprites[id].z;
-  z=-z;
-  y=-y;
+  var x = snot.sprites[id].x * snot.quality;
+  var y = snot.sprites[id].y * snot.quality;
+  var z = snot.sprites[id].z * snot.quality;
+  z = -z;
+  y = -y;
   var arc = x === 0 && z === 0 ? 0 : acos( z / pow(x * x + z * z, 0.5));
 
   arc = x < 0 ? 2 * PI - arc : arc;
   arc = arc * 180/ PI;
 
   var r = distance3D(x, y, z, 0, 0, 0);
-  x += snot.bg_size / 2;
-  y += snot.bg_size / 2;
+  x += snot._size / 2;
+  y += snot._size / 2;
 
   var spriteContainer = document.getElementById(id);
 
-  spriteContainer.style['-webkit-transform'] = 'translate3d(' + epsilon(x) + 'px,' + epsilon(y) + 'px,' + epsilon(z) + 'px) rotateY(' + epsilon(arc) + 'deg) rotateX(' + epsilon(- (y - snot.bg_size / 2) / r * 90) + 'deg) rotateY(180deg)';
+  spriteContainer.style['-webkit-transform'] = 'translate3d(' + epsilon(x) + 'px,' + epsilon(y) + 'px,' + epsilon(z) + 'px) rotateY(' + epsilon(arc) + 'deg) rotateX(' + epsilon(- (y - snot._size / 2) / r * 90) + 'deg) rotateY(180deg)';
 };
 
 function run() {
@@ -363,7 +363,7 @@ function update() {
 snot.controls.mouse_click = function(x, y) {
   var R = 100;
   var fov = snot.fov;
-  var bg_size = snot.bg_size;
+  var size = snot._size;
   var arcFactor = Math.PI / 180;
   var rz = snot.rz * arcFactor;
   var width = snot.width;
@@ -371,10 +371,10 @@ snot.controls.mouse_click = function(x, y) {
 
   var ry = (x / width - 0.5) * fov;
   var rx = (y / height-0.5) * fov * height / width;
-  var r = cos(fov / 2 * arcFactor) * bg_size;
+  var r = cos(fov / 2 * arcFactor) * size;
   var ratiox = (x - width / 2) / width * 2;
   var ratioy = (y - height / 2) / width * 2;
-  var P = sin(fov / 2 * arcFactor) * bg_size;
+  var P = sin(fov / 2 * arcFactor) * size;
 
   ry = atan(ratiox * P / r);
   rx = atan(ratioy * P / r);
@@ -391,43 +391,42 @@ snot.controls.mouse_click = function(x, y) {
   var new_y = - xyz2.y * ratio;
   var new_z = xyz2.z * ratio;
 
-  var pos = v_set_from_matrix_position(m_multiply(
+  var point = v_set_from_matrix_position(m_multiply(
     m_make_rotation_axis({x: 0, y: 1, z: 0}, snot.ry * PI / 180),
     m_make_rotation_axis({x: 0, y: 0, z: 1}, - snot.rz * PI / 180),
     m_make_rotation_axis({x: 1, y: 0, z: 0}, - snot.rx * PI / 180),
     m_set_position({x: new_x, y: new_y, z: new_z})
   ));
 
-  ax = pos.x;
-  ay = pos.y;
-  az = pos.z;
+  point = util.standardlization(point, snot.clicks_depth * snot.quality);
 
   var min_offset = 0.4;
-  var min_distance = snot.min_detect_distance;
+  var min_distance = snot.min_detect_distance * snot.quality;
   var nearest;
 
   var spriteContainers = document.getElementsByClassName('sprite-container');
   for (var i = 0 ;i < spriteContainers.length; ++i) {
     var self = spriteContainers[i];
     var matrix = util.css_text_to_matrix(self.style.webkitTransform);
-    var rate_ = 100 / distance3D(0, 0, 0, snot.bg_size / 2 - matrix[12], matrix[13] - snot.bg_size / 2, - matrix[14]);
+    var candidate_point = util.standardlization({
+      x: snot._size / 2 - matrix[12],
+      y: matrix[13] - snot._size / 2,
+      z: - matrix[14],
+    }, snot.clicks_depth * snot.quality);
 
-    var distance = distance3D(ax, - ay, az, (snot.bg_size / 2 - matrix[12]) * rate_, rate_ * (matrix[13] - snot.bg_size / 2), rate_ * ( - matrix[14]));
+    var distance = distance3D(point.x, - point.y, point.z, candidate_point.x, candidate_point.y, candidate_point.z);
     if (distance < min_distance) {
       min_distance = distance;
       nearest = self.children[0];
     }
   }
 
-  var rotation = util.position_to_rotation(ax, az, ay);
+  var rotation = util.position_to_rotation(point.x, point.z, point.y);
   if (nearest) {
-    snot.on_sprite_click(snot.sprites[nearest.parentElement.id], nearest);
+    snot.sprite_on_click(snot.sprites[nearest.parentElement.id], nearest);
   } else {
-    snot.on_click({
-      x: ax,
-      y: ay,
-      z: az,
-    }, {
+    point = util.standardlization(point, snot.clicks_depth);
+    snot.on_click(point, {
       rx: rotation[0],
       ry: rotation[1]
     });

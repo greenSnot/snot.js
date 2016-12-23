@@ -1,6 +1,6 @@
-function on_sprite_click(data) {
+function sprite_on_click(data) {
   console.log(data);
-  alert('on_sprite_click');
+  alert('sprite_on_click');
 }
 
 document.getElementsByClassName('btn-gyro')[0].addEventListener('click', function() {
@@ -10,10 +10,10 @@ document.getElementsByClassName('btn-gyro')[0].addEventListener('click', functio
 function on_click(point, rotation) {
   snot.load_sprites([{
     generator: 'spot',
-    id: 'spot-' + 123,
-    x: point.x * 4,
-    y: point.y * 4,
-    z: point.z * 4,
+    id: 'spot-' + Math.random(),
+    x: point.x,
+    y: point.y,
+    z: point.z,
 
     text: 'haha',
     spotType: 'right',
@@ -104,7 +104,9 @@ var sprites = {
 
 snot.init({
   debug: true,
-  bg_size: 1248,
+  size: 1248,
+  quality: 0.2,
+  auto_rotation: 0.1,
   bg_imgs: [
     'images/test.png',
     'images/test.png',
@@ -119,7 +121,7 @@ snot.init({
   rx: 0,
   ry: 0,
   on_click: on_click,
-  on_sprite_click: on_sprite_click,
+  sprite_on_click: sprite_on_click,
   sprites: sprites
 });
 

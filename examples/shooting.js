@@ -2,22 +2,6 @@ var util = snot.util;
 document.getElementsByClassName('btn-gyro')[0].addEventListener('click', function() {
   snot.gyro = !snot.gyro;
 });
-function on_sprite_click(data){
-  console.log(data);
-  alert('on_sprite_click');
-}
-function on_click(point, rotation) {
-  snot.load_sprites([{
-    generator: 'spot',
-    id: 'spot-' + 123,
-    x: point.x * 4,
-    y: point.y * 4,
-    z: point.z * 4,
-
-    text: 'haha',
-    spotType: 'right',
-  }]);
-}
 
 var sprites = {
 };
@@ -47,9 +31,11 @@ for (var i = 0 ;i < enemies_pool_size; ++i) {
   enemies_running.push(id);
 }
 
+var quality = 0.3;
+
 var bullets_pool = [];
 var bullets_running = [];
-var bullet_shooting_range = 400;
+var bullet_shooting_range = 400 ;
 var bullet_pool_size = 100;
 var max_bullets = 35;
 for (var i = 0 ;i < bullet_pool_size; ++i) {
@@ -73,7 +59,8 @@ for (var i = 0 ;i < bullet_pool_size; ++i) {
 }
 
 snot.init({
-  bg_size:1248,
+  size: 1248,
+  quality: quality,
   bg_imgs:[
     'images/test.png',
     'images/test.png',
@@ -96,8 +83,6 @@ snot.init({
   rx: 0,
   ry: 0,
   min_detect_distance: 20,
-  on_click: on_click,
-  on_sprite_click: on_sprite_click,
   sprites: sprites
 });
 
@@ -188,13 +173,13 @@ function update() {
 
   var collision = [];
   util.octree_collision({
-    x: snot.bg_size * 1.5,
-    y: snot.bg_size * 1.5,
-    z: snot.bg_size * 1.5,
+    x: snot.size * 1.5,
+    y: snot.size * 1.5,
+    z: snot.size * 1.5,
   }, {
-    x: - snot.bg_size * 1.5,
-    y: - snot.bg_size * 1.5,
-    z: - snot.bg_size * 1.5,
+    x: - snot.size * 1.5,
+    y: - snot.size * 1.5,
+    z: - snot.size * 1.5,
   }, points_a, points_b, collision);
   if (collision.length) {
     for (var k in collision) {
