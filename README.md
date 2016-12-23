@@ -3,7 +3,9 @@ HTML5/Webgl panorama viewer
 
 # Examples
 [Street view](http://greensnot.github.io/snot.js/)
+
 [Shooting game](http://greensnot.github.io/snot.js/shooting.html)
+
 [Music wall](http://mclassical.org)
 
 #Usage
@@ -121,7 +123,7 @@ sti.init({
 * Android-original-browser(webkit) 
 
 ###Options
-
+```
 {
   debug: false, // show rotation infomation
   container: document.getElementById('snot-container'),
@@ -153,3 +155,4 @@ sti.init({
   on_click: function() {}, // background on click
   sprite_on_click: function() {},
 }
+```
