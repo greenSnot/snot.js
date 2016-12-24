@@ -48,7 +48,9 @@ var touches = {
 };
 
 var mouse_move = function(event) {
-  event.preventDefault();
+  if (event.cancelable) {
+    event.preventDefault();
+  }
   event.stopPropagation();
 
   var x = Math.floor(event.clientX >= 0 ? event.clientX : event.touches[0].pageX);
@@ -82,6 +84,16 @@ var mouse_move = function(event) {
     return false;
   }
 
+  if (snot.raycaster_on_touch_move && snot.on_touch_move) {
+    var mouse = new THREE.Vector2();
+    mouse.set((x / snot.width) * 2 - 1, - (y / snot.height) * 2 + 1);
+    snot.raycaster.setFromCamera(mouse, snot.camera);
+    var intersects = snot.raycaster.intersectObjects(snot.suspects_for_raycaster);
+    var point = util.standardlization(intersects[0].point, snot.clicks_depth);
+    snot.on_touch_move(event, point);
+    return;
+  }
+
   snot.dest_ry = snot.dest_ry + (touches.fx - x) * snot.mouse_sensitivity;
   snot.dest_rx = snot.dest_rx - (touches.fy - y) * snot.mouse_sensitivity;
 
@@ -94,7 +106,9 @@ var mouse_move = function(event) {
 };
 
 var mouse_down = function (event) {
-  event.preventDefault();
+  if (event.cancelable) {
+    event.preventDefault();
+  }
   event.stopPropagation();
 
   var x = floor(event.clientX >= 0 ? event.clientX : event.touches[0].clientX);
@@ -119,7 +133,9 @@ var mouse_down = function (event) {
 };
 
 var mouse_wheel = function (event) {
-  event.preventDefault();
+  if (event.cancelable) {
+    event.preventDefault();
+  }
   event.stopPropagation();
 
   var offset = event.deltaY;
@@ -128,7 +144,9 @@ var mouse_wheel = function (event) {
 };
 
 var mouse_up = function(event) {
-  event.preventDefault();
+  if (event.cancelable) {
+    event.preventDefault();
+  }
   event.stopPropagation();
 
   var x = floor(event.clientX >= 0 ? event.clientX : event.changedTouches[0].pageX);

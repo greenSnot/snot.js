@@ -32,7 +32,7 @@ var snot = {
   generator: {},
 
   dom      : document.getElementById('snot-wrap'),
-  camera   : document.getElementById('snot-camera'),
+  camera   : undefined,
   container: document.getElementById('snot-container'),
 
   size: 1024,
@@ -40,40 +40,38 @@ var snot = {
 
   gyro: false,
 
-  smooth: 0.83,
   quaternion: {},
 
+  ry: 0,        // Rotate * degrees around y axis
+  rx: 0,        // Rotate * degrees around x axis
   rz: 0,
-  ry: 0,       // Rotate * degree around y axis
-  rx: 0,       // Rotate * degree around x axis
-
-  dest_rx: 0,
-  dest_ry: 0,
-  dest_rz: 0,
+  dest_rx: 0,   // Destination of rotationX
+  dest_ry: 0,   // Destination of rotationY
+  dest_rz: 0,   // Destination of rotationY
 
   max_fov: 120, // Max field of view (degree)
   min_fov: 60,  // Min field of view (degree)
-  fov: 90,     // Default field of view
+  fov: 90,      // Default field of view
+  smooth: 0.83, // between 0 to 1, from rigid to smooth
+  on_click: function() {}, // background on click
+  on_touch_move: function() {},
+  sprite_on_click: function() {},
+
+  suspects_for_raycaster: [],
+  raycaster_on_touch_move: false,
 };
 
 var epsilon = util.epsilon;
 var distance3D = util.distance3D;
 var distance2D = util.distance2D;
 
-var camera;
 var scene;
 var renderer;
+var screenshot_renderer;
 var bg_materials = [];
-var suspects = [];
 var sprites = {};
 var _overdraw = 1;
 THREE.ImageUtils.crossOrigin = '*';
-
-var mouse_down_x;
-var mouse_down_rx;
-var mouse_down_ry;
-var mouse_down_y;
-var is_mouse_down = false;
 
 //0     1    2    3    4   5
 //front down left back top right
@@ -118,6 +116,8 @@ function init(config) {
     snot[i] = config[i];
   }
   var smooth = snot.smooth;
+  snot.width = snot.dom.offsetWidth;
+  snot.height = snot.dom.offsetHeight;
   snot.smooth = 0;
   for (i in sprites) {
     scene.remove(scene.getObjectByName(i));
@@ -125,9 +125,8 @@ function init(config) {
   sprites = {};
 
   var container = snot.container;
-  camera = new THREE.PerspectiveCamera(snot.fov, window.innerWidth / window.innerHeight, 1, snot.size);
-  camera.target = new THREE.Vector3(0, 0, 0);
-  snot.camera = camera;
+  snot.camera = new THREE.PerspectiveCamera(snot.fov, window.innerWidth / window.innerHeight, 1, snot.size);
+  snot.camera.target = new THREE.Vector3(0, 0, 0);
 
   scene = new THREE.Scene();
 
@@ -140,14 +139,20 @@ function init(config) {
   var SphereMaterial = new THREE.MeshBasicMaterial({side: THREE.DoubleSide});
   var SphereMesh = new THREE.Mesh(SphereGeometry, SphereMaterial);
   scene.add(SphereMesh);
-  suspects.push(SphereMesh);
+  snot.suspects_for_raycaster.push(SphereMesh);
 
   load_sprites(config.sprites);
 
+  snot.raycaster = new THREE.Raycaster();
+  snot.raycaster.far = snot.size * 2;
+
   renderer = new THREE.WebGLRenderer();
+  screenshot_renderer = new THREE.WebGLRenderer();
 
   renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(snot.width, snot.height);
+  screenshot_renderer.setPixelRatio(1);
+  screenshot_renderer.setSize(snot.size, snot.size);
   container.appendChild(renderer.domElement);
 
   update();
@@ -165,12 +170,10 @@ function init(config) {
 }
 
 snot.controls.mouse_click = function(x, y) {
-  var raycaster = new THREE.Raycaster();
   var mouse = new THREE.Vector2();
-  mouse.set((x / window.innerWidth) * 2 - 1, - (y / window.innerHeight) * 2 + 1);
-  raycaster.setFromCamera(mouse, camera);
-  raycaster.far = snot.size * 2;
-  var intersects = raycaster.intersectObjects(suspects);
+  mouse.set((x / snot.width) * 2 - 1, - (y / snot.height) * 2 + 1);
+  snot.raycaster.setFromCamera(mouse, snot.camera);
+  var intersects = snot.raycaster.intersectObjects(snot.suspects_for_raycaster);
   if (intersects.length !== 0) {
     var point = intersects[0].point;
     if (intersects[0].object.data) {
@@ -208,7 +211,7 @@ function update() {
     rz = - snot.controls.gyro_data.gamma;
   }
 
-  camera.autoUpdateMatrix = false;
+  snot.camera.autoUpdateMatrix = false;
 
   camera_euler.set(ry, rx, rz, 'YXZ'); // 'ZXY' for the device, but 'YXZ' for us
 
@@ -218,20 +221,20 @@ function update() {
   target_quat.multiply(adjust_screen_quats[snot.controls.screen_orientation]); // adjust for screen orientation
 
   var new_quat = new THREE.Quaternion();
-  THREE.Quaternion.slerp(camera.quaternion, target_quat, new_quat, 1 - snot.smooth);
-  camera.quaternion.copy(new_quat);
-  camera.quaternion.normalize();
+  THREE.Quaternion.slerp(snot.camera.quaternion, target_quat, new_quat, 1 - snot.smooth);
+  snot.camera.quaternion.copy(new_quat);
+  snot.camera.quaternion.normalize();
 
   var euler = new THREE.Euler();
   euler.order = 'YXZ';
-  euler.setFromQuaternion(camera.quaternion);
+  euler.setFromQuaternion(snot.camera.quaternion);
   snot.rx = euler.x * 180 / Math.PI;
   snot.ry = euler.y * 180 / Math.PI - 180;
   snot.rz = euler.z * 180 / Math.PI;
 
-  camera.fov = snot.fov;
-  camera.updateProjectionMatrix();
-  renderer.render(scene, camera);
+  snot.camera.fov = snot.fov;
+  snot.camera.updateProjectionMatrix();
+  renderer.render(scene, snot.camera);
 
   if (snot.debug) {
     document.getElementById('logger').innerHTML = 'rx:' + parseInt(snot.rx) + ' ' +
@@ -261,7 +264,7 @@ function load_sprites(sps) {
 
     mesh.data = sps[i];
     sprites[mesh.name] = true;
-    suspects.push(mesh);
+    snot.suspects_for_raycaster.push(mesh);
     scene.add(mesh);
 
   }
@@ -274,13 +277,34 @@ function run() {
   }
 }
 
+function screenshot() {
+  var camera = new THREE.PerspectiveCamera(90, 1, 1, snot.size);
+  camera.target = new THREE.Vector3(0, 0, 0);
+  var look_at = [
+    [0, 0, 1],
+    [0, -1, 0],
+    [1, 0, 0],
+    [0, 0, -1],
+    [0, 1, 0],
+    [-1, 0, 0],
+  ];
+  var images = []; // front bottom left back top right
+  for (var i = 0;i < 6; ++i) {
+    camera.lookAt(new THREE.Vector3(look_at[i][0], look_at[i][1], look_at[i][2]));
+    screenshot_renderer.render(scene, camera);
+    images.push(screenshot_renderer.domElement.toDataURL('image/png'));
+  }
+  return images;
+}
+
 util.merge_json(snot, {
   set_fov: set_fov,
   set_rx: set_rx,
   set_ry: set_ry,
   init: init,
   run: run,
-  load_sprites: load_sprites
+  load_sprites: load_sprites,
+  screenshot: screenshot,
 });
 
 module.exports = snot;

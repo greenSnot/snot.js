@@ -63,12 +63,8 @@ function spot_generator(spot) {
 
   var mesh = new THREE.Mesh( geometry, material );
 
-  var rotation = util.position_to_rotation(spot.x, spot.z, spot.y);
-
-  rotation.ry = 270 - rotation.ry;
-  rotation.ry = rotation.ry < 0 ? rotation.ry + 360 : rotation.ry;
-  mesh.rotation.y = rotation.ry * Math.PI / 180;
   mesh.position.set(spot.x, spot.y, spot.z);
+  mesh.lookAt(new THREE.Vector3(0, 0, 0));
 
   var text = text_generator({
     generator: 'text',
@@ -184,8 +180,8 @@ var sprites = {
 
 snot.init({
   debug: true,
-  size: 1248,
-  clicks_depth: 1248 / 2.5,
+  size: 1024,
+  clicks_depth: 1024 / 2.5,
   //bg_imgs: [
   //  'images/test.png',
   //  'images/test.png',

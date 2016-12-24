@@ -6,6 +6,8 @@ HTML5/Webgl panorama viewer
 
 [Shooting game](http://greensnot.github.io/snot.js/shooting.html)
 
+[Painter](http://greensnot.github.io/snot.js/painter.html)
+
 [Music wall](http://mclassical.org)
 
 #Usage
