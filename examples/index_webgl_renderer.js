@@ -76,7 +76,6 @@ function spot_generator(spot) {
   mesh.add(text);
   mesh.scale.x = 2;
   mesh.scale.y = 2;
-  // TODO rx
   return mesh;
 }
 

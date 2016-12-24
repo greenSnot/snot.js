@@ -55,6 +55,8 @@ var snot = {
   smooth: 0.83, // between 0 to 1, from rigid to smooth
   on_click: function() {}, // background on click
   on_touch_move: function() {},
+  on_touch_start: function() {},
+  on_touch_end: function() {},
   sprite_on_click: function() {},
 
   suspects_for_raycaster: [],

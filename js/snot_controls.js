@@ -129,6 +129,10 @@ var mouse_down = function (event) {
 
   }
 
+  if (snot.on_touch_start) {
+    snot.on_touch_start(event);
+  }
+
   touches.is_touching = true;
 };
 
@@ -157,6 +161,9 @@ var mouse_up = function(event) {
   //Screen coordinate to Sphere 3d coordinate
   if (distance2D(touches.mouse_down_x, touches.mouse_down_y, x, y) < 5) {
     snot.controls.mouse_click(x, y);
+  }
+  if (snot.on_touch_end) {
+    snot.on_touch_end(event);
   }
   touches.is_touching = false;
 };

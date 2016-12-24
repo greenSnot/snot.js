@@ -16,21 +16,13 @@ function brush_triangle(point) {
   triangle_shape.lineTo(0, - triangle_lt.y);
   triangle_shape.lineTo(triangle_lt.x, triangle_lt.y);
 
-  var extrudeSettings = {
-    amount: 8,
-    bevelEnabled: true,
-    bevelSegments: 2,
-    steps: 2,
-    bevelSize: 1,
-    bevelThickness: 1
-  };
   var color = Math.ceil(Math.random() * 0x8080f0);
   triangle_shape.autoClose = true;
   var points = triangle_shape.createPointsGeometry();
   var spacedPoints = triangle_shape.createSpacedPointsGeometry(50);
   //var geo = new THREE.Line(points, new THREE.LineBasicMaterial({color: color, linewidth: 3}));
   //var geo = new THREE.Points(points, new THREE.PointsMaterial({color: color, size: 4}));
-  var geo = new THREE.Points(spacedPoints, new THREE.PointsMaterial({color: color, size: 4}));
+  var geo = new THREE.Points(spacedPoints, new THREE.PointsMaterial({color: color, size: 4, transparent: true, opacity: 0.5}));
   geo.position.set(point.x, point.y, point.z);
   geo.lookAt(new THREE.Vector3(0, 0, 0));
   geo.scale.set(scale, scale, scale);
@@ -38,8 +30,27 @@ function brush_triangle(point) {
   return geo;
 }
 
+var last_strip_vertex;
+function brush_strip(point) {
+  point = new THREE.Vector3(point.x, point.y, point.z);
+  if (!last_strip_vertex) {
+    last_strip_vertex = point.clone();
+  }
+  var color = 0x553300;
+  var scale = 1;
+  var geometry = new THREE.Geometry();
+  geometry.vertices.push(point);
+  geometry.vertices.push(last_strip_vertex);
+  var material = new THREE.LineBasicMaterial({color: color, opacity: 1, blending: THREE.AdditiveBlending, transparent: true});
+  var mesh = new THREE.Line(geometry, material);
+
+  last_strip_vertex = point;
+  return mesh;
+}
+
 function on_touch_move(e, point) {
   snot.load_sprites([{
+    //generator: 'brush_strip',
     generator: 'brush_triangle',
 
     spotType: 'right',
@@ -49,6 +60,10 @@ function on_touch_move(e, point) {
     y: point.y,
     z: point.z
   }]);
+}
+
+function on_touch_end(e) {
+  last_strip_vertex = undefined;
 }
 
 snot.init({
@@ -61,6 +76,7 @@ snot.init({
   ],
   generator: {
     brush_triangle: brush_triangle,
+    brush_strip: brush_strip,
   },
   fov: 90,
   max_fov: 110,
@@ -70,6 +86,7 @@ snot.init({
   rx: 0,
   ry: 0,
   on_touch_move: on_touch_move,
+  on_touch_end: on_touch_end,
   raycaster_on_touch_move: true,
 });
 
