@@ -61,6 +61,7 @@ var snot = {
 
   suspects_for_raycaster: [],
   raycaster_on_touch_move: false,
+  raycaster_on_touch_start: false,
 };
 
 var epsilon = util.epsilon;

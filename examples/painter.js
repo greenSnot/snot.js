@@ -30,21 +30,18 @@ function brush_triangle(point) {
   return geo;
 }
 
-var last_strip_vertex;
+var strip_head;
 function brush_strip(point) {
   point = new THREE.Vector3(point.x, point.y, point.z);
-  if (!last_strip_vertex) {
-    last_strip_vertex = point.clone();
-  }
   var color = 0x553300;
   var scale = 1;
   var geometry = new THREE.Geometry();
   geometry.vertices.push(point);
-  geometry.vertices.push(last_strip_vertex);
+  geometry.vertices.push(strip_head);
   var material = new THREE.LineBasicMaterial({color: color, opacity: 1, blending: THREE.AdditiveBlending, transparent: true});
   var mesh = new THREE.Line(geometry, material);
 
-  last_strip_vertex = point;
+  strip_head = point;
   return mesh;
 }
 
@@ -63,7 +60,11 @@ function on_touch_move(e, point) {
 }
 
 function on_touch_end(e) {
-  last_strip_vertex = undefined;
+  strip_head = undefined;
+}
+
+function on_touch_start(e, point) {
+  strip_head = point.clone();
 }
 
 snot.init({
@@ -87,7 +88,9 @@ snot.init({
   ry: 0,
   on_touch_move: on_touch_move,
   on_touch_end: on_touch_end,
+  on_touch_start: on_touch_start,
   raycaster_on_touch_move: true,
+  raycaster_on_touch_start: true,
 });
 
 snot.run();

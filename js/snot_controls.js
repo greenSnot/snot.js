@@ -84,13 +84,13 @@ var mouse_move = function(event) {
     return false;
   }
 
-  if (snot.raycaster_on_touch_move && snot.on_touch_move) {
-    var mouse = new THREE.Vector2();
-    mouse.set((x / snot.width) * 2 - 1, - (y / snot.height) * 2 + 1);
-    snot.raycaster.setFromCamera(mouse, snot.camera);
-    var intersects = snot.raycaster.intersectObjects(snot.suspects_for_raycaster);
-    var point = util.standardlization(intersects[0].point, snot.clicks_depth);
-    snot.on_touch_move(event, point);
+  if (snot.on_touch_move) {
+    if (snot.raycaster_on_touch_move) {
+      var point = compute_raycaster_point(x, y);
+      snot.on_touch_move(event, point);
+    } else {
+      snot.on_touch_move(event);
+    }
     return;
   }
 
@@ -104,6 +104,15 @@ var mouse_move = function(event) {
   snot.dest_rx = snot.dest_rx < -90 ? -90 : snot.dest_rx;
 
 };
+
+function compute_raycaster_point(x, y) {
+  var mouse = new THREE.Vector2();
+  mouse.set((x / snot.width) * 2 - 1, - (y / snot.height) * 2 + 1);
+  snot.raycaster.setFromCamera(mouse, snot.camera);
+  var intersects = snot.raycaster.intersectObjects(snot.suspects_for_raycaster);
+  var point = util.standardlization(intersects[0].point, snot.clicks_depth);
+  return point;
+}
 
 var mouse_down = function (event) {
   if (event.cancelable) {
@@ -130,7 +139,12 @@ var mouse_down = function (event) {
   }
 
   if (snot.on_touch_start) {
-    snot.on_touch_start(event);
+    if (snot.raycaster_on_touch_start) {
+      var point = compute_raycaster_point(x, y);
+      snot.on_touch_start(event, point);
+    } else {
+      snot.on_touch_start(event);
+    }
   }
 
   touches.is_touching = true;
