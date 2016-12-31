@@ -89,6 +89,12 @@ function distance2D(a, b, c, d) {
 }
 
 function distance3D(a, b, c, d, e, f) {
+  if (typeof(a) == 'object') {
+    var diff_x = a.x - b.x;
+    var diff_y = a.y - b.y;
+    var diff_z = a.z - b.z;
+    return Math.pow(diff_x * diff_x + diff_y * diff_y + diff_z * diff_z, 0.5);
+  }
   return Math.pow((a - d) * (a - d) + (b - e) * (b - e) + (c - f) * (c - f), 0.5);
 }
 

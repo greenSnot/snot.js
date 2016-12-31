@@ -87,11 +87,11 @@ var mouse_move = function(event) {
   if (snot.on_touch_move) {
     if (snot.raycaster_on_touch_move) {
       var point = compute_raycaster_point(x, y);
-      snot.on_touch_move(event, point);
+      snot.on_touch_move(event, x, y, point);
+      return;
     } else {
-      snot.on_touch_move(event);
+      snot.on_touch_move(event, x, y);
     }
-    return;
   }
 
   snot.dest_ry = snot.dest_ry + (touches.fx - x) * snot.mouse_sensitivity;
@@ -138,16 +138,16 @@ var mouse_down = function (event) {
 
   }
 
+  touches.is_touching = true;
   if (snot.on_touch_start) {
     if (snot.raycaster_on_touch_start) {
       var point = compute_raycaster_point(x, y);
-      snot.on_touch_start(event, point);
+      snot.on_touch_start(event, x, y, point);
     } else {
-      snot.on_touch_start(event);
+      snot.on_touch_start(event, x, y);
     }
   }
 
-  touches.is_touching = true;
 };
 
 var mouse_wheel = function (event) {

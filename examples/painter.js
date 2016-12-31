@@ -1,38 +1,38 @@
 var util = snot.util;
 var THREE = snot.THREE;
 
-function brush_triangle(point) {
-  var loader = THREE.ImageUtils;
-  var scale = 1;
+var color, depth = 300, range = 3;
+function brush_triangle(data) {
+  var point = new THREE.Vector3(data.x, data.y, data.z);
   var size = 20;
 
-  var triangle_shape = new THREE.Shape();
-  var triangle_lt = {
-    x: - 0.5 * size,
-    y: Math.pow(3, 0.5) / 4 * size,
-  };
-  triangle_shape.moveTo(triangle_lt.x, triangle_lt.y);
-  triangle_shape.lineTo(- triangle_lt.x, triangle_lt.y);
-  triangle_shape.lineTo(0, - triangle_lt.y);
-  triangle_shape.lineTo(triangle_lt.x, triangle_lt.y);
+  point.x += Math.random() * range - range;
+  point.y += Math.random() * range - range;
+  point.z += Math.random() * range - range;
+  util.standardlization(point, depth);
+  depth -= 0.2;
 
-  var color = Math.ceil(Math.random() * 0x8080f0);
-  triangle_shape.autoClose = true;
-  var points = triangle_shape.createPointsGeometry();
-  var spacedPoints = triangle_shape.createSpacedPointsGeometry(50);
-  //var geo = new THREE.Line(points, new THREE.LineBasicMaterial({color: color, linewidth: 3}));
-  //var geo = new THREE.Points(points, new THREE.PointsMaterial({color: color, size: 4}));
-  var geo = new THREE.Points(spacedPoints, new THREE.PointsMaterial({color: color, size: 4, transparent: true, opacity: 0.5}));
-  geo.position.set(point.x, point.y, point.z);
-  geo.lookAt(new THREE.Vector3(0, 0, 0));
-  geo.scale.set(scale, scale, scale);
+  var geo = new THREE.Geometry();
+  geo.vertices.push(vertex_a);
+  geo.vertices.push(vertex_b);
+  geo.vertices.push(point);
 
-  return geo;
+  geo.faces.push(new THREE.Face3(0, 1, 2 ));
+  geo.computeFaceNormals();
+
+  var mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: color - Math.random() * 1000, transparent: true, opacity: 0.8, side: THREE.DoubleSide}));
+
+  vertex_a = snot.frames % 2 == 0? vertex_b : vertex_a;
+  vertex_b = point;
+
+  return mesh;
 }
 
+var vertex_a, vertex_b;
+
 var strip_head;
-function brush_strip(point) {
-  point = new THREE.Vector3(point.x, point.y, point.z);
+function brush_strip(data) {
+  var point = new THREE.Vector3(data.x, data.y, data.z);
   var color = 0x553300;
   var scale = 1;
   var geometry = new THREE.Geometry();
@@ -45,7 +45,12 @@ function brush_strip(point) {
   return mesh;
 }
 
-function on_touch_move(e, point) {
+var last_x, last_y;
+function on_touch_move(e, x, y, point) {
+  range = util.distance2D(x, y, last_x, last_y) + 10;
+  last_x = x;
+  last_y = y;
+
   snot.load_sprites([{
     //generator: 'brush_strip',
     generator: 'brush_triangle',
@@ -63,8 +68,23 @@ function on_touch_end(e) {
   strip_head = undefined;
 }
 
-function on_touch_start(e, point) {
+function on_touch_start(e, x, y, point) {
+  last_x = x;
+  last_y = y;
   strip_head = point.clone();
+
+  color = Math.ceil(Math.random() * 0xffffff);
+  var range = 20;
+  vertex_a = point.clone();
+  vertex_b = point.clone();
+  function make_bias(v) {
+    v.x += Math.random() * range - range;
+    v.y += Math.random() * range - range;
+    v.z += Math.random() * range - range;
+    util.standardlization(v, depth);
+  }
+  make_bias(vertex_a);
+  make_bias(vertex_b);
 }
 
 snot.init({
