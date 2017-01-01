@@ -23,7 +23,7 @@ function bullet_generator(data) {
 }
 
 function enemy_generator(data) {
-  var size = 2;
+  var size = 20;
   var loader = THREE.ImageUtils;
   var geometry = new THREE.PlaneGeometry(size, size);
   var material = new THREE.MeshBasicMaterial({
@@ -148,7 +148,9 @@ function update() {
       continue;
     }
     update_bullet(bullet);
-    candidates_a.push(bullet);
+    if (bullet.running) {
+      candidates_a.push(bullet);
+    }
   }
   for (i in enemies) {
     var enemy = enemies[i];
@@ -159,26 +161,28 @@ function update() {
       continue;
     }
     update_enemy(enemy);
-    candidates_b.push(enemy);
+    if (enemy.running) {
+      candidates_b.push(enemy);
+    }
   }
-  var collision_result = [];
-  util.octree_collision({
-    x: 200,
-    y: 200,
-    z: 200,
-  }, {
-    x: - 200,
-    y: - 200,
-    z: - 200,
-  }, candidates_a, candidates_b, collision_result);
-  if (collision_result.length) {
+  var collision_pairs = util.collision_test({
+      x: 200,
+      y: 200,
+      z: 200,
+    }, {
+      x: - 200,
+      y: - 200,
+      z: - 200,
+    }, candidates_a, candidates_b, 5, 0.1);
+  if (collision_pairs.length) {
+    console.log("!");
     var k, l;
-    for (k in collision_result) {
-      for (l in collision_result[k].points_b) {
-        collision_result[k].points_b[l].progress = 1;
+    for (k in collision_pairs) {
+      for (l in collision_pairs[k].points_b) {
+        collision_pairs[k].points_b[l].progress = 1;
       }
-      for (l in collision_result[k].points_a) {
-        collision_result[k].points_a[l].progress = 1;
+      for (l in collision_pairs[k].points_a) {
+        collision_pairs[k].points_a[l].progress = 1;
       }
     }
   }
@@ -217,7 +221,7 @@ function update_bullet(bullet) {
   }
 
   if (bullet.running) {
-    bullet.progress += 0.02;
+    bullet.progress += 0.04;
     bullet.x = (bullet.dest_x + bullet.origin_x) * bullet.progress - bullet.origin_x;
     bullet.y = (bullet.dest_y + bullet.origin_y) * bullet.progress - bullet.origin_y;
     bullet.z = (bullet.dest_z + bullet.origin_z) * bullet.progress - bullet.origin_z;

@@ -24,11 +24,9 @@ var util = {
   m_set_position: m_set_position,
   m_make_rotation_from_quaternion: m_make_rotation_from_quaternion,
 
+  collision_test: collision_test,
   merge_json: merge_json,
   clone: clone,
-
-  octree_collision_depth: 7,
-  octree_collision: octree_collision,
 };
 module.exports = util;
 
@@ -244,22 +242,6 @@ function standardlization(point, r) {
   return point;
 }
 
-function is_point_inside(point, a, b) {
-  if (point.x >= b.x && point.y >= b.y && point.z >= b.z &&
-  point.x < a.x && point.y < a.y && point.z < a.z) {
-    return true;
-  }
-  return false;
-}
-function get_inside_points(points, a, b) {
-  var candidates = [];
-  for (var i in points) {
-    if (is_point_inside(points[i], a, b)) {
-      candidates.push(points[i]);
-    }
-  }
-  return candidates;
-}
 /*
 * see ../images/octree.png
 *
@@ -267,118 +249,143 @@ function get_inside_points(points, a, b) {
 * a.y > b.y
 * a.z > b.z
 */
-function octree_collision(a, b, points_a, points_b, res, depth) {
-  depth = depth || 1;
-  if (!points_a.length || !points_b.length) {
+function collision_test(a, b, points_a, points_b, max_depth, random_factor) {
+  max_depth = max_depth || 7;
+  random_factor = random_factor || 0.2;
+  var random_factor_half = random_factor / 2;
+  var res = [];
+
+  function is_point_inside(point, a, b) {
+    if (point.x >= b.x && point.y >= b.y && point.z >= b.z &&
+    point.x < a.x && point.y < a.y && point.z < a.z) {
+      return true;
+    }
     return false;
   }
-  if (depth > util.octree_collision_depth) {
-    res.push({
-      points_a: points_a,
-      points_b: points_b,
-    });
-    return true;
-  }
 
-  // random split
-  var half = {
-    x: (a.x - b.x) / (Math.random() * 0.2 - 0.1 + 2),
-    y: (a.y - b.y) / (Math.random() * 0.2 - 0.1 + 2),
-    z: (a.z - b.z) / (Math.random() * 0.2 - 0.1 + 2),
-  };
-  var b_xyz = {
-    x: b.x + half.x,
-    y: b.y + half.y,
-    z: b.z + half.z,
-  };
-  var b_x = {
-    x: b_xyz.x,
-    y: b.y,
-    z: b.z,
-  };
-  var b_y = {
-    x: b.x,
-    y: b_xyz.y,
-    z: b.z,
-  };
-  var b_z = {
-    x: b.x,
-    y: b.y,
-    z: b_xyz.z,
-  };
-  var b_xz = {
-    x: b_xyz.x,
-    y: b.y,
-    z: b_xyz.z,
-  };
-  var b_xy = {
-    x: b_xyz.x,
-    y: b_xyz.y,
-    z: b.z,
-  };
-  var b_yz = {
-    x: b.x,
-    y: b_xyz.y,
-    z: b_xyz.z,
-  };
-
-  var a_z = {
-    x: a.x,
-    y: a.y,
-    z: a.z - half.z,
-  };
-  var a_x = {
-    x: a.x - half.x,
-    y: a.y,
-    z: a.z,
-  };
-  var a_y = {
-    x: a.x,
-    y: a.y - half.y,
-    z: a.z,
-  };
-  var a_xy = {
-    x: a_x.x,
-    y: a_y.y,
-    z: a.z,
-  };
-  var a_yz = {
-    x: a.x,
-    y: a_y.y,
-    z: a_z.z,
-  };
-  var a_xz = {
-    x: a_x.x,
-    y: a.y,
-    z: a_z.z,
-  };
-
-  function sub_collision(a, b) {
-    var candidates_a = get_inside_points(points_a, a, b);
-    var candidates_b = get_inside_points(points_b, a, b);
-    return octree_collision(a, b, candidates_a, candidates_b, res, depth + 1);
-  }
-
-  var pairs = [
-    [a_x, b_yz],
-    [a, b_xyz],
-    [a_xy, b_z],
-    [a_y, b_xz],
-
-    [a_xz, b_y],
-    [a_z, b_xy],
-    [b_xyz, b],
-    [a_yz, b_x],
-  ];
-
-  var found = false;
-  for (var i in pairs) {
-    if (sub_collision(pairs[i][0], pairs[i][1])) {
-      found = true;
+  function get_inside_points(points, a, b) {
+    var candidates = [];
+    for (var i in points) {
+      if (is_point_inside(points[i], a, b)) {
+        candidates.push(points[i]);
+      }
     }
+    return candidates;
   }
 
-  return found;
+  (function octree_collision_test(a, b, points_a, points_b, depth) {
+    if (!points_a.length || !points_b.length) {
+      return false;
+    }
+    if (depth > max_depth) {
+      res.push({
+        points_a: points_a,
+        points_b: points_b,
+      });
+      return true;
+    }
+
+    // random split
+    var half = {
+      x: (a.x - b.x) / (Math.random() * random_factor - random_factor_half + 2),
+      y: (a.y - b.y) / (Math.random() * random_factor - random_factor_half + 2),
+      z: (a.z - b.z) / (Math.random() * random_factor - random_factor_half + 2),
+    };
+    var b_xyz = {
+      x: b.x + half.x,
+      y: b.y + half.y,
+      z: b.z + half.z,
+    };
+    var b_x = {
+      x: b_xyz.x,
+      y: b.y,
+      z: b.z,
+    };
+    var b_y = {
+      x: b.x,
+      y: b_xyz.y,
+      z: b.z,
+    };
+    var b_z = {
+      x: b.x,
+      y: b.y,
+      z: b_xyz.z,
+    };
+    var b_xz = {
+      x: b_xyz.x,
+      y: b.y,
+      z: b_xyz.z,
+    };
+    var b_xy = {
+      x: b_xyz.x,
+      y: b_xyz.y,
+      z: b.z,
+    };
+    var b_yz = {
+      x: b.x,
+      y: b_xyz.y,
+      z: b_xyz.z,
+    };
+
+    var a_z = {
+      x: a.x,
+      y: a.y,
+      z: a.z - half.z,
+    };
+    var a_x = {
+      x: a.x - half.x,
+      y: a.y,
+      z: a.z,
+    };
+    var a_y = {
+      x: a.x,
+      y: a.y - half.y,
+      z: a.z,
+    };
+    var a_xy = {
+      x: a_x.x,
+      y: a_y.y,
+      z: a.z,
+    };
+    var a_yz = {
+      x: a.x,
+      y: a_y.y,
+      z: a_z.z,
+    };
+    var a_xz = {
+      x: a_x.x,
+      y: a.y,
+      z: a_z.z,
+    };
+
+    function sub_collision(a, b) {
+      var candidates_a = get_inside_points(points_a, a, b);
+      var candidates_b = get_inside_points(points_b, a, b);
+      return octree_collision_test(a, b, candidates_a, candidates_b, depth + 1);
+    }
+
+    var pairs = [
+      [a_x, b_yz],
+      [a, b_xyz],
+      [a_xy, b_z],
+      [a_y, b_xz],
+
+      [a_xz, b_y],
+      [a_z, b_xy],
+      [b_xyz, b],
+      [a_yz, b_x],
+    ];
+
+    var found = false;
+    for (var i in pairs) {
+      if (sub_collision(pairs[i][0], pairs[i][1])) {
+        found = true;
+      }
+    }
+
+    return found;
+  })(a, b, points_a, points_b, 1);
+  return res;
 }
 
 function clone(obj) {

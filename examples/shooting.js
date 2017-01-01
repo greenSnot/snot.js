@@ -171,16 +171,15 @@ function update() {
     enemy.need_update_position = true;
   }
 
-  var collision = [];
-  util.octree_collision({
-    x: snot.size * 1.5,
-    y: snot.size * 1.5,
-    z: snot.size * 1.5,
-  }, {
-    x: - snot.size * 1.5,
-    y: - snot.size * 1.5,
-    z: - snot.size * 1.5,
-  }, points_a, points_b, collision);
+  var collision = util.collision_test({
+      x: snot.size * 1.5,
+      y: snot.size * 1.5,
+      z: snot.size * 1.5,
+    }, {
+      x: - snot.size * 1.5,
+      y: - snot.size * 1.5,
+      z: - snot.size * 1.5,
+    }, points_a, points_b);
   if (collision.length) {
     for (var k in collision) {
       for (var l in collision[k].points_b) {
