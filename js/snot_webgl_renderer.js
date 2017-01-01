@@ -237,12 +237,34 @@ function update() {
 
   snot.camera.fov = snot.fov;
   snot.camera.updateProjectionMatrix();
+  snot.camera_look_at = snot.camera.localToWorld(new THREE.Vector3(0, 0, -1));
   renderer.render(scene, snot.camera);
+
+  update_sprites();
 
   if (snot.debug) {
     document.getElementById('logger').innerHTML = 'rx:' + parseInt(snot.rx) + ' ' +
                       'ry:' + parseInt(snot.ry) + ' ' +
                       'rz:' + parseInt(snot.rz);
+  }
+}
+
+function update_sprites() {
+  for (var i in snot.sprites) {
+    var data = snot.sprites[i];
+    var sprite = sprites[i];
+    if (data.need_update_position) {
+      sprite.position.set(data.x, data.y, data.z);
+      data.need_update_position = false;
+    }
+    if (data.need_update_visibility) {
+      sprite.visible = data.visible;
+      data.need_update_visibility = false;
+    }
+    if (data.need_update_look_at) {
+      sprite.lookAt(data.look_at);
+      data.need_update_look_at = false;
+    }
   }
 }
 
@@ -262,11 +284,14 @@ function set_ry(ry) {
 
 function load_sprites(sps) {
   for (var i in sps) {
-    var functionName = sps[i].generator;
-    var mesh = snot.generator[functionName](sps[i]);
+    var data = sps[i];
+    var functionName = data.generator;
+    var mesh = snot.generator[functionName](data);
 
-    mesh.data = sps[i];
-    sprites[mesh.name] = true;
+    mesh.data = data;
+    mesh.visible = data.visible === undefined ? true : data.visible;
+
+    sprites[mesh.name] = mesh;
     snot.suspects_for_raycaster.push(mesh);
     scene.add(mesh);
 
@@ -306,6 +331,8 @@ util.merge_json(snot, {
   set_ry: set_ry,
   init: init,
   run: run,
+  update: update,
+  update_sprites: update_sprites,
   load_sprites: load_sprites,
   screenshot: screenshot,
 });

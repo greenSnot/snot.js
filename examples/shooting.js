@@ -31,7 +31,7 @@ for (var i = 0 ;i < enemies_pool_size; ++i) {
   enemies_running.push(id);
 }
 
-var quality = 0.3;
+var quality = 1;
 
 var bullets_pool = [];
 var bullets_running = [];
