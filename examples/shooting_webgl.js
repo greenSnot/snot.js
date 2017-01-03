@@ -12,6 +12,7 @@ function bullet_generator(data) {
   var material = new THREE.MeshBasicMaterial({
     color: 0xffff00,
     transparent: true,
+    side: THREE.DoubleSide,
     opacity: 0.5,
   });
   var mesh = new THREE.Mesh(geometry, material);
@@ -39,7 +40,8 @@ function enemy_generator(data) {
   return mesh;
 }
 
-var bullet_fire_interval = 40; // ms
+var n_max_bullet = 50;
+var bullet_fire_interval = 125; // ms
 var enemy_reborn_interval = 500; // ms
 var bullets = {};
 var enemies = {};
@@ -54,10 +56,10 @@ var sprite_origin_data = {
   dest_y: 0,
   dest_z: 0,
 
-  origin_x: 0,
-  origin_y: 0,
-  origin_z: 0,
-  progress: 0, // from 0(origin) to 1(destination)
+  initial_x: 0,
+  initial_y: 0,
+  initial_z: 0,
+  progress: 0, // from 0(initial point) to 1(destination)
   visible: false,
 
   need_update_position: false,
@@ -87,7 +89,7 @@ function init_bullets() {
     reset_bullet(bullets[id], id);
   }
 
-  for (var i = 0;i < 50; ++i) {
+  for (var i = 0;i < n_max_bullet; ++i) {
     var id = 'bullet' + i;
     init_bullet(id);
   }
@@ -175,7 +177,6 @@ function update() {
       z: - 200,
     }, candidates_a, candidates_b, 5, 0.1);
   if (collision_pairs.length) {
-    console.log("!");
     var k, l;
     for (k in collision_pairs) {
       for (l in collision_pairs[k].points_b) {
@@ -202,12 +203,12 @@ function fire(bullet) {
   bullet.dest_y = look_at.y * scalar;
   bullet.dest_z = look_at.z * scalar;
 
-  var origin = snot.camera.localToWorld(new THREE.Vector3(0, 3, 0));
-  bullet.origin_x = origin.x;
-  bullet.origin_y = origin.y;
-  bullet.origin_z = origin.z;
+  var initial = snot.camera.localToWorld(new THREE.Vector3(0, 3, 0));
+  bullet.initial_x = initial.x;
+  bullet.initial_y = initial.y;
+  bullet.initial_z = initial.z;
 
-  bullet.look_at.set( - origin.x, - origin.y, - origin.z);
+  bullet.look_at.set( - initial.x, - initial.y, - initial.z);
 
 }
 
@@ -220,11 +221,46 @@ function update_bullet(bullet) {
     bullet.need_update_look_at = true;
   }
 
+  function parabola(bullet) {
+    // y = - (x - k)^2 / c + d
+    // satisfied by T(t1,t2), P(p1, p2)
+    // c is known
+    function compute_k_d(p1, p2, t1, t2, c) {
+      t1 = t1 === p1 ? t1 + 0.01 : t1;
+      var k = (p1 * p1 - t1 * t1 - c * t2 + c * p2) / ( - 2 * t1 + 2 * p1);
+      var d = (k * k - 2 * t1 * k + t1 * t1 + c * t2) / c;
+      return [k, d];
+    }
+
+    var p_to_o = util.distance3D(bullet.initial_x, bullet.initial_y, bullet.initial_z, 0, 0, 0);
+    var t_to_o = util.distance3D(bullet.dest_x, bullet.dest_y, bullet.dest_z, 0, 0, 0);
+    var p_rx = - snot.rx * Math.PI / 180;
+    var p = [Math.cos(p_rx) * p_to_o , Math.sin(p_rx) * p_to_o];
+    var t_rx = Math.atan(bullet.dest_y / Math.pow(bullet.dest_x * bullet.dest_x + bullet.dest_z * bullet.dest_z, 0.5));
+    var t = [Math.cos(t_rx) * t_to_o , Math.sin(t_rx) * t_to_o];
+
+    var c = 200;
+    var res = compute_k_d(p[0], p[1], t[0], t[1], c);
+    var k = res[0];
+    var d = res[1];
+
+    bullet.x = (bullet.dest_x + bullet.initial_x) * bullet.progress - bullet.initial_x;
+    var y = - Math.pow(Math.pow(bullet.x * bullet.x + bullet.z * bullet.z, 0.5) - k, 2) / c + d;
+    bullet.y = y;
+    bullet.z = (bullet.dest_z + bullet.initial_z) * bullet.progress - bullet.initial_z;
+  }
+
+  function linear(bullet) {
+    bullet.x = (bullet.dest_x + bullet.initial_x) * bullet.progress - bullet.initial_x;
+    bullet.y = (bullet.dest_y + bullet.initial_y) * bullet.progress - bullet.initial_y;
+    bullet.z = (bullet.dest_z + bullet.initial_z) * bullet.progress - bullet.initial_z;
+  }
+
   if (bullet.running) {
     bullet.progress += 0.04;
-    bullet.x = (bullet.dest_x + bullet.origin_x) * bullet.progress - bullet.origin_x;
-    bullet.y = (bullet.dest_y + bullet.origin_y) * bullet.progress - bullet.origin_y;
-    bullet.z = (bullet.dest_z + bullet.origin_z) * bullet.progress - bullet.origin_z;
+
+    linear(bullet);
+    //parabola(bullet);
 
     bullet.need_update_position = true;
   }
@@ -239,9 +275,9 @@ function reborn(enemy) {
 
   var random = new THREE.Vector3((Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2).normalize();
   var scalar = 100;
-  enemy.origin_x = random.x * scalar;
-  enemy.origin_y = random.y * scalar;
-  enemy.origin_z = random.z * scalar;
+  enemy.initial_x = random.x * scalar;
+  enemy.initial_y = random.y * scalar;
+  enemy.initial_z = random.z * scalar;
 
   var dest = snot.camera.localToWorld(new THREE.Vector3(0, 3, 0));
   enemy.dest_x = dest.x;
@@ -262,9 +298,9 @@ function update_enemy(enemy) {
 
   if (enemy.running) {
     enemy.progress += 0.0002;
-    enemy.x = (enemy.origin_x) * (1 - enemy.progress);
-    enemy.y = (enemy.origin_y) * (1 - enemy.progress);
-    enemy.z = (enemy.origin_z) * (1 - enemy.progress);
+    enemy.x = (enemy.initial_x) * (1 - enemy.progress);
+    enemy.y = (enemy.initial_y) * (1 - enemy.progress);
+    enemy.z = (enemy.initial_z) * (1 - enemy.progress);
 
     enemy.need_update_position = true;
   }

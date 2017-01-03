@@ -238,10 +238,10 @@ function update() {
   snot.camera.fov = snot.fov;
   snot.camera.updateProjectionMatrix();
   snot.camera_look_at = snot.camera.localToWorld(new THREE.Vector3(0, 0, -1));
+  update_sprites();
   renderer.render(scene, snot.camera);
 
-  update_sprites();
-
+  ++ snot.frames;
   if (snot.debug) {
     document.getElementById('logger').innerHTML = 'rx:' + parseInt(snot.rx) + ' ' +
                       'ry:' + parseInt(snot.ry) + ' ' +

@@ -107,14 +107,15 @@ function destory_bullet(id) {
 
 var bullet_offset_y = 50;
 function update() {
+  var i, id;
   requestAnimationFrame(update);
   snot.update();
   if (bullets_running.length != max_bullets) {
     shoot();
   }
   var points_a = [];
-  for (var i in bullets_running) {
-    var id = bullets_running[i];
+  for (i in bullets_running) {
+    id = bullets_running[i];
     var bullet = snot.sprites[id];
     points_a.push(snot.sprites[id]);
     if (bullet.status == -1) {
@@ -133,8 +134,8 @@ function update() {
       snot.sprites[id].dest_x = snot.camera_look_at.x * bullet_shooting_range;
       snot.sprites[id].dest_y = snot.camera_look_at.y * bullet_shooting_range;
       snot.sprites[id].dest_z = snot.camera_look_at.z * bullet_shooting_range;
-      bullet.x = snot.camera_look_at.x,
-      bullet.y = snot.camera_look_at.y - bullet_offset_y,
+      bullet.x = snot.camera_look_at.x;
+      bullet.y = snot.camera_look_at.y - bullet_offset_y;
       bullet.z = - snot.camera_look_at.z;
       bullet.status = -1;
       bullet.visible = false;
@@ -152,8 +153,8 @@ function update() {
   }
 
   var points_b = [];
-  for (var i in enemies_running) {
-    var id = enemies_running[i];
+  for (i in enemies_running) {
+    id = enemies_running[i];
     var enemy = snot.sprites[id];
     points_b.push(snot.sprites[id]);
     if (enemy.status == -1) {
@@ -164,9 +165,6 @@ function update() {
       enemy.z = Math.random() - 0.5;
       util.standardlization(enemy, 300);
       enemy.need_update_visibility = true;
-    }
-    if (enemy.health) {
-    } else {
     }
     enemy.need_update_position = true;
   }
