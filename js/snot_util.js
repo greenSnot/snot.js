@@ -246,7 +246,7 @@ function standardlization(point, r) {
 }
 
 /*
-* see ../images/octree.png
+* see http://imgur.com/1HRG2fF
 *
 * a.x > b.x
 * a.y > b.y

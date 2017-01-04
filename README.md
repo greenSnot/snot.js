@@ -10,7 +10,7 @@ HTML5/Webgl panorama viewer
 
 [Shooting game(webgl renderer)](http://greensnot.github.io/snot.js/examples/shooting_webgl_renderer.html)
 
-[Painter](http://greensnot.github.io/snot.js/painter.html)
+[Painter(gyro sensor required)](http://greensnot.github.io/snot.js/examples/painter.html)
 
 [Music wall](http://mclassical.org)
 
