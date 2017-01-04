@@ -100,10 +100,10 @@ HTML5/Webgl panorama viewer
 function on_click(x, y, z, rx, ry) {
 }
 
-function onSpriteClick(data) {
+function sprite_on_click(data) {
   console.log(data);
 }
-sti.init({
+snot.init({
   //...
   on_click: on_click, // when you are clicking the backgrounds
   sprite_on_click: sprite_on_click
