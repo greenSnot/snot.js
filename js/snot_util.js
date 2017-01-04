@@ -1,4 +1,7 @@
 var THREE = require('three');
+var FastClick = require('fastclick');
+FastClick(document.body);
+
 var util = {
   left_pos: left_pos,
   top_pos: top_pos,

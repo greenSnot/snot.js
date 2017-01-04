@@ -1,3 +1,0 @@
-[submodule "libs/fastclick"]
-	path = libs/fastclick
-	url = https://github.com/ftlabs/fastclick.git

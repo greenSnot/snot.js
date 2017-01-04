@@ -2,10 +2,11 @@
   "name": "snot",
   "version": "1.0.0",
   "dependencies": {
-    "gulp-minify": "0.0.14",
-    "jshint-stylish": "^2.2.1"
   },
   "devDependencies": {
+    "jshint-stylish": "^2.2.1",
+    "three": "^0.83.0",
+    "gulp-minify": "0.0.14",
     "browserify": "^13.1.1",
     "event-stream": "^3.3.2",
     "gulp": "^3.9.1",
