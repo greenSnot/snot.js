@@ -15,7 +15,7 @@ var sqrt = Math.sqrt;
 
 var snot = {
   renderer: 'css',
-  version: 1.0,
+  version: 1.01,
   container: document.getElementById('snot-container'),
   dom: document.getElementById('snot-wrap'),
 

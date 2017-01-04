@@ -3,7 +3,7 @@ var util = require('./snot_util.js');
 var controls = require('./snot_controls.js');
 var PI = Math.PI;
 var snot = {
-  version: 1.0,
+  version: 1.01,
   renderer: 'webgl',
   camera_look_at: {
     x: 0,
