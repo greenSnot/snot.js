@@ -99,7 +99,7 @@ HTML5/Webgl panorama viewer
 
 ##Interaction
 ```
-function on_click(x, y, z, rx, ry) {
+function on_click(point, rotation) {
 }
 
 function sprite_on_click(data) {
