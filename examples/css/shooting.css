@@ -3,6 +3,7 @@
   height: 30px;
   background: rgba(255, 0, 0, 0.5);
 }
+
 .crosshair {
   position: absolute;
   z-index: 100;
@@ -14,7 +15,15 @@
   left: 50%;
   transform: translateX(-50%) translateY(-50%);
 }
+
 .bullet {
   width:20px;
   height:20px;
+}
+
+.btn-gyro{
+  position:absolute;
+  top:20px;
+  left:20px;
+  z-index:40;
 }

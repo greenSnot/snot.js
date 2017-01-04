@@ -1,0 +1,19 @@
+.btn-gyro{
+  position:absolute;
+  top:20px;
+  left:20px;
+  z-index:40;
+}
+
+.spot-description{
+  width:128px;
+  margin-bottom:-30px;
+  text-align:center;
+}
+
+.spot-straight, .spot-left, .spot-right{
+  color: #fff;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px #000;
+  z-index: 25;
+}
