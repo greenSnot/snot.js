@@ -16,7 +16,6 @@ var sqrt = Math.sqrt;
 var snot = {
   renderer: 'css',
   version: 1.0,
-  debug: false,
   container: document.getElementById('snot-container'),
   dom: document.getElementById('snot-wrap'),
 
@@ -351,11 +350,6 @@ function update() {
       sprite.need_update_visibility = false;
       update_sprite_visibility(sprite.id);
     }
-  }
-  if (snot.debug) {
-    document.getElementById('logger').innerHTML = 'rx:' + parseInt(snot.rx) + ' ' +
-                      'ry:' + parseInt(snot.ry) + ' ' +
-                      'rz:' + parseInt(snot.rz);
   }
 }
 

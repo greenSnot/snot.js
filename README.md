@@ -129,7 +129,6 @@ sti.init({
 ###Options
 ```
 {
-  debug: false, // show rotation infomation
   container: document.getElementById('snot-container'),
   dom: document.getElementById('snot-wrap'),
   quality: 1, // between 0 to 1, higher quality needs more computation

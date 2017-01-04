@@ -178,7 +178,6 @@ var sprites = {
 };
 
 snot.init({
-  debug: true,
   size: 1024,
   clicks_depth: 1024 / 2.5,
   //bg_imgs: [

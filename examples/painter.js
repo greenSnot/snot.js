@@ -88,7 +88,6 @@ function on_touch_start(e, x, y, point) {
 }
 
 snot.init({
-  debug: true,
   size: 1024,
   gyro: true,
   clicks_depth: 1024 / 2.5,

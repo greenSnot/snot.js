@@ -103,7 +103,6 @@ var sprites = {
 };
 
 snot.init({
-  debug: true,
   size: 1248,
   quality: 0.2,
   auto_rotation: 0.1,

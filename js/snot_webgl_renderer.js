@@ -242,11 +242,6 @@ function update() {
   renderer.render(scene, snot.camera);
 
   ++ snot.frames;
-  if (snot.debug) {
-    document.getElementById('logger').innerHTML = 'rx:' + parseInt(snot.rx) + ' ' +
-                      'ry:' + parseInt(snot.ry) + ' ' +
-                      'rz:' + parseInt(snot.rz);
-  }
 }
 
 function update_sprites() {
