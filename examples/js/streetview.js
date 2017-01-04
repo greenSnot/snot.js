@@ -98,13 +98,13 @@ var sprites = {
     z: -110,
 
     text: 'Garage',
-    spotType: 'straight',
+    spotType: 'left',
   }
 };
 
 snot.init({
   size: 1248,
-  quality: 0.2,
+  quality: 0.9,
   auto_rotation: 0.1,
   bg_imgs: [
     'images/test.png',

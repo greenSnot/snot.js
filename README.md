@@ -2,11 +2,13 @@
 HTML5/Webgl panorama viewer
 
 # Examples
-[Street view](http://greensnot.github.io/snot.js/)
+[Street view(css renderer)](http://greensnot.github.io/snot.js/examples/streetview.html)
 
-[Shooting game](http://greensnot.github.io/snot.js/shooting.html)
+[Street view(webgl renderer)](http://greensnot.github.io/snot.js/examples/streetview_webgl_renderer.html)
 
-[Shooting game(webgl)](http://greensnot.github.io/snot.js/shooting.html)
+[Shooting game(css renderer)](http://greensnot.github.io/snot.js/examples/shooting.html)
+
+[Shooting game(webgl renderer)](http://greensnot.github.io/snot.js/examples/shooting_webgl_renderer.html)
 
 [Painter](http://greensnot.github.io/snot.js/painter.html)
 
