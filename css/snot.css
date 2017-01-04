@@ -31,17 +31,6 @@ html, body {
   z-index: 1;
 }
 
-#logger{
-  position: absolute;
-  top: 0;
-  width: 100%;
-  z-index: 100;
-  color: #fff;
-  font-size: 20px;
-  text-shadow: 1px 1px #000;
-  word-break: break-all;
-}
-
 .sprite-wrap {
   -webkit-transform: translateY(-50%) translateX(-50%);
   z-index: 20;
