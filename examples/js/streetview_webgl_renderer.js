@@ -85,7 +85,7 @@ function sprite_on_click(data) {
 }
 
 function on_click(point, rotation) {
-  snot.load_sprites([{
+  snot.add_sprites([{
     generator: 'spot',
 
     spotType: 'right',

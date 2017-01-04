@@ -51,13 +51,11 @@ function on_touch_move(e, x, y, point) {
   last_x = x;
   last_y = y;
 
-  snot.load_sprites([{
+  snot.add_sprites([{
     //generator: 'brush_strip',
     generator: 'brush_triangle',
 
-    spotType: 'right',
     id: 'spot-' + Math.random(),
-    text: 'haha',
     x: point.x,
     y: point.y,
     z: point.z

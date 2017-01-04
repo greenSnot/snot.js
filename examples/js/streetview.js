@@ -8,7 +8,7 @@ document.getElementsByClassName('btn-gyro')[0].addEventListener('click', functio
 });
 
 function on_click(point, rotation) {
-  snot.load_sprites([{
+  snot.add_sprites([{
     generator: 'spot',
     id: 'spot-' + Math.random(),
     x: point.x,

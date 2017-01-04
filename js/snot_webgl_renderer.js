@@ -132,6 +132,7 @@ function init(config) {
   snot.camera.target = new THREE.Vector3(0, 0, 0);
 
   scene = new THREE.Scene();
+  window.scene=scene;
 
   if (config.callback) {
     config.callback();
@@ -144,7 +145,7 @@ function init(config) {
   scene.add(SphereMesh);
   snot.suspects_for_raycaster.push(SphereMesh);
 
-  load_sprites(config.sprites);
+  add_sprites(config.sprites);
 
   snot.raycaster = new THREE.Raycaster();
   snot.raycaster.far = snot.size * 2;
@@ -277,19 +278,31 @@ function set_ry(ry) {
   snot.dest_ry = ry;
 }
 
-function load_sprites(sps) {
+function add_sprites(sps) {
   for (var i in sps) {
     var data = sps[i];
     var functionName = data.generator;
     var mesh = snot.generator[functionName](data);
 
     mesh.data = data;
+    mesh.name = i;
     mesh.visible = data.visible === undefined ? true : data.visible;
 
     sprites[mesh.name] = mesh;
     snot.suspects_for_raycaster.push(mesh);
     scene.add(mesh);
 
+  }
+}
+
+function remove_sprite(sprite_id) {
+  var mesh = scene.getChildByName(sprite_id);
+  scene.remove(mesh);
+  for (var i in snot.suspects_for_raycaster) {
+    if (snot.suspects_for_raycaster[i].name == sprite_id) {
+      snot.suspects_for_raycaster.splice(i, 1);
+      return;
+    }
   }
 }
 
@@ -328,7 +341,8 @@ util.merge_json(snot, {
   run: run,
   update: update,
   update_sprites: update_sprites,
-  load_sprites: load_sprites,
+  add_sprites: add_sprites,
+  remove_sprite: remove_sprite,
   screenshot: screenshot,
 });
 

@@ -16,7 +16,7 @@ HTML5/Webgl panorama viewer
 
 #Usage
 ###CSS Render
-####./index.html
+####./examples/streetview.html
 ```
 <head>
   <link rel="stylesheet" type="text/css" href="build/css/snot.min.css">
@@ -71,7 +71,7 @@ HTML5/Webgl panorama viewer
     // ...
     // after snot.init
     snot.generator.spot = template('template-spot');
-    snot.load_sprites([{
+    snot.add_sprites([{
       //Essentials
       generator: 'spot',
       id: 'spot-'+123,
@@ -86,7 +86,7 @@ HTML5/Webgl panorama viewer
   </script>
 ```
 ###Webgl Render
-####./index_webgl_renderer.html
+####./examples/streetview_webgl_renderer.html
 ```
 <div id="snot-wrap">
   <div id="snot-container">
@@ -95,7 +95,7 @@ HTML5/Webgl panorama viewer
 <script src="build/js/snot_webgl_renderer.min.js"></script>
 ```
 ####Custom Sprites
-####./index_webgl_renderer.html
+####./examples/shooting_webgl_renderer.html
 
 ##Interaction
 ```
@@ -105,6 +105,7 @@ function on_click(point, rotation) {
 function sprite_on_click(data) {
   console.log(data);
 }
+
 snot.init({
   //...
   on_click: on_click, // when you are clicking the backgrounds
@@ -160,4 +161,14 @@ snot.init({
   on_click: function() {}, // background on click
   sprite_on_click: function() {},
 }
+
+###API
+set_fov(fov:number);
+set_rx(rx:number);
+set_ry(ry:number);
+add_sprites(sprites);
+remove_sprite(sprite_id);
+update(); // update manually, see examples/shooting_webgl_renderer.html
+run(); // start main loop, it will call snot.update automatically.
+screenshot(); //return base64_imgs_arr[front, down, left, back, top, right], webgl_renderer only.
 ```

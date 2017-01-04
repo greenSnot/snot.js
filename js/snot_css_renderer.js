@@ -90,7 +90,7 @@ var set_fov = function (degree) {
 function reset() {
   var sprites = document.getElementsByClassName('sprite');
   for (var i = 0; i < sprites.length; ++ i) {
-    sprites[i].remove();
+    remove_sprite(i);
   }
 }
 
@@ -145,7 +145,7 @@ var init = function(config) {
   }
 
   if (config) {
-    load_sprites(config.sprites);
+    add_sprites(config.sprites);
   }
 
   if (util.is_mobile()) {
@@ -190,7 +190,7 @@ function load_bg_imgs(bg_imgs, bg_rotation) {
   }
 }
 
-var load_sprites = function(sprites) {
+var add_sprites = function(sprites) {
   for (var i in sprites) {
     if (!snot.sprites[sprites[i].id]) {
       snot.sprites[sprites[i].id] = sprites[i];
@@ -203,6 +203,11 @@ var load_sprites = function(sprites) {
     element.data = sprites[i];
     add_sprite_by_position(element, t);
   }
+};
+
+var remove_sprite = function(sprite_id) {
+  document.getElementById(sprite_id).remove();
+  delete(snot.sprites[sprite_id]);
 };
 
 function add_sprite_by_position(element, p) {
@@ -432,7 +437,8 @@ util.merge_json(snot, {
   init: init,
   run: run,
   update: update,
-  load_sprites: load_sprites,
+  add_sprites: add_sprites,
+  remove_sprite: remove_sprite,
 });
 
 module.exports = snot;
