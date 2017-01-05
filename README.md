@@ -162,6 +162,7 @@ snot.init({
   sprite_on_click: function() {},
 }
 
+```
 ###API
 set_fov(fov:number);
 set_rx(rx:number);
@@ -171,4 +172,3 @@ remove_sprite(sprite_id);
 update(); // update manually, see examples/shooting_webgl_renderer.html
 run(); // start main loop, it will call snot.update automatically.
 screenshot(); //return base64_imgs_arr[front, down, left, back, top, right], webgl_renderer only.
-```
