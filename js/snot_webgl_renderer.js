@@ -4,6 +4,7 @@ var controls = require('./snot_controls.js');
 var PI = Math.PI;
 var snot = {
   version: 1.01,
+  scene: undefined,
   renderer: 'webgl',
   camera_look_at: {
     x: 0,
@@ -68,7 +69,6 @@ var epsilon = util.epsilon;
 var distance3D = util.distance3D;
 var distance2D = util.distance2D;
 
-var scene;
 var renderer;
 var screenshot_renderer;
 var bg_materials = [];
@@ -88,7 +88,7 @@ function load_bg_imgs(imgs) {
       map: new THREE.TextureLoader().load(imgs[0])
     });
     var SphereMesh = new THREE.Mesh(SphereGeometry, SphereMaterial);
-    scene.add(SphereMesh);
+    snot.scene.add(SphereMesh);
   } else if (img.length == 6) {
     var size = snot.size;
     var precision = 1;
@@ -104,7 +104,7 @@ function load_bg_imgs(imgs) {
     var mesh = new THREE.Mesh(geometry, material);
     mesh.scale.x = - 1;
 
-    scene.add(mesh);
+    snot.scene.add(mesh);
   }
 }
 function init(config) {
@@ -123,7 +123,7 @@ function init(config) {
   snot.height = snot.dom.offsetHeight;
   snot.smooth = 0;
   for (i in sprites) {
-    scene.remove(scene.getObjectByName(i));
+    snot.scene.remove(snotscene.getObjectByName(i));
   }
   sprites = {};
 
@@ -131,8 +131,7 @@ function init(config) {
   snot.camera = new THREE.PerspectiveCamera(snot.fov, window.innerWidth / window.innerHeight, 1, snot.size);
   snot.camera.target = new THREE.Vector3(0, 0, 0);
 
-  scene = new THREE.Scene();
-  window.scene=scene;
+  snot.scene = new THREE.Scene();
 
   if (config.callback) {
     config.callback();
@@ -142,7 +141,7 @@ function init(config) {
   var SphereGeometry = new THREE.SphereGeometry(snot.size * 2, 32, 32);
   var SphereMaterial = new THREE.MeshBasicMaterial({side: THREE.DoubleSide});
   var SphereMesh = new THREE.Mesh(SphereGeometry, SphereMaterial);
-  scene.add(SphereMesh);
+  snot.scene.add(SphereMesh);
   snot.suspects_for_raycaster.push(SphereMesh);
 
   add_sprites(config.sprites);
@@ -240,7 +239,7 @@ function update() {
   snot.camera.updateProjectionMatrix();
   snot.camera_look_at = snot.camera.localToWorld(new THREE.Vector3(0, 0, -1));
   update_sprites();
-  renderer.render(scene, snot.camera);
+  renderer.render(snot.scene, snot.camera);
 
   ++ snot.frames;
 }
@@ -290,14 +289,14 @@ function add_sprites(sps) {
 
     sprites[mesh.name] = mesh;
     snot.suspects_for_raycaster.push(mesh);
-    scene.add(mesh);
+    snot.scene.add(mesh);
 
   }
 }
 
 function remove_sprite(sprite_id) {
-  var mesh = scene.getChildByName(sprite_id);
-  scene.remove(mesh);
+  var mesh = snot.scene.getChildByName(sprite_id);
+  snot.scene.remove(mesh);
   for (var i in snot.suspects_for_raycaster) {
     if (snot.suspects_for_raycaster[i].name == sprite_id) {
       snot.suspects_for_raycaster.splice(i, 1);
@@ -327,7 +326,7 @@ function screenshot() {
   var images = []; // front bottom left back top right
   for (var i = 0;i < 6; ++i) {
     camera.lookAt(new THREE.Vector3(look_at[i][0], look_at[i][1], look_at[i][2]));
-    screenshot_renderer.render(scene, camera);
+    screenshot_renderer.render(snot.scene, camera);
     images.push(screenshot_renderer.domElement.toDataURL('image/png'));
   }
   return images;
