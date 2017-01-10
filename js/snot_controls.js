@@ -9,6 +9,7 @@ function init(caller) {
   dom_offset_left = util.left_pos(snot.dom);
   dom_offset_top = util.top_pos(snot.dom);
 
+  snot.controls.screen_orientation = window.orientation;
   window.addEventListener('orientationchange', function(ev) {
     snot.controls.screen_orientation = window.orientation || 0;
   }, false);

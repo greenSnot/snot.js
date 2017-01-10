@@ -128,7 +128,7 @@ function init(config) {
   sprites = {};
 
   var container = snot.container;
-  snot.camera = new THREE.PerspectiveCamera(snot.fov, window.innerWidth / window.innerHeight, 1, snot.size);
+  snot.camera = new THREE.PerspectiveCamera(snot.fov, snot.width / snot.height, 1, snot.size);
   snot.camera.target = new THREE.Vector3(0, 0, 0);
 
   snot.scene = new THREE.Scene();
@@ -172,6 +172,15 @@ function init(config) {
   controls.init(snot);
 }
 
+window.onresize = function() {
+  snot.width = snot.dom.offsetWidth;
+  snot.height = snot.dom.offsetHeight;
+
+  snot.camera.aspect = snot.width / snot.height;
+  snot.camera.updateProjectionMatrix();
+  renderer.setSize(snot.width, snot.height);
+};
+
 snot.controls.mouse_click = function(x, y) {
   var mouse = new THREE.Vector2();
   mouse.set((x / snot.width) * 2 - 1, - (y / snot.height) * 2 + 1);
@@ -195,9 +204,9 @@ var target_quat = new THREE.Quaternion();
 var rotate_90_quat = new THREE.Quaternion(- sqrt( 0.5 ), 0, 0, sqrt( 0.5 ));
 var adjust_screen_quats = {
   0: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0),
-  90: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - 90),
-  180: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - 180),
-  '-90': new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 90),
+  90: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - Math.PI / 2),
+  180: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - Math.PI),
+  '-90': new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 2),
 };
 
 function update() {
@@ -208,10 +217,12 @@ function update() {
   var rx = - snot.dest_ry * Math.PI / 180 + Math.PI;
   var rz = 0;
 
+  var orientation = 0;
   if (snot.gyro) {
     ry = snot.controls.gyro_data.beta;
     rx = snot.controls.gyro_data.alpha;
     rz = - snot.controls.gyro_data.gamma;
+    orientation = snot.controls.screen_orientation;
   }
 
   snot.camera.autoUpdateMatrix = false;
@@ -221,7 +232,8 @@ function update() {
   target_quat.setFromEuler(camera_euler); // orient the device
   target_quat.multiply(rotate_90_quat); // camera looks out the back of the device, not the top
                                         // - PI/2 around the x-axis
-  target_quat.multiply(adjust_screen_quats[snot.controls.screen_orientation]); // adjust for screen orientation
+
+  target_quat.multiply(adjust_screen_quats[orientation]); // adjust for screen orientation
 
   var new_quat = new THREE.Quaternion();
   THREE.Quaternion.slerp(snot.camera.quaternion, target_quat, new_quat, 1 - snot.smooth);

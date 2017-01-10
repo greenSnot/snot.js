@@ -7,7 +7,6 @@ var util = {
   top_pos: top_pos,
   standardlization: standardlization,
   is_mobile: is_mobile,
-  is_wechat_login: is_wechat_login,
   get_window_width: get_window_width,
   get_window_height: get_window_height,
   position_to_rotation: position_to_rotation,
@@ -56,12 +55,8 @@ function left_pos(elem) {
 }
 
 function is_mobile() {
-  //TODO
-  return get_window_width() < 500;
-}
-
-function is_wechat_login() {
-  return window.navigator.userAgent.indexOf('MicroMessenger') >= 0 ? true : false;
+  var agent = window.navigator.userAgent.toLowerCase();
+  return agent.indexOf('ipad') > 0 || agent.indexOf('iphone') > 0 || agent.indexOf('android') > 0;
 }
 
 function get_window_width() {

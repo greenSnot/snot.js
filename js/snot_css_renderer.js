@@ -166,6 +166,15 @@ var init = function(config) {
   update();
 };
 
+window.onresize = function() {
+  snot.width = snot.dom.offsetWidth;
+  snot.height = snot.dom.offsetHeight;
+  snot.perspective = snot.width / 2 / tan(snot.max_fov / 2 * PI / 180);
+  snot.container.style['-webkit-perspective'] = snot.perspective + 'px';
+  camera_base_transform = 'translateX(' + epsilon(- (snot._size - snot.width) / 2) + 'px) translateY(' + epsilon(- (snot._size - snot.height) / 2) + 'px)';
+  camera_dom.style['-webkit-transform'] = 'translateZ(-' + snot.perspective + 'px) rotateY(' + epsilon(snot.rx) + 'deg) rotateX(' + epsilon(snot.ry) + 'deg)' + camera_base_transform;
+};
+
 function load_bg_imgs(bg_imgs, bg_rotation) {
   var bg_config = {
     front : 'rotateY(90deg)' + '                rotateZ(' + bg_rotation[0] + 'deg)  translateZ(-' + (snot._size / 2) + 'px)',
@@ -283,13 +292,17 @@ var target_quat = new THREE.Quaternion();
 var rotate_90_quat = new THREE.Quaternion(- sqrt( 0.5 ), 0, 0, sqrt( 0.5 ));
 var adjust_screen_quats = {
   0: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0),
-  90: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - 90),
-  180: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - 180),
-  '-90': new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 90),
+  90: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - Math.PI / 2),
+  180: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), - Math.PI),
+  '-90': new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 2),
 };
 var look_at_euler = new THREE.Euler();
 
 function update_camera(x, y, z) {
+  var orientation = 0;
+  if (snot.gyro) {
+    orientation = snot.controls.screen_orientation;
+  }
 
   camera_euler.set(y, x, z, 'YXZ'); // 'ZXY' for the device, but 'YXZ' for us
 
@@ -297,7 +310,7 @@ function update_camera(x, y, z) {
 
   target_quat.multiply(rotate_90_quat); // camera looks out the back of the device, not the top
                                         // - PI/2 around the x-axis
-  target_quat.multiply(adjust_screen_quats[snot.controls.screen_orientation]); // adjust for screen orientation
+  target_quat.multiply(adjust_screen_quats[orientation]); // adjust for screen orientation
 
   var slerp_quat = new THREE.Quaternion();
   THREE.Quaternion.slerp(target_quat, previous_quat, slerp_quat, snot.smooth);
