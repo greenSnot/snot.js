@@ -21,9 +21,15 @@
   height:20px;
 }
 
-.btn-gyro{
+.btn-gyro {
   position:absolute;
   top:20px;
   left:20px;
   z-index:40;
+}
+
+.fps {
+ position:absolute;
+ top:0;
+ right:0;
 }

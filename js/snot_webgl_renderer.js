@@ -63,6 +63,7 @@ var snot = {
   suspects_for_raycaster: [],
   raycaster_on_touch_move: false,
   raycaster_on_touch_start: false,
+  raycaster_from_mouse: null, 
 };
 
 var epsilon = util.epsilon;
@@ -181,11 +182,15 @@ window.onresize = function() {
   renderer.setSize(snot.width, snot.height);
 };
 
-snot.controls.mouse_click = function(x, y) {
+snot.raycaster_from_mouse = function(x, y) {
   var mouse = new THREE.Vector2();
   mouse.set((x / snot.width) * 2 - 1, - (y / snot.height) * 2 + 1);
   snot.raycaster.setFromCamera(mouse, snot.camera);
-  var intersects = snot.raycaster.intersectObjects(snot.suspects_for_raycaster);
+  return snot.raycaster.intersectObjects(snot.suspects_for_raycaster);
+};
+
+snot.controls.mouse_click = function(x, y) {
+  var intersects = snot.raycaster_from_mouse(x, y);
   if (intersects.length !== 0) {
     var point = intersects[0].point;
     if (intersects[0].object.data) {

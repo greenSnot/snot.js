@@ -137,7 +137,22 @@ snot.init({
   sprites: sprites,
 });
 
+var fps_dom = document.getElementsByClassName('fps')[0];
+var update_time_arr = [];
+function update_fps() {
+  var now = new Date().valueOf();
+  for (var t = 0; t < update_time_arr.length; ++t) {
+    if (update_time_arr[t] < now - 1000) {
+      update_time_arr.splice(t, 1);
+      t--;
+    }
+  }
+  update_time_arr.push(now);
+  fps_dom.innerHTML = update_time_arr.length;
+}
+
 function update() {
+  update_fps();
   var i;
   var candidates_a = [], candidates_b = [];
   for (i in bullets) {
