@@ -296,6 +296,10 @@ function set_ry(ry) {
 
 function add_sprites(sps) {
   for (var i in sps) {
+    if (snot.sprites[i]) {
+      console.warn('sprite exists');
+      return;
+    }
     var data = sps[i];
     var functionName = data.generator;
     var mesh = snot.generator[functionName](data);
@@ -305,6 +309,7 @@ function add_sprites(sps) {
     mesh.visible = data.visible === undefined ? true : data.visible;
 
     sprites[mesh.name] = mesh;
+    snot.sprites[mesh.name] = data;
     snot.suspects_for_raycaster.push(mesh);
     snot.scene.add(mesh);
 
