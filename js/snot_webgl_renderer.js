@@ -6,6 +6,7 @@ var snot = {
   version: 1.01,
   scene: undefined,
   renderer: 'webgl',
+  sprites: {},
   camera_look_at: {
     x: 0,
     y: 0,
@@ -30,7 +31,6 @@ var snot = {
   bg_rotation: [0, 0, 0, 0, 0, 0],
 
   pause_animation: false,
-  generator: {},
 
   dom      : document.getElementById('snot-wrap'),
   camera   : undefined,
@@ -111,12 +111,6 @@ function load_bg_imgs(imgs) {
 function init(config) {
   var i;
   for (i in config) {
-    if (i == 'generator') {
-      for (var j in config.generator) {
-        snot.generator[j] = config.generator[j];
-      }
-      continue;
-    }
     snot[i] = config[i];
   }
   var smooth = snot.smooth;
@@ -295,17 +289,18 @@ function set_ry(ry) {
 }
 
 function add_sprites(sps) {
+  var id;
   for (var i in sps) {
-    if (snot.sprites[i]) {
+    id = sps[i].id;
+    if (sprites[id]) {
       console.warn('sprite exists');
       return;
     }
     var data = sps[i];
-    var functionName = data.generator;
-    var mesh = snot.generator[functionName](data);
+    var mesh = data.mesh_generator();
 
     mesh.data = data;
-    mesh.name = i;
+    mesh.name = id;
     mesh.visible = data.visible === undefined ? true : data.visible;
 
     sprites[mesh.name] = mesh;

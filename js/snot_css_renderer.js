@@ -1,7 +1,6 @@
 var util = require('./snot_util.js');
 var controls = require('./snot_controls.js');
 var THREE = require('three');
-var template = require('art-template');
 
 var PI = Math.PI;
 var sin = Math.sin;
@@ -46,7 +45,6 @@ var snot = {
   size: 1024,
   clicks_depth: 1024 / 2.5,
 
-  generator: {},
   gyro: false,
   ry: 0,        // Rotate * degrees around y axis
   rx: 0,        // Rotate * degrees around x axis
@@ -100,9 +98,6 @@ var init = function(config) {
   cancelAnimationFrame(snot._animateId);
 
   for (var i in config) {
-    if (i == 'generator') {
-      util.merge_json(snot.generator, config.generator);
-    }
     snot[i] = config[i];
   }
 
@@ -206,8 +201,7 @@ var add_sprites = function(sprites) {
     }
     var t = sprites[i];
     var temp_wrapper = document.createElement('div');
-    var inner_html = document.getElementById(snot.generator[t.generator]).innerHTML;
-    temp_wrapper.innerHTML = template.render(inner_html)(t);
+    temp_wrapper.innerHTML = t.mesh_generator();
     var element = temp_wrapper.children[0];
     element.data = sprites[i];
     add_sprite_by_position(element, t);

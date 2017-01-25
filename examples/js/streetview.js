@@ -7,9 +7,17 @@ document.getElementsByClassName('btn-gyro')[0].addEventListener('click', functio
   snot.gyro = !snot.gyro;
 });
 
+function spot_generator() {
+  return '' +
+    '<div class="spot-' + this.spotType + '">' +
+      '<div class="spot-description">' + this.text + '</div>' +
+      '<img class="spot-image" src="images/' + this.spotType + '.png"/>' +
+    '</div>';
+}
+
 function on_click(point, rotation) {
   snot.add_sprites([{
-    generator: 'spot',
+    mesh_generator: spot_generator,
     id: 'spot-' + Math.random(),
     x: point.x,
     y: point.y,
@@ -22,8 +30,8 @@ function on_click(point, rotation) {
 
 var sprites = {
   '-x-axis': {
-    generator: 'spot',
-    id: '-x',
+    mesh_generator: spot_generator,
+    id: '-x-axis',
     x: - 360,
     y: 0,
     z: 0,
@@ -32,8 +40,8 @@ var sprites = {
     text: '-x',
   },
   '-z-axis': {
-    generator: 'spot',
-    id: '-z',
+    mesh_generator: spot_generator,
+    id: '-z-axis',
     z: - 360,
     x: 0,
     y: 0,
@@ -42,8 +50,8 @@ var sprites = {
     text: '-z',
   },
   '-y-axis': {
-    generator: 'spot',
-    id: '-y',
+    mesh_generator: spot_generator,
+    id: '-y-axis',
     y: - 360,
     x: 0,
     z: 0,
@@ -52,8 +60,8 @@ var sprites = {
     text: '-y',
   },
   'x-axis': {
-    generator: 'spot',
-    id: 'x',
+    mesh_generator: spot_generator,
+    id: 'x-axis',
     x: 360,
     y: 0,
     z: 0,
@@ -62,8 +70,8 @@ var sprites = {
     text: 'x',
   },
   'y-axis': {
-    generator: 'spot',
-    id: 'y',
+    mesh_generator: spot_generator,
+    id: 'y-axis',
     x: 0,
     y: 360,
     z: 0,
@@ -72,8 +80,8 @@ var sprites = {
     text: 'y',
   },
   'z-axis': {
-    generator: 'spot',
-    id: 'z',
+    mesh_generator: spot_generator,
+    id: 'z-axis',
     x: 0,
     y: 0,
     z: 360,
@@ -82,7 +90,7 @@ var sprites = {
     text: 'z',
   },
   'spot1': {
-    generator: 'spot',
+    mesh_generator: spot_generator,
     id: 'spot1',
     x: 4,
     y: 120,
@@ -91,7 +99,7 @@ var sprites = {
     spotType: 'left',
     text: 'Home',
   }, 'spot2': {
-    generator: 'spot',
+    mesh_generator: spot_generator,
     id: 'spot2',
     x: 400,
     y: 0,
@@ -114,9 +122,6 @@ snot.init({
     'images/test.png',
     'images/test.png',
   ],
-  generator: {
-    spot: 'template-spot'
-  },
   rx: 0,
   ry: 0,
   on_click: on_click,

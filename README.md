@@ -61,19 +61,19 @@ HTML5/Webgl panorama viewer
 ```
 ###Custom Sprites
 ```
-  <script id="template-spot" type="text/html">
-    <div class="spot-<#=spotType#>">
-      <div class="spot-description"><#=text#></div>
-      <img class="spot-image" src="images/<#=spotType#>.png"/>
-    </div>
-  </script>
   <script>
     // ...
     // after snot.init
-    snot.generator.spot = template('template-spot');
+    function spot_generator() {
+      return '' +
+        '<div class="spot-' + this.spotType + '">' +
+          '<div class="spot-description">' + this.text + '</div>' +
+          '<img class="spot-image" src="images/' + this.spotType + '.png"/>' +
+        '</div>';
+    }
     snot.add_sprites([{
       //Essentials
-      generator: 'spot',
+      mesh_generator: spot_generator,
       id: 'spot-'+123,
       x: 100,
       y: 200,
@@ -145,7 +145,6 @@ snot.init({
   size: 1024,
   clicks_depth: 1024 / 2.5,
 
-  generator: {},
   gyro: false,
   ry: 0,        // Rotate * degrees around y axis
   rx: 0,        // Rotate * degrees around x axis

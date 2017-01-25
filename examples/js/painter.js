@@ -2,8 +2,8 @@ var util = snot.util;
 var THREE = snot.THREE;
 
 var color, depth = 300, range = 3;
-function brush_triangle(data) {
-  var point = new THREE.Vector3(data.x, data.y, data.z);
+function brush_triangle() {
+  var point = new THREE.Vector3(this.x, this.y, this.z);
   var size = 20;
 
   point.x += Math.random() * range - range;
@@ -31,8 +31,8 @@ function brush_triangle(data) {
 var vertex_a, vertex_b;
 
 var strip_head;
-function brush_strip(data) {
-  var point = new THREE.Vector3(data.x, data.y, data.z);
+function brush_strip() {
+  var point = new THREE.Vector3(this.x, this.y, this.z);
   var color = 0x553300;
   var scale = 1;
   var geometry = new THREE.Geometry();
@@ -52,8 +52,8 @@ function on_touch_move(e, x, y, point) {
   last_y = y;
 
   snot.add_sprites([{
-    //generator: 'brush_strip',
-    generator: 'brush_triangle',
+    //mesh_enerator: brush_strip,
+    mesh_generator: brush_triangle,
 
     id: 'spot-' + Math.random(),
     x: point.x,
@@ -92,10 +92,6 @@ snot.init({
   bg_imgs: [
     'images/forrest.jpg',
   ],
-  generator: {
-    brush_triangle: brush_triangle,
-    brush_strip: brush_strip,
-  },
   fov: 90,
   max_fov: 110,
   min_fov: 60,

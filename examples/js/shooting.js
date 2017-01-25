@@ -3,6 +3,14 @@ document.getElementsByClassName('btn-gyro')[0].addEventListener('click', functio
   snot.gyro = !snot.gyro;
 });
 
+function enemy_generator() {
+  return '<div class="enemy"></div>';
+}
+
+function bullet_generator() {
+  return '<div class="bullet">O</div>';
+}
+
 var sprites = {
 };
 
@@ -13,7 +21,7 @@ var max_enemies = 20;
 for (var i = 0 ;i < enemies_pool_size; ++i) {
   var id = 'enemy' + i;
   sprites[id] = {
-    generator: 'enemy',
+    mesh_generator: enemy_generator,
     id: id,
     x: 0,
     y: - 1,
@@ -41,7 +49,7 @@ var max_bullets = 35;
 for (var i = 0 ;i < bullet_pool_size; ++i) {
   var id = 'bullet' + i;
   sprites[id] = {
-    generator: 'bullet',
+    mesh_generator: bullet_generator,
     id: id,
     x: 0,
     y: - 1,
@@ -70,11 +78,6 @@ snot.init({
     'images/test.png',
   ],
   bg_rotation: [0,0,0,0,0,0],
-  generator: {
-    bullet: 'template-bullet',
-    spot: 'template-spot',
-    enemy: 'template-enemy',
-  },
   fov: 90,
   max_fov: 110,
   min_fov: 60,

@@ -5,7 +5,7 @@ document.getElementsByClassName('btn-gyro')[0].addEventListener('click', functio
   snot.gyro = !snot.gyro;
 });
 
-function bullet_generator(data) {
+function bullet_generator() {
   var size = 2;
   var loader = THREE.ImageUtils;
   var geometry = new THREE.PlaneGeometry(size, size);
@@ -16,14 +16,13 @@ function bullet_generator(data) {
     opacity: 0.5,
   });
   var mesh = new THREE.Mesh(geometry, material);
-  mesh.position.set(data.x, data.y, data.z);
-  mesh.lookAt(data.look_at);
+  mesh.position.set(this.x, this.y, this.z);
+  mesh.lookAt(this.look_at);
   mesh.visible = false;
-  mesh.name = data.id;
   return mesh;
 }
 
-function enemy_generator(data) {
+function enemy_generator() {
   var size = 20;
   var loader = THREE.ImageUtils;
   var geometry = new THREE.PlaneGeometry(size, size);
@@ -33,10 +32,9 @@ function enemy_generator(data) {
     opacity: 0.5,
   });
   var mesh = new THREE.Mesh(geometry, material);
-  mesh.position.set(data.x, data.y, data.z);
-  mesh.lookAt(data.look_at);
+  mesh.position.set(this.x, this.y, this.z);
+  mesh.lookAt(this.look_at);
   mesh.visible = false;
-  mesh.name = data.id;
   return mesh;
 }
 
@@ -50,7 +48,7 @@ var sprite_origin_data = {
   y: 0,
   z: 0,
 
-  generator: undefined,
+  mesh_generator: undefined,
   running: false,
   dest_x: 0,
   dest_y: 0,
@@ -67,11 +65,11 @@ var sprite_origin_data = {
   need_update_look_at: false,
 };
 var bullet_origin_data = util.clone(sprite_origin_data);
-bullet_origin_data.generator = 'bullet';
 bullet_origin_data.look_at = new THREE.Vector3(0, 0, 0);
+bullet_origin_data.mesh_generator = bullet_generator;
 var enemy_origin_data = util.clone(sprite_origin_data);
-enemy_origin_data.generator = 'enemy';
 enemy_origin_data.look_at = new THREE.Vector3(0, 0, 0);
+enemy_origin_data.mesh_generator = enemy_generator;
 
 function reset_bullet(bullet, id) {
   util.merge_json(bullet, bullet_origin_data, true);
@@ -123,10 +121,6 @@ snot.init({
   bg_imgs: [
     'images/forrest.jpg',
   ],
-  generator: {
-    bullet: bullet_generator,
-    enemy: enemy_generator
-  },
   fov: 90,
   max_fov: 110,
   min_fov: 60,

@@ -46,7 +46,7 @@ function text_generator(data) {
   return mesh;
 }
 
-function spot_generator(spot) {
+function spot_generator() {
   var size = 40;
   var loader = THREE.ImageUtils;
   var geometry = new THREE.PlaneGeometry(size, size);
@@ -58,18 +58,17 @@ function spot_generator(spot) {
 
   var material = new THREE.MeshBasicMaterial({
     transparent:true,
-    map: loader.loadTexture('http://7xiljm.com1.z0.glb.clouddn.com/images/tools/spot' + spotType2code[spot.spotType] + '.png?imageMogr2/gravity/NorthWest/crop/!128x128a0a0/interlace/0/thumbnail/!100p',THREE.UVMapping)
+    map: loader.loadTexture('http://7xiljm.com1.z0.glb.clouddn.com/images/tools/spot' + spotType2code[this.spotType] + '.png?imageMogr2/gravity/NorthWest/crop/!128x128a0a0/interlace/0/thumbnail/!100p',THREE.UVMapping)
   } );
 
   var mesh = new THREE.Mesh( geometry, material );
 
-  mesh.position.set(spot.x, spot.y, spot.z);
+  mesh.position.set(this.x, this.y, this.z);
   mesh.lookAt(new THREE.Vector3(0, 0, 0));
 
   var text = text_generator({
-    generator: 'text',
     id: 'x',
-    text: spot.text,
+    text: this.text,
     size: 120,
   });
   text.position.set(1, 12, 1);
@@ -86,7 +85,7 @@ function sprite_on_click(data) {
 
 function on_click(point, rotation) {
   snot.add_sprites([{
-    generator: 'spot',
+    mesh_generator: spot_generator,
 
     spotType: 'right',
     id: 'spot-' + Math.random(),
@@ -99,8 +98,8 @@ function on_click(point, rotation) {
 
 var sprites = {
   '-x-axis': {
-    generator: 'spot',
-    id: '-x',
+    mesh_generator: spot_generator,
+    id: '-x-axis',
     x: - 360,
     y: 0,
     z: 0,
@@ -109,8 +108,8 @@ var sprites = {
     text: '-x',
   },
   '-z-axis': {
-    generator: 'spot',
-    id: '-z',
+    mesh_generator: spot_generator,
+    id: '-z-axis',
     z: - 360,
     x: 0,
     y: 0,
@@ -119,8 +118,8 @@ var sprites = {
     text: '-z',
   },
   '-y-axis': {
-    generator: 'spot',
-    id: '-y',
+    mesh_generator: spot_generator,
+    id: '-y-axis',
     y: - 360,
     x: 0,
     z: 0,
@@ -129,8 +128,8 @@ var sprites = {
     text: '-y',
   },
   'x-axis': {
-    generator: 'spot',
-    id: 'x',
+    mesh_generator: spot_generator,
+    id: 'x-axis',
     x: 360,
     y: 0,
     z: 0,
@@ -139,8 +138,8 @@ var sprites = {
     text: 'x',
   },
   'y-axis': {
-    generator: 'spot',
-    id: 'y',
+    mesh_generator: spot_generator,
+    id: 'y-axis',
     x: 0,
     y: 360,
     z: 0,
@@ -149,8 +148,8 @@ var sprites = {
     text: 'y',
   },
   'z-axis': {
-    generator: 'spot',
-    id: 'z',
+    mesh_generator: spot_generator,
+    id: 'z-axis',
     x: 0,
     y: 0,
     z: 360,
@@ -159,7 +158,7 @@ var sprites = {
     text: 'z',
   },
   'spot1': {
-    generator: 'spot',
+    mesh_generator: spot_generator,
     spotType: 'left',
     id: 'spot1',
     text: 'Home',
@@ -167,7 +166,7 @@ var sprites = {
     y: 120,
     z: 360
   }, 'spot2': {
-    generator: 'spot',
+    mesh_generator: spot_generator,
     spotType: 'straight',
     id: 'spot2',
     text: 'Garage',
@@ -191,9 +190,6 @@ snot.init({
   bg_imgs: [
     'images/forrest.jpg',
   ],
-  generator: {
-    spot: spot_generator
-  },
   bg_rotation: [0, 0, 0, 0, 0, 0],
   fov: 90,
   max_fov: 110,
