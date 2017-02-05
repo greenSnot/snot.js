@@ -67,20 +67,6 @@ function get_window_height() {
   return document.documentElement.clientHeight;
 }
 
-function position_to_rotation(x, y, z) {
-  var r = distance3D(x, y, z, 0, 0, 0);
-  var rx = Math.asin(z / r);
-  var ry = Math.asin(y / r / Math.cos(rx));
-  if (x < 0) {
-    ry = ry > 0 ? Math.PI - ry : - Math.PI - ry;
-  }
-
-  return {
-    rx: - rx * 180 / Math.PI,
-    ry: (ry < 0 ? ry + Math.PI * 2 : ry) * 180 / Math.PI
-  };
-}
-
 function distance2D(a, b, c, d) {
   return Math.pow((a - c) * (a - c) + (b - d) * (b - d), 0.5);
 }
@@ -181,6 +167,20 @@ function load_js(file, callback) {
       }
     };
   }
+}
+
+function position_to_rotation(x, y, z) {
+  var r = distance3D(x, y, z, 0, 0, 0);
+  var rx = Math.asin(z / r);
+  var ry = Math.asin(y / r / Math.cos(rx));
+  if (x < 0) {
+    ry = ry > 0 ? Math.PI - ry : - Math.PI - ry;
+  }
+
+  return {
+    rx: - rx * 180 / Math.PI,
+    ry: (ry < 0 ? ry + Math.PI * 2 : ry) * 180 / Math.PI
+  };
 }
 
 function rotation_to_position(z, rx, ry, rz) {

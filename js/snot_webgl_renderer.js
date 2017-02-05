@@ -131,7 +131,10 @@ function init(config) {
   if (config.callback) {
     config.callback();
   }
-  load_bg_imgs(config.bg_imgs);
+
+  if (config.bg_imgs) {
+    load_bg_imgs(config.bg_imgs);
+  }
 
   var SphereGeometry = new THREE.SphereGeometry(snot.size * 2, 32, 32);
   var SphereMaterial = new THREE.MeshBasicMaterial({side: THREE.DoubleSide});
@@ -329,7 +332,8 @@ function run() {
   }
 }
 
-function screenshot() {
+function screenshot(directions) {
+  directions = directions || [true, true, true, true, true, true]; // front bottom left back top right
   var camera = new THREE.PerspectiveCamera(90, 1, 1, snot.size);
   camera.target = new THREE.Vector3(0, 0, 0);
   var look_at = [
@@ -340,8 +344,11 @@ function screenshot() {
     [0, 1, 0],
     [-1, 0, 0],
   ];
-  var images = []; // front bottom left back top right
+  var images = [];
   for (var i = 0;i < 6; ++i) {
+    if (!directions[i]) {
+      continue;
+    }
     camera.lookAt(new THREE.Vector3(look_at[i][0], look_at[i][1], look_at[i][2]));
     screenshot_renderer.render(snot.scene, camera);
     images.push(screenshot_renderer.domElement.toDataURL('image/png'));

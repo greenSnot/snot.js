@@ -1,16 +1,15 @@
 var util = snot.util;
 var THREE = snot.THREE;
 
-var color, depth = 300, range = 3;
+var color, depth = 300, random_range = 3;
 function brush_triangle() {
   var point = new THREE.Vector3(this.x, this.y, this.z);
   var size = 20;
 
-  point.x += Math.random() * range - range;
-  point.y += Math.random() * range - range;
-  point.z += Math.random() * range - range;
+  point.x += Math.random() * random_range - random_range;
+  point.y += Math.random() * random_range - random_range;
+  point.z += Math.random() * random_range - random_range;
   util.standardlization(point, depth);
-  depth -= 0.2;
 
   var geo = new THREE.Geometry();
   geo.vertices.push(vertex_a);
@@ -22,7 +21,7 @@ function brush_triangle() {
 
   var mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: color - Math.random() * 1000, transparent: true, opacity: 0.8, side: THREE.DoubleSide}));
 
-  vertex_a = snot.frames % 2 == 0? vertex_b : vertex_a;
+  vertex_a = snot.frames % 2 === 0? vertex_b : vertex_a;
   vertex_b = point;
 
   return mesh;
@@ -45,9 +44,9 @@ function brush_strip() {
   return mesh;
 }
 
-var last_x, last_y;
-function on_touch_move(e, x, y, point) {
-  range = util.distance2D(x, y, last_x, last_y) + 10;
+function on_touch_move(e, x, y, point, intersects) {
+
+  random_range = util.distance2D(x, y, last_x, last_y) + 10;
   last_x = x;
   last_y = y;
 
@@ -55,7 +54,7 @@ function on_touch_move(e, x, y, point) {
     //mesh_enerator: brush_strip,
     mesh_generator: brush_triangle,
 
-    id: 'spot-' + Math.random(),
+    id: 'shape-' + Math.random(),
     x: point.x,
     y: point.y,
     z: point.z
@@ -72,13 +71,13 @@ function on_touch_start(e, x, y, point) {
   strip_head = point.clone();
 
   color = Math.ceil(Math.random() * 0xffffff);
-  var range = 20;
+  var random_range = 20;
   vertex_a = point.clone();
   vertex_b = point.clone();
   function make_bias(v) {
-    v.x += Math.random() * range - range;
-    v.y += Math.random() * range - range;
-    v.z += Math.random() * range - range;
+    v.x += Math.random() * random_range - random_range;
+    v.y += Math.random() * random_range - random_range;
+    v.z += Math.random() * random_range - random_range;
     util.standardlization(v, depth);
   }
   make_bias(vertex_a);

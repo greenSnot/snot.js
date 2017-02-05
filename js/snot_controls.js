@@ -87,8 +87,8 @@ var mouse_move = function(event) {
 
   if (snot.on_touch_move) {
     if (snot.raycaster_on_touch_move) {
-      var point = compute_raycaster_point(x, y);
-      snot.on_touch_move(event, x, y, point);
+      var res = raycaster_compute(x, y);
+      snot.on_touch_move(event, x, y, res.point, res.intersects);
       return;
     } else {
       snot.on_touch_move(event, x, y);
@@ -106,13 +106,16 @@ var mouse_move = function(event) {
 
 };
 
-function compute_raycaster_point(x, y) {
+function raycaster_compute(x, y) {
   var mouse = new THREE.Vector2();
   mouse.set((x / snot.width) * 2 - 1, - (y / snot.height) * 2 + 1);
   snot.raycaster.setFromCamera(mouse, snot.camera);
   var intersects = snot.raycaster.intersectObjects(snot.suspects_for_raycaster);
   var point = util.standardlization(intersects[0].point, snot.clicks_depth);
-  return point;
+  return {
+    point: point,
+    intersects: intersects
+  };
 }
 
 var mouse_down = function (event) {
@@ -142,8 +145,8 @@ var mouse_down = function (event) {
   touches.is_touching = true;
   if (snot.on_touch_start) {
     if (snot.raycaster_on_touch_start) {
-      var point = compute_raycaster_point(x, y);
-      snot.on_touch_start(event, x, y, point);
+      var res = raycaster_compute(x, y);
+      snot.on_touch_start(event, x, y, res.point, res.intersects);
     } else {
       snot.on_touch_start(event, x, y);
     }
