@@ -2,33 +2,60 @@ var util = snot.util;
 var THREE = snot.THREE;
 
 var grid;
+var last_x;
+var last_y;
 
 function set_color_from_intersects(intersects, color) {
   for (var i = 0; i < intersects.length; ++i) {
     if (intersects[i].object.name == 'grid') {
       intersects[i].face.color.set(color);
       grid.geometry.colorsNeedUpdate = true;
+      return;
     }
   }
 }
 
-function on_touch_move(e, x, y, point, intersects) {
+function get_color() {
   var random_color_range = 0.3;
   var random_color = new THREE.Color().setRGB(0.5 + Math.random() * random_color_range,
       0.3 + Math.random * random_color_range,
       0 + Math.random * random_color_range);
-  set_color_from_intersects(intersects, random_color);
+  return random_color;
+}
+
+function on_touch_move(e, x, y, point, intersects) {
+  set_color_from_intersects(intersects, get_color());
+  var distance_to_last = util.distance2D(last_x, last_y, x, y);
+  if (distance_to_last > 80) {
+    var min_offset = 15;
+    var steps = Math.floor(distance_to_last / min_offset);
+
+    var i = x;
+    var i_end = last_x;
+    var j = y;
+    var j_end = last_y;
+
+    var offset_i = (i_end - i) / steps;
+    var offset_j = (j_end - j) / steps;
+    for (var k = 0; k < steps; ++k) {
+      intersects = snot.raycaster_from_mouse(i, j);
+      set_color_from_intersects(intersects, get_color());
+      i += offset_i;
+      j += offset_j;
+    }
+
+  }
+  last_x = x;
+  last_y = y;
 }
 
 function on_touch_start(e, x, y, point, intersects) {
   if (e.touches.length > 1) {
     return;
   }
-  var random_color_range = 0.3;
-  var random_color = new THREE.Color().setRGB(0.5 + Math.random() * random_color_range,
-      0.3 + Math.random * random_color_range,
-      0 + Math.random * random_color_range);
-  set_color_from_intersects(intersects, random_color);
+  last_x = x;
+  last_y = y;
+  set_color_from_intersects(intersects, get_color());
 }
 
 snot.init({
@@ -43,6 +70,7 @@ snot.init({
   rx: 0,
   ry: 0,
   on_touch_move: on_touch_move,
+  fisheye_offset: 30,
   on_touch_start: on_touch_start,
   raycaster_on_touch_move: true,
   raycaster_on_touch_start: true,
@@ -51,7 +79,7 @@ snot.init({
       id: 'grid',
       mesh_generator: function () {
         grid = new THREE.Mesh(
-          new THREE.IcosahedronGeometry(300, 5),
+          new THREE.IcosahedronGeometry(100, 5),
           new THREE.MeshBasicMaterial({color: 0xffffff, vertexColors: THREE.VertexColors, side: THREE.DoubleSide})
         );
         return grid;
@@ -63,4 +91,23 @@ snot.init({
   ]
 });
 
-snot.run();
+var fps_dom = document.getElementsByClassName('fps')[0];
+var update_time_arr = [];
+function update_fps() {
+  var now = new Date().valueOf();
+  for (var t = 0; t < update_time_arr.length; ++t) {
+    if (update_time_arr[t] < now - 1000) {
+      update_time_arr.splice(t, 1);
+      t--;
+    }
+  }
+  update_time_arr.push(now);
+  fps_dom.innerHTML = update_time_arr.length;
+}
+
+function update() {
+  update_fps();
+  snot.update();
+  requestAnimationFrame(update);
+}
+update();

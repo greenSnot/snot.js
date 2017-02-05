@@ -7,6 +7,7 @@ var snot = {
   scene: undefined,
   renderer: 'webgl',
   sprites: {},
+  fisheye_offset: 0,
   camera_look_at: {
     x: 0,
     y: 0,
@@ -123,8 +124,10 @@ function init(config) {
   sprites = {};
 
   var container = snot.container;
-  snot.camera = new THREE.PerspectiveCamera(snot.fov, snot.width / snot.height, 1, snot.size);
+  snot.camera = new THREE.PerspectiveCamera(snot.fov, snot.width / snot.height, 1, snot.size * 2);
   snot.camera.target = new THREE.Vector3(0, 0, 0);
+  snot.camera.position.copy(snot.camera.localToWorld(new THREE.Vector3(0, 0, - snot.fisheye_offset)));
+  snot.camera.updateMatrixWorld();
 
   snot.scene = new THREE.Scene();
 
@@ -251,7 +254,10 @@ function update() {
 
   snot.camera.fov = snot.fov;
   snot.camera.updateProjectionMatrix();
-  snot.camera_look_at = snot.camera.localToWorld(new THREE.Vector3(0, 0, -1));
+  snot.camera.updateMatrixWorld();
+  snot.camera_look_at = snot.camera.localToWorld(new THREE.Vector3(0, 0, 3 + snot.fisheye_offset)).normalize();
+  snot.camera.position.copy(snot.camera_look_at).multiplyScalar(snot.fisheye_offset);
+
   update_sprites();
   renderer.render(snot.scene, snot.camera);
 
