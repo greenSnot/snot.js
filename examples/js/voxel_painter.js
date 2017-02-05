@@ -4,6 +4,7 @@ var THREE = snot.THREE;
 var grid;
 var last_x;
 var last_y;
+var current_color = new THREE.Color();
 
 function set_color_from_intersects(intersects, color) {
   for (var i = 0; i < intersects.length; ++i) {
@@ -17,9 +18,9 @@ function set_color_from_intersects(intersects, color) {
 
 function get_color() {
   var random_color_range = 0.3;
-  var random_color = new THREE.Color().setRGB(0.5 + Math.random() * random_color_range,
-      0.3 + Math.random * random_color_range,
-      0 + Math.random * random_color_range);
+  var random_color = new THREE.Color().setRGB(current_color.r + Math.random() * random_color_range,
+      current_color.g + Math.random() * random_color_range,
+      current_color.b + Math.random() * random_color_range);
   return random_color;
 }
 
@@ -111,3 +112,28 @@ function update() {
   requestAnimationFrame(update);
 }
 update();
+
+var palette_dom = document.getElementsByClassName('palette')[0];
+
+function add_color(color) {
+  var dom = document.createElement('div');
+  dom.setAttribute('class', 'palette-color');
+  dom.setAttribute('style', 'background-color:#' + color);
+  dom.setAttribute('data-color', color);
+  dom.addEventListener('click', function() {
+    var color = parseInt(this.getAttribute('data-color'), 16);
+    current_color.setHex(color);
+  });
+  palette_dom.append(dom);
+}
+
+function init_palette() {
+  var c = new THREE.Color();
+  for (var i = 0.3; i < 1; i+= 0.1) {
+    c.setHSL(0, 1, i);
+    add_color(c.getHex().toString(16));
+  }
+  current_color.setRGB(0.5, 0.3, 0);
+}
+
+init_palette();
