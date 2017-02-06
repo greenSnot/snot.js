@@ -1,16 +1,16 @@
 var util = snot.util;
 var THREE = snot.THREE;
 
-var grid;
+var triangle_net;
 var last_x;
 var last_y;
 var current_color = new THREE.Color();
 
 function set_color_from_intersects(intersects, color) {
   for (var i = 0; i < intersects.length; ++i) {
-    if (intersects[i].object.name == 'grid') {
+    if (intersects[i].object.name === 'triangle_net') {
       intersects[i].face.color.set(color);
-      grid.geometry.colorsNeedUpdate = true;
+      triangle_net.geometry.colorsNeedUpdate = true;
       return;
     }
   }
@@ -77,14 +77,38 @@ snot.init({
   raycaster_on_touch_start: true,
   sprites: [
     {
-      id: 'grid',
+      id: 'triangle_net',
       mesh_generator: function () {
-        grid = new THREE.Mesh(
+        triangle_net = new THREE.Mesh(
           new THREE.IcosahedronGeometry(100, 5),
           new THREE.MeshBasicMaterial({color: 0xffffff, vertexColors: THREE.VertexColors, side: THREE.DoubleSide})
         );
-        return grid;
+        return triangle_net;
       },
+      x: 0,
+      y: 0,
+      z: 0
+    }, {
+      id: 'auxiliary_triangle_net',
+      mesh_generator: function () {
+        return new THREE.Mesh(
+          new THREE.IcosahedronGeometry(99, 5),
+          new THREE.MeshBasicMaterial({wireframe: true, color: 0x666666, opacity: 0.4, side: THREE.DoubleSide})
+        );
+      },
+      visible: false,
+      x: 0,
+      y: 0,
+      z: 0
+    }, {
+      id: 'auxiliary_sphere_net',
+      mesh_generator: function () {
+        return new THREE.Mesh(
+          new THREE.SphereGeometry(90, 32, 32),
+          new THREE.MeshBasicMaterial({wireframe: true, color: 0x666666, opacity: 0.4, side: THREE.DoubleSide})
+        );
+      },
+      visible: true,
       x: 0,
       y: 0,
       z: 0
