@@ -17,7 +17,7 @@ function set_color_from_intersects(intersects, color) {
 }
 
 function get_color() {
-  var random_color_range = 0.3;
+  var random_color_range = 0.1 * (Math.random() - 0.5 > 0 ? 1 : -1);
   var random_color = new THREE.Color().setRGB(current_color.r + Math.random() * random_color_range,
       current_color.g + Math.random() * random_color_range,
       current_color.b + Math.random() * random_color_range);
@@ -153,11 +153,11 @@ function add_color(color) {
 
 function init_palette() {
   var c = new THREE.Color();
-  for (var i = 0.3; i < 1; i+= 0.1) {
+  for (var i = 0.5; i < 0.9; i+= 0.1) {
     c.setHSL(0, 1, i);
     add_color(c.getHex().toString(16));
   }
-  current_color.setRGB(0.5, 0.3, 0);
+  current_color.setHSL(0, 1, 0.6);
 }
 
 init_palette();
