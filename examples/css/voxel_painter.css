@@ -12,11 +12,22 @@
   height: 50px;
   overflow-x: scroll;
   overflow-y: hidden;
+  display: flex;
+  justify-content: space-around;
+}
+
+.btn-more {
+  display: inline-block;
+  width: 40px;
+  line-height: 20px;
+  color: #ff6565;
+  font-size: 40px;
+  text-align: center;
+  height: 40px;
 }
 
 .palette-color {
-  background-color: #fff;
-  width: 50px;
-  height: 50px;
-  float: left;
+  width: 40px;
+  height: 40px;
+  border-radius: 3px;
 }

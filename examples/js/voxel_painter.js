@@ -151,12 +151,21 @@ function add_color(color) {
   palette_dom.append(dom);
 }
 
+function add_btn_more(color) {
+  var dom = document.createElement('div');
+  dom.innerHTML = '...';
+  dom.setAttribute('class', 'btn-more');
+  dom.setAttribute('style', 'color:#' + color);
+  palette_dom.append(dom);
+}
+
 function init_palette() {
   var c = new THREE.Color();
   for (var i = 0.5; i < 0.9; i+= 0.1) {
-    c.setHSL(0, 1, i);
+    c.setHSL(0.4, 0.8, i);
     add_color(c.getHex().toString(16));
   }
+  add_btn_more(c.setHSL(0, 1, 0.7).getHex().toString(16));
   current_color.setHSL(0, 1, 0.6);
 }
 
