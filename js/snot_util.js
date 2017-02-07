@@ -1,5 +1,6 @@
 var THREE = require('three');
 var FastClick = require('fastclick');
+var kd_tree = require('kd-tree-javascript').kdTree;
 FastClick(document.body);
 
 var util = {
@@ -29,6 +30,7 @@ var util = {
   collision_test: collision_test,
   merge_json: merge_json,
   clone: clone,
+  kd_tree: kd_tree,
 };
 module.exports = util;
 

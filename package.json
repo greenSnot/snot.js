@@ -2,6 +2,7 @@
   "name": "snot",
   "version": "1.0.0",
   "dependencies": {
+    "kd-tree-javascript": "^1.0.1"
   },
   "devDependencies": {
     "jshint-stylish": "^2.2.1",

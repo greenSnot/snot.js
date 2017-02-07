@@ -5,10 +5,16 @@ var triangle_net;
 var last_x;
 var last_y;
 var current_color = new THREE.Color();
+var triangle_net_kd;
 
 function set_color_from_intersects(intersects, color) {
   for (var i = 0; i < intersects.length; ++i) {
     if (intersects[i].object.name === 'triangle_net') {
+      var neighbors = triangle_net_kd.nearest(intersects[i].face, 20);
+
+      for (var j = 0; j < neighbors.length; ++j) {
+        neighbors[j][0].color.set(get_color());
+      }
       intersects[i].face.color.set(color);
       triangle_net.geometry.colorsNeedUpdate = true;
       return;
@@ -79,10 +85,25 @@ snot.init({
     {
       id: 'triangle_net',
       mesh_generator: function () {
+        var geo = new THREE.IcosahedronGeometry(100, 5);
         triangle_net = new THREE.Mesh(
-          new THREE.IcosahedronGeometry(100, 5),
+          geo,
           new THREE.MeshBasicMaterial({color: 0xffffff, vertexColors: THREE.VertexColors, side: THREE.DoubleSide})
         );
+
+        for (var i = 0;i < geo.faces.length; ++i) {
+          var v1 = geo.vertices[geo.faces[i].a];
+          var v2 = geo.vertices[geo.faces[i].b];
+          var v3 = geo.vertices[geo.faces[i].c];
+
+          geo.faces[i].x = (v1.x + v2.x + v3.x) / 3;
+          geo.faces[i].y = (v1.y + v2.y + v3.y) / 3;
+          geo.faces[i].z = (v1.z + v2.z + v3.z) / 3;
+          geo.faces[i].index = i;
+        }
+        triangle_net_kd = new util.kd_tree(triangle_net.geometry.faces, function(a, b) {
+          return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) + Math.pow(a.z - b.z, 2);
+        }, ['x', 'y', 'z']);
         return triangle_net;
       },
       x: 0,
@@ -162,7 +183,10 @@ function add_btn_more(color) {
 function init_palette() {
   var c = new THREE.Color();
   for (var i = 0.5; i < 0.9; i+= 0.1) {
-    c.setHSL(0.4, 0.8, i);
+    // red
+    //c.setHSL(0.4, 0.8, i);
+    // green
+    c.setHSL(0, 0.8, i);
     add_color(c.getHex().toString(16));
   }
   add_btn_more(c.setHSL(0, 1, 0.7).getHex().toString(16));
