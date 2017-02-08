@@ -2,10 +2,9 @@ var util = snot.util;
 var THREE = snot.THREE;
 
 var triangle_net;
-var last_x;
-var last_y;
 var current_color = new THREE.Color();
 var triangle_net_kd;
+var random_color_range = 0.1 * (Math.random() - 0.5 > 0 ? 1 : -1);
 
 function set_color_from_intersects(intersects, color) {
   for (var i = 0; i < intersects.length; ++i) {
@@ -23,7 +22,6 @@ function set_color_from_intersects(intersects, color) {
 }
 
 function get_color() {
-  var random_color_range = 0.1 * (Math.random() - 0.5 > 0 ? 1 : -1);
   var random_color = new THREE.Color().setRGB(current_color.r + Math.random() * random_color_range,
       current_color.g + Math.random() * random_color_range,
       current_color.b + Math.random() * random_color_range);
@@ -32,36 +30,12 @@ function get_color() {
 
 function on_touch_move(e, x, y, point, intersects) {
   set_color_from_intersects(intersects, get_color());
-  var distance_to_last = util.distance2D(last_x, last_y, x, y);
-  if (distance_to_last > 80) {
-    var min_offset = 15;
-    var steps = Math.floor(distance_to_last / min_offset);
-
-    var i = x;
-    var i_end = last_x;
-    var j = y;
-    var j_end = last_y;
-
-    var offset_i = (i_end - i) / steps;
-    var offset_j = (j_end - j) / steps;
-    for (var k = 0; k < steps; ++k) {
-      intersects = snot.raycaster_from_mouse(i, j);
-      set_color_from_intersects(intersects, get_color());
-      i += offset_i;
-      j += offset_j;
-    }
-
-  }
-  last_x = x;
-  last_y = y;
 }
 
 function on_touch_start(e, x, y, point, intersects) {
   if (e.touches.length > 1) {
     return;
   }
-  last_x = x;
-  last_y = y;
   set_color_from_intersects(intersects, get_color());
 }
 
@@ -77,7 +51,7 @@ snot.init({
   rx: 0,
   ry: 0,
   on_touch_move: on_touch_move,
-  fisheye_offset: 30,
+  fisheye_offset: - 30,
   on_touch_start: on_touch_start,
   raycaster_on_touch_move: true,
   raycaster_on_touch_start: true,
@@ -129,7 +103,7 @@ snot.init({
           new THREE.MeshBasicMaterial({wireframe: true, color: 0x666666, opacity: 0.4, side: THREE.DoubleSide})
         );
       },
-      visible: true,
+      visible: false,
       x: 0,
       y: 0,
       z: 0
@@ -160,15 +134,23 @@ update();
 
 var palette_dom = document.getElementsByClassName('palette')[0];
 
-function add_color(color) {
+function add_color_btn(color, is_eraser) {
   var dom = document.createElement('div');
   dom.setAttribute('class', 'palette-color');
-  dom.setAttribute('style', 'background-color:#' + color);
+  dom.setAttribute('style', is_eraser ? 'background:#fff;border:1px solid #' + color : 'background-color:#' + color);
   dom.setAttribute('data-color', color);
-  dom.addEventListener('click', function() {
-    var color = parseInt(this.getAttribute('data-color'), 16);
-    current_color.setHex(color);
-  });
+  if (!is_eraser) {
+    dom.addEventListener('click', function() {
+      var color = parseInt(this.getAttribute('data-color'), 16);
+      current_color.setHex(color);
+      random_color_range = 0.1 * (Math.random() - 0.5 > 0 ? 1 : -1);
+    });
+  } else {
+    dom.addEventListener('click', function() {
+      random_color_range = 0;
+      current_color.setRGB(1, 1, 1);
+    });
+  }
   palette_dom.append(dom);
 }
 
@@ -182,13 +164,10 @@ function add_btn_more(color) {
 
 function init_palette() {
   var c = new THREE.Color();
-  for (var i = 0.5; i < 0.9; i+= 0.1) {
-    // red
-    //c.setHSL(0.4, 0.8, i);
-    // green
-    c.setHSL(0, 0.8, i);
-    add_color(c.getHex().toString(16));
+  for (var i = 0.6; i < 0.9; i+= 0.1) {
+    add_color_btn(c.setHSL(0, 0.8, i).getHex().toString(16));
   }
+  add_color_btn(c.setHSL(0, 0.8, 0.9).getHex().toString(16), true);
   add_btn_more(c.setHSL(0, 1, 0.7).getHex().toString(16));
   current_color.setHSL(0, 1, 0.6);
 }
