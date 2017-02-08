@@ -175,23 +175,17 @@ function update() {
       candidates_b.push(enemy);
     }
   }
-  var collision_pairs = util.collision_test({
-      x: 200,
-      y: 200,
-      z: 200,
-    }, {
-      x: - 200,
-      y: - 200,
-      z: - 200,
-    }, candidates_a, candidates_b, 5, 0.1);
-  if (collision_pairs.length) {
-    var k, l;
-    for (k in collision_pairs) {
-      for (l in collision_pairs[k].points_b) {
-        collision_pairs[k].points_b[l].progress = 1;
-      }
-      for (l in collision_pairs[k].points_a) {
-        collision_pairs[k].points_a[l].progress = 1;
+
+  var kd = new util.kd_tree(candidates_b, function(a, b) {
+    return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) + Math.pow(a.z - b.z, 2);
+  }, ['x', 'y', 'z']);
+
+  for (i = 0; i < candidates_a.length; ++i) {
+    var collision = kd.nearest(candidates_a[i], 1);
+    for (j = 0; j < collision.length; ++j) {
+      if (util.distance3D(collision[j][0], candidates_a[i]) < 13) {
+        collision[j][0].progress = 1;
+        candidates_a[i].progress = 1;
       }
     }
   }
@@ -229,35 +223,6 @@ function update_bullet(bullet) {
     bullet.need_update_look_at = true;
   }
 
-  function parabola(bullet) {
-    // y = - (x - k)^2 / c + d
-    // satisfied by T(t1,t2), P(p1, p2)
-    // c is known
-    function compute_k_d(p1, p2, t1, t2, c) {
-      t1 = t1 === p1 ? t1 + 0.01 : t1;
-      var k = (p1 * p1 - t1 * t1 - c * t2 + c * p2) / ( - 2 * t1 + 2 * p1);
-      var d = (k * k - 2 * t1 * k + t1 * t1 + c * t2) / c;
-      return [k, d];
-    }
-
-    var p_to_o = util.distance3D(bullet.initial_x, bullet.initial_y, bullet.initial_z, 0, 0, 0);
-    var t_to_o = util.distance3D(bullet.dest_x, bullet.dest_y, bullet.dest_z, 0, 0, 0);
-    var p_rx = - snot.rx * Math.PI / 180;
-    var p = [Math.cos(p_rx) * p_to_o , Math.sin(p_rx) * p_to_o];
-    var t_rx = Math.atan(bullet.dest_y / Math.pow(bullet.dest_x * bullet.dest_x + bullet.dest_z * bullet.dest_z, 0.5));
-    var t = [Math.cos(t_rx) * t_to_o , Math.sin(t_rx) * t_to_o];
-
-    var c = 200;
-    var res = compute_k_d(p[0], p[1], t[0], t[1], c);
-    var k = res[0];
-    var d = res[1];
-
-    bullet.x = (bullet.dest_x + bullet.initial_x) * bullet.progress - bullet.initial_x;
-    var y = - Math.pow(Math.pow(bullet.x * bullet.x + bullet.z * bullet.z, 0.5) - k, 2) / c + d;
-    bullet.y = y;
-    bullet.z = (bullet.dest_z + bullet.initial_z) * bullet.progress - bullet.initial_z;
-  }
-
   function linear(bullet) {
     bullet.x = (bullet.dest_x + bullet.initial_x) * bullet.progress - bullet.initial_x;
     bullet.y = (bullet.dest_y + bullet.initial_y) * bullet.progress - bullet.initial_y;
@@ -268,7 +233,6 @@ function update_bullet(bullet) {
     bullet.progress += 0.04;
 
     linear(bullet);
-    //parabola(bullet);
 
     bullet.need_update_position = true;
   }

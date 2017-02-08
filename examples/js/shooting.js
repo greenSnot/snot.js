@@ -172,22 +172,19 @@ function update() {
     enemy.need_update_position = true;
   }
 
-  var collision = util.collision_test({
-      x: snot.size * 1.5,
-      y: snot.size * 1.5,
-      z: snot.size * 1.5,
-    }, {
-      x: - snot.size * 1.5,
-      y: - snot.size * 1.5,
-      z: - snot.size * 1.5,
-    }, points_a, points_b);
-  if (collision.length) {
-    for (var k in collision) {
-      for (var l in collision[k].points_b) {
-        collision[k].points_b[l].status = -1;
+  var kd = new util.kd_tree(points_b, function(a, b) {
+    return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) + Math.pow(a.z - b.z, 2);
+  }, ['x', 'y', 'z']);
+
+  for (i = 0; i < points_a.length; ++i) {
+    var collision = kd.nearest(points_a[i], 1);
+    for (j = 0; j < collision.length; ++j) {
+      if (util.distance3D(collision[j][0], points_a[i]) < 30) {
+        collision[j][0].status = -1;
       }
     }
   }
+
 }
 update();
 

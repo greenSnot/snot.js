@@ -11,7 +11,7 @@ var snot = {
   camera_look_at: {
     x: 0,
     y: 0,
-    z: 1,
+    z: - 1,
   },
   quality: 1,
 
@@ -125,8 +125,7 @@ function init(config) {
 
   var container = snot.container;
   snot.camera = new THREE.PerspectiveCamera(snot.fov, snot.width / snot.height, 1, snot.size * 2);
-  snot.camera.target = new THREE.Vector3(0, 0, 0);
-  snot.camera.position.copy(snot.camera.localToWorld(new THREE.Vector3(0, 0, - snot.fisheye_offset)));
+  snot.camera.position.set(0, 0, snot.fisheye_offset);
   snot.camera.updateMatrixWorld();
 
   snot.scene = new THREE.Scene();
@@ -253,9 +252,7 @@ function update() {
   snot.rz = euler.z * 180 / Math.PI;
 
   snot.camera.fov = snot.fov;
-  snot.camera.updateProjectionMatrix();
-  snot.camera.updateMatrixWorld();
-  snot.camera_look_at = snot.camera.localToWorld(new THREE.Vector3(0, 0, 3 + snot.fisheye_offset)).normalize();
+  snot.camera_look_at = new THREE.Vector3(0, 0, -1).applyQuaternion(snot.camera.quaternion);
   snot.camera.position.copy(snot.camera_look_at).multiplyScalar(snot.fisheye_offset);
 
   update_sprites();
@@ -341,7 +338,6 @@ function run() {
 function screenshot(directions) {
   directions = directions || [true, true, true, true, true, true]; // front bottom left back top right
   var camera = new THREE.PerspectiveCamera(90, 1, 1, snot.size);
-  camera.target = new THREE.Vector3(0, 0, 0);
   var look_at = [
     [0, 0, 1],
     [0, -1, 0],
