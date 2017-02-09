@@ -1,4 +1,4 @@
-
+var THREE = require('three');
 var dom_offset_top;
 var dom_offset_left;
 
