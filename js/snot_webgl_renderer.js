@@ -188,6 +188,71 @@ snot.raycaster_from_mouse = function(x, y) {
   return snot.raycaster.intersectObjects(snot.suspects_for_raycaster);
 };
 
+snot.raycaster_point_from_mouse = function (mouse_x, mouse_y, depth) {
+  depth = depth || 100;
+  var mouse = new THREE.Vector2();
+  mouse.set((mouse_x / snot.width) * 2 - 1, - (mouse_y / snot.height) * 2 + 1);
+  snot.raycaster.setFromCamera(mouse, snot.camera);
+
+  var x1 = snot.raycaster.ray.origin.x;
+  var y1 = snot.raycaster.ray.origin.y;
+  var z1 = snot.raycaster.ray.origin.z;
+  var x2 = snot.raycaster.ray.origin.x + snot.raycaster.ray.direction.x;
+  var y2 = snot.raycaster.ray.origin.y + snot.raycaster.ray.direction.y;
+  var z2 = snot.raycaster.ray.origin.z + snot.raycaster.ray.direction.z;
+
+  // (x - x1) / (x2 - x1) = (y - y1) / (y2 - y1) = (z - z1) / (z2 - z1)
+  //
+  // let kx = (y2 - y1) / (x2 - x1)
+  // x = (y - y1) / (y2 - y1) * (x2 - x1) + x1
+  //   = (y - y1) / kx + x1
+  // x² = (y- y1)² / kx² + 2*x1*(y - y1) / kx + x1²
+  //
+  // let kz = (y2 - y1) / (z2 - z1)
+  // z = (y - y1) / (y2 - y1) * (z2 - z1) + z1
+  //   = (y - y1) / zx + z1
+  // z² = (y- y1)² / kz² + 2*z1*(y - y1) / kz + z1²
+
+  // x²+y²+z² = NET_SIZE²
+  // (y-y1)² / kx² + 2*x1*(y - y1) / kx + x1² + y² + (y-y1)² / kz² + 2*z1*(y - y1) / kz + z1²= NET_SIZE²
+  // (y-y1)² / kx² + (y-y1)² / kz² + 2*x1*(y - y1) / kx + 2*z1*(y - y1) / kz + x1² + y² + z1²= NET_SIZE²
+  //
+  // let t1 = (1 / kx² + 1 / kz²)
+  // let t2 = (2*x1 / kx + 2*z1 / kz)
+  // (y-y1)² * t1 + (y - y1) * t2 + x1² + y² + z1²= NET_SIZE²
+  // t1*y² - 2*y*y1*t1 + y1²*t1 + t2 * y - y1 * t2 + y² = NET_SIZE² - x1² - z1²
+  // (t1 + 1) * y² - (2*y1*t1 - t2) * y + y1²*t1 - y1*t2 = NET_SIZE² - x1² - z1²
+  // (t1 + 1) * y² - (2*y1*t1 - t2) * y = NET_SIZE² - x1² - z1² - y1²*t1 + y1*t2
+  //
+  // a = (t1 + 1)
+  // b = - (2*y1*t1 - t2)
+  // c = -(NET_SIZE² - x1² - z1² - y1²*t1 + y1*t2)
+  //
+  // y= (4*a*c - b²) / (4*a)
+
+  var kx = (y2 - y1) / (x2 - x1);
+  var kz = (y2 - y1) / (z2 - z1);
+  var t1 = 1 / kx / kx + 1 / kz / kz;
+  var t2 = 2 * x1 / kx + 2 * z1 / kz;
+
+  var a = t1 + 1;
+  var b = t2 - 2 * y1 * t1;
+  var c = depth * depth + x1 * x1 + z1 * z1 + y1 * y1 * t1 - y1 * t2;
+
+  var t_sqrt = Math.pow(b * b - 4 * a * c, 0.5);
+  var y = (t_sqrt - b) / (2 * a);
+  var x = (y - y1) / kx + x1;
+  var z = (y - y1) / kz + z1;
+
+  if (util.distance3D(x, y, z, x1, y1, z1) < util.distance3D(x, y, z, x2, y2, z2)) {
+    y = (t_sqrt + b) / (2 * a);
+    x = (y - y1) / kx + x1;
+    z = (y - y1) / kz + z1;
+  }
+
+  return new THREE.Vector3(x, y, z);
+};
+
 snot.controls.mouse_click = function(x, y) {
   var intersects = snot.raycaster_from_mouse(x, y);
   if (intersects.length !== 0) {
