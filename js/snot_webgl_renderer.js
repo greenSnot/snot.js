@@ -245,7 +245,7 @@ snot.raycaster_point_from_mouse = function (mouse_x, mouse_y, depth) {
   var z = (y - y1) / kz + z1;
 
   if (util.distance3D(x, y, z, x1, y1, z1) < util.distance3D(x, y, z, x2, y2, z2)) {
-    y = (t_sqrt + b) / (2 * a);
+    y = - (t_sqrt + b) / (2 * a);
     x = (y - y1) / kx + x1;
     z = (y - y1) / kz + z1;
   }
