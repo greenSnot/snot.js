@@ -237,7 +237,7 @@ snot.raycaster_point_from_mouse = function (mouse_x, mouse_y, depth) {
 
   var a = t1 + 1;
   var b = t2 - 2 * y1 * t1;
-  var c = depth * depth + x1 * x1 + z1 * z1 + y1 * y1 * t1 - y1 * t2;
+  var c = - depth * depth + x1 * x1 + z1 * z1 + y1 * y1 * t1 - y1 * t2;
 
   var t_sqrt = Math.pow(b * b - 4 * a * c, 0.5);
   var y = (t_sqrt - b) / (2 * a);
