@@ -375,6 +375,7 @@ function add_sprites(sps) {
     mesh.visible = data.visible === undefined ? true : data.visible;
 
     sprites[mesh.name] = mesh;
+    data.mesh = mesh;
     snot.sprites[mesh.name] = data;
     snot.suspects_for_raycaster.push(mesh);
     snot.scene.add(mesh);
