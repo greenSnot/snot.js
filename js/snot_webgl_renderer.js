@@ -160,6 +160,19 @@ function init(config) {
   update();
   snot.smooth = smooth;
 
+  controls.init(snot);
+  run_event_listeners();
+}
+
+function clean() {
+  for (var i in sprites) {
+    snot.scene.remove(snot.scene.getObjectByName(i));
+  }
+}
+
+function run_event_listeners() {
+  window.addEventListener('resize', on_resize, false);
+
   snot.container.addEventListener('touchstart', controls.on_mouse_down, false);
   snot.container.addEventListener('touchmove' , controls.on_mouse_move, false);
   snot.container.addEventListener('touchend'  , controls.on_mouse_up  , false);
@@ -168,16 +181,11 @@ function init(config) {
   snot.container.addEventListener('mousemove' , controls.on_mouse_move , false);
   snot.container.addEventListener('mouseup'   , controls.on_mouse_up   , false);
   snot.container.addEventListener('mousewheel', controls.on_mouse_wheel, false);
-  controls.init(snot);
-
-  window.addEventListener('resize', on_resize, false);
+  controls.run_event_listeners();
 }
 
-function clean() {
-  for (var i in sprites) {
-    snot.scene.remove(snot.scene.getObjectByName(i));
-  }
-
+function stop_event_listeners() {
+  window.removeEventListener('resize', on_resize, false);
   if (snot.container) {
     snot.container.removeEventListener('touchstart', controls.on_mouse_down, false);
     snot.container.removeEventListener('touchmove' , controls.on_mouse_move, false);
@@ -188,10 +196,7 @@ function clean() {
     snot.container.removeEventListener('mouseup'   , controls.on_mouse_up   , false);
     snot.container.removeEventListener('mousewheel', controls.on_mouse_wheel, false);
   }
-
-  window.removeEventListener('resize', on_resize, false);
-
-  controls.clean();
+  controls.stop_event_listeners();
 }
 
 function on_resize() {
@@ -452,6 +457,8 @@ util.merge_json(snot, {
   set_ry: set_ry,
   init: init,
   clean: clean,
+  stop_event_listeners: stop_event_listeners,
+  run_event_listeners: run_event_listeners,
   run: run,
   update: update,
   update_sprites: update_sprites,
