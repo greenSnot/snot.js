@@ -26,12 +26,12 @@ function deviceorientation_on_change(ev) {
   }
 }
 
-function run_event_listeners() {
+function start_listeners() {
   window.addEventListener('orientationchange', orientation_on_change, false);
   window.addEventListener('deviceorientation', deviceorientation_on_change, true);
 }
 
-function stop_event_listeners() {
+function stop_listeners() {
   window.removeEventListener('orientationchange', orientation_on_change, false);
   window.removeEventListener('deviceorientation', deviceorientation_on_change, true);
 }
@@ -199,8 +199,8 @@ var mouse_up = function(event) {
 
 var controls = {
   init: init,
-  run_event_listeners: run_event_listeners,
-  stop_event_listeners: stop_event_listeners,
+  start_listeners: start_listeners,
+  stop_listeners: stop_listeners,
   on_mouse_down: mouse_down,
   on_mouse_move: mouse_move,
   on_mouse_up: mouse_up,

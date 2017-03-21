@@ -161,7 +161,7 @@ function init(config) {
   snot.smooth = smooth;
 
   controls.init(snot);
-  run_event_listeners();
+  start_listeners();
 }
 
 function clean() {
@@ -170,7 +170,7 @@ function clean() {
   }
 }
 
-function run_event_listeners() {
+function start_listeners() {
   window.addEventListener('resize', on_resize, false);
 
   snot.container.addEventListener('touchstart', controls.on_mouse_down, false);
@@ -181,10 +181,10 @@ function run_event_listeners() {
   snot.container.addEventListener('mousemove' , controls.on_mouse_move , false);
   snot.container.addEventListener('mouseup'   , controls.on_mouse_up   , false);
   snot.container.addEventListener('mousewheel', controls.on_mouse_wheel, false);
-  controls.run_event_listeners();
+  controls.start_listeners();
 }
 
-function stop_event_listeners() {
+function stop_listeners() {
   window.removeEventListener('resize', on_resize, false);
   if (snot.container) {
     snot.container.removeEventListener('touchstart', controls.on_mouse_down, false);
@@ -196,7 +196,7 @@ function stop_event_listeners() {
     snot.container.removeEventListener('mouseup'   , controls.on_mouse_up   , false);
     snot.container.removeEventListener('mousewheel', controls.on_mouse_wheel, false);
   }
-  controls.stop_event_listeners();
+  controls.stop_listeners();
 }
 
 function on_resize() {
@@ -457,8 +457,8 @@ util.merge_json(snot, {
   set_ry: set_ry,
   init: init,
   clean: clean,
-  stop_event_listeners: stop_event_listeners,
-  run_event_listeners: run_event_listeners,
+  stop_listeners: stop_listeners,
+  start_listeners: start_listeners,
   run: run,
   update: update,
   update_sprites: update_sprites,

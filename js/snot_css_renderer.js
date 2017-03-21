@@ -149,6 +149,14 @@ var init = function(config) {
   if (config.callback) {
     config.callback();
   }
+  controls.init(snot);
+  start_listeners();
+  update();
+};
+
+function start_listeners() {
+  window.addEventListener('resize', on_resize, false);
+
   snot.container.addEventListener('touchstart', controls.on_mouse_down, false);
   snot.container.addEventListener('touchmove' , controls.on_mouse_move, false);
   snot.container.addEventListener('touchend'  , controls.on_mouse_up  , false);
@@ -157,18 +165,32 @@ var init = function(config) {
   snot.container.addEventListener('mousemove' , controls.on_mouse_move , false);
   snot.container.addEventListener('mouseup'   , controls.on_mouse_up   , false);
   snot.container.addEventListener('mousewheel', controls.on_mouse_wheel, false);
-  controls.init(snot);
-  update();
-};
+  controls.start_listeners();
+}
 
-window.onresize = function() {
+function stop_listeners() {
+  window.removeEventListener('resize', on_resize, false);
+  if (snot.container) {
+    snot.container.removeEventListener('touchstart', controls.on_mouse_down, false);
+    snot.container.removeEventListener('touchmove' , controls.on_mouse_move, false);
+    snot.container.removeEventListener('touchend'  , controls.on_mouse_up  , false);
+
+    snot.container.removeEventListener('mousedown' , controls.on_mouse_down , false);
+    snot.container.removeEventListener('mousemove' , controls.on_mouse_move , false);
+    snot.container.removeEventListener('mouseup'   , controls.on_mouse_up   , false);
+    snot.container.removeEventListener('mousewheel', controls.on_mouse_wheel, false);
+  }
+  controls.stop_listeners();
+}
+
+function on_resize() {
   snot.width = snot.dom.offsetWidth;
   snot.height = snot.dom.offsetHeight;
   snot.perspective = snot.width / 2 / tan(snot.max_fov / 2 * PI / 180);
   snot.container.style['-webkit-perspective'] = snot.perspective + 'px';
   camera_base_transform = 'translateX(' + epsilon(- (snot._size - snot.width) / 2) + 'px) translateY(' + epsilon(- (snot._size - snot.height) / 2) + 'px)';
   camera_dom.style['-webkit-transform'] = 'translateZ(-' + snot.perspective + 'px) rotateY(' + epsilon(snot.rx) + 'deg) rotateX(' + epsilon(snot.ry) + 'deg)' + camera_base_transform;
-};
+}
 
 function load_bg_imgs(bg_imgs, bg_rotation) {
   var bg_config = {
@@ -444,6 +466,8 @@ util.merge_json(snot, {
   init: init,
   run: run,
   update: update,
+  stop_listeners: stop_listeners,
+  start_listeners: start_listeners,
   add_sprites: add_sprites,
   remove_sprite: remove_sprite,
 });
