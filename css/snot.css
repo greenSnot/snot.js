@@ -6,7 +6,7 @@ html, body {
   overflow: hidden;
 }
 
-#snot-wrap {
+.snot-wrap {
   width: 100%;
   height: 100%;
   margin: 0;
@@ -14,12 +14,12 @@ html, body {
   overflow: hidden;
 }
 
-#snot-container {
+.snot-container {
   width: 100%;
   height: 100%;
   -webkit-transform: scale(1);
 }
-#snot-camera {
+.snot-camera {
   width: 100%;
   height: 100%;
   -webkit-transform-style: preserve-3d;

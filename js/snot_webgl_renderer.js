@@ -110,6 +110,7 @@ function load_bg_imgs(imgs) {
   }
 }
 function init(config) {
+  clean();
   var i;
   for (i in config) {
     snot[i] = config[i];
@@ -118,9 +119,7 @@ function init(config) {
   snot.width = snot.dom.offsetWidth;
   snot.height = snot.dom.offsetHeight;
   snot.smooth = 0;
-  for (i in sprites) {
-    snot.scene.remove(snotscene.getObjectByName(i));
-  }
+
   sprites = {};
 
   var container = snot.container;
@@ -170,16 +169,39 @@ function init(config) {
   snot.container.addEventListener('mouseup'   , controls.on_mouse_up   , false);
   snot.container.addEventListener('mousewheel', controls.on_mouse_wheel, false);
   controls.init(snot);
+
+  window.addEventListener('resize', on_resize, false);
 }
 
-window.onresize = function() {
+function clean() {
+  for (var i in sprites) {
+    snot.scene.remove(snot.scene.getObjectByName(i));
+  }
+
+  if (snot.container) {
+    snot.container.removeEventListener('touchstart', controls.on_mouse_down, false);
+    snot.container.removeEventListener('touchmove' , controls.on_mouse_move, false);
+    snot.container.removeEventListener('touchend'  , controls.on_mouse_up  , false);
+
+    snot.container.removeEventListener('mousedown' , controls.on_mouse_down , false);
+    snot.container.removeEventListener('mousemove' , controls.on_mouse_move , false);
+    snot.container.removeEventListener('mouseup'   , controls.on_mouse_up   , false);
+    snot.container.removeEventListener('mousewheel', controls.on_mouse_wheel, false);
+  }
+
+  window.removeEventListener('resize', on_resize, false);
+
+  controls.clean();
+}
+
+function on_resize() {
   snot.width = snot.dom.offsetWidth;
   snot.height = snot.dom.offsetHeight;
 
   snot.camera.aspect = snot.width / snot.height;
   snot.camera.updateProjectionMatrix();
   renderer.setSize(snot.width, snot.height);
-};
+}
 
 snot.raycaster_from_mouse = function(x, y) {
   var mouse = new THREE.Vector2();
@@ -429,6 +451,7 @@ util.merge_json(snot, {
   set_rx: set_rx,
   set_ry: set_ry,
   init: init,
+  clean: clean,
   run: run,
   update: update,
   update_sprites: update_sprites,

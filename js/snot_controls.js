@@ -10,19 +10,28 @@ function init(caller) {
   dom_offset_top = util.top_pos(snot.dom);
 
   snot.controls.screen_orientation = window.orientation || 0;
-  window.addEventListener('orientationchange', function(ev) {
-    snot.controls.screen_orientation = window.orientation || 0;
-  }, false);
+  window.addEventListener('orientationchange', orientation_on_change, false);
 
-  window.addEventListener('deviceorientation', function(ev) {
-    if (ev.alpha !== null) {
-      snot.controls.gyro_data.beta = ev.beta  * Math.PI / 180 ;
-      snot.controls.gyro_data.gamma = ev.gamma  * Math.PI / 180;
-      snot.controls.gyro_data.alpha = ev.alpha  * Math.PI / 180;
-    } else {
-      snot.controls.gyro_data.beta = snot.controls.gyro_data.gamma = snot.controls.gyro_data.alpha = -1;
-    }
-  }, true);
+  window.addEventListener('deviceorientation', deviceorientation_on_change, true);
+}
+
+function orientation_on_change(ev) {
+  snot.controls.screen_orientation = window.orientation || 0;
+}
+
+function deviceorientation_on_change(ev) {
+  if (ev.alpha !== null) {
+    snot.controls.gyro_data.beta = ev.beta  * Math.PI / 180 ;
+    snot.controls.gyro_data.gamma = ev.gamma  * Math.PI / 180;
+    snot.controls.gyro_data.alpha = ev.alpha  * Math.PI / 180;
+  } else {
+    snot.controls.gyro_data.beta = snot.controls.gyro_data.gamma = snot.controls.gyro_data.alpha = -1;
+  }
+}
+
+function clean() {
+  window.removeEventListener('orientationchange', orientation_on_change, false);
+  window.removeEventListener('deviceorientation', deviceorientation_on_change, true);
 }
 
 var util = require('./snot_util.js');
@@ -188,6 +197,7 @@ var mouse_up = function(event) {
 
 var controls = {
   init: init,
+  clean: clean,
   on_mouse_down: mouse_down,
   on_mouse_move: mouse_move,
   on_mouse_up: mouse_up,
