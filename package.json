@@ -1,5 +1,5 @@
 {
-  "name": "snot",
+  "name": "snot.js",
   "version": "1.0.0",
   "dependencies": {
     "kd-tree-javascript": "^1.0.1"
@@ -23,6 +23,7 @@
     "stream-combiner2": "^1.1.1",
     "yargs": "^4.7.1"
   },
+  "main": "build/js/snot_webgl_renderer.min.js",
   "scripts": {
     "build": "gulp"
   },
