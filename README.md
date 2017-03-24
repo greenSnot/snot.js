@@ -35,7 +35,7 @@ HTML5/Webgl panorama viewer
 </div>
 <script src="build/js/snot_css_renderer.min.js"></script>
 <script>
-  snot.init({
+  var viewer = new snot({
     size: 1248, // usually it is the width of the background image
     quality: 0.9, // between 0 to 1, higher quality needs more computation
     bg_imgs:[
@@ -106,7 +106,7 @@ function sprite_on_click(data) {
   console.log(data);
 }
 
-snot.init({
+var viewer = new snot({
   //...
   on_click: on_click, // when you are clicking the backgrounds
   sprite_on_click: sprite_on_click

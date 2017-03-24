@@ -1,8 +1,36 @@
-var util = snot.util;
-var THREE = snot.THREE;
+var viewer = new snot({
+  size: 1024,
+  clicks_depth: 1024 / 2.5,
+  //bg_imgs: [
+  //  'images/test.png',
+  //  'images/test.png',
+  //  'images/test.png',
+  //  'images/test.png',
+  //  'images/test.png',
+  //  'images/test.png',
+  //],
+  bg_imgs: [
+    'images/forrest.jpg',
+  ],
+  bg_rotation: [0, 0, 0, 0, 0, 0],
+  fov: 90,
+  max_fov: 110,
+  min_fov: 60,
+  mouse_sensitivity: 0.3,
+  auto_rotation: 0.0,
+  rx: 0,
+  ry: 0,
+  min_detect_distance: 20,
+  on_click: on_click,
+  sprite_on_click: sprite_on_click,
+  sprites: sprites
+});
+
+var util = viewer.util;
+var THREE = viewer.THREE;
 
 document.getElementsByClassName('btn-gyro')[0].addEventListener('click', function() {
-  snot.gyro = !snot.gyro;
+  viewer.gyro = !viewer.gyro;
 });
 
 function text_generator(data) {
@@ -84,7 +112,7 @@ function sprite_on_click(data) {
 }
 
 function on_click(point, rotation) {
-  snot.add_sprites([{
+  viewer.add_sprites([{
     mesh_generator: spot_generator,
 
     spotType: 'right',
@@ -176,32 +204,4 @@ var sprites = {
   }
 };
 
-snot.init({
-  size: 1024,
-  clicks_depth: 1024 / 2.5,
-  //bg_imgs: [
-  //  'images/test.png',
-  //  'images/test.png',
-  //  'images/test.png',
-  //  'images/test.png',
-  //  'images/test.png',
-  //  'images/test.png',
-  //],
-  bg_imgs: [
-    'images/forrest.jpg',
-  ],
-  bg_rotation: [0, 0, 0, 0, 0, 0],
-  fov: 90,
-  max_fov: 110,
-  min_fov: 60,
-  mouse_sensitivity: 0.3,
-  auto_rotation: 0.0,
-  rx: 0,
-  ry: 0,
-  min_detect_distance: 20,
-  on_click: on_click,
-  sprite_on_click: sprite_on_click,
-  sprites: sprites
-});
-
-snot.run();
+viewer.run();

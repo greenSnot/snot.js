@@ -1,10 +1,28 @@
+var viewer = new snot({
+  size: 1248,
+  quality: 0.9,
+  auto_rotation: 0.1,
+  bg_imgs: [
+    'images/test.png',
+    'images/test.png',
+    'images/test.png',
+    'images/test.png',
+    'images/test.png',
+    'images/test.png',
+  ],
+  rx: 0,
+  ry: 0,
+  on_click: on_click,
+  sprite_on_click: sprite_on_click,
+});
+
 function sprite_on_click(data) {
   console.log(data);
   alert('sprite_on_click');
 }
 
 document.getElementsByClassName('btn-gyro')[0].addEventListener('click', function() {
-  snot.gyro = !snot.gyro;
+  viewer.gyro = !viewer.gyro;
 });
 
 function spot_generator() {
@@ -16,7 +34,7 @@ function spot_generator() {
 }
 
 function on_click(point, rotation) {
-  snot.add_sprites([{
+  viewer.add_sprites([{
     mesh_generator: spot_generator,
     id: 'spot-' + Math.random(),
     x: point.x,
@@ -110,23 +128,5 @@ var sprites = {
   }
 };
 
-snot.init({
-  size: 1248,
-  quality: 0.9,
-  auto_rotation: 0.1,
-  bg_imgs: [
-    'images/test.png',
-    'images/test.png',
-    'images/test.png',
-    'images/test.png',
-    'images/test.png',
-    'images/test.png',
-  ],
-  rx: 0,
-  ry: 0,
-  on_click: on_click,
-  sprite_on_click: sprite_on_click,
-  sprites: sprites
-});
-
-snot.run();
+viewer.add_sprites(sprites);
+viewer.run();

@@ -54,6 +54,11 @@ function browserify_file(file, dest_name, dest, standalone, external) {
   }
   let r = browserify(file, cfg)
     .external(external || [])
+    .transform('babelify', {
+      presets: ['es2015'],
+      //sourceMapsAbsolute: true,
+      compact: false
+    })
     .bundle()
     .pipe(source(dest_name))
     .pipe(buffer());
@@ -70,7 +75,9 @@ function browserify_file(file, dest_name, dest, standalone, external) {
 function hint() {
   do_watch('hint');
   return gulp.src(['./js/**/*.js'])
-    .pipe(jshint())
+    .pipe(jshint({
+      esversion: 6
+    }))
     .pipe(jshint.reporter(stylish));
 }
 
@@ -85,6 +92,7 @@ function webgl_renderer() {
 }
 
 function both_renderer() {
+  //TODO
 }
 
 let task_2_files = {

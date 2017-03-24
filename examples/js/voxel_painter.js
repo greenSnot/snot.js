@@ -1,5 +1,23 @@
-var util = snot.util;
-var THREE = snot.THREE;
+var viewer = new snot({
+  size: 1024,
+  gyro: true,
+  clicks_depth: 1024 / 2.5,
+  fov: 90,
+  max_fov: 110,
+  min_fov: 40,
+  mouse_sensitivity: 0.3,
+  auto_rotation: 0.0,
+  rx: 0,
+  ry: 0,
+  on_touch_move: on_touch_move,
+  fisheye_offset: - 30,
+  on_touch_start: on_touch_start,
+  raycaster_on_touch_move: true,
+  raycaster_on_touch_start: true,
+});
+
+var util = viewer.util;
+var THREE = viewer.THREE;
 
 var triangle_net;
 var current_color = new THREE.Color();
@@ -39,78 +57,6 @@ function on_touch_start(e, x, y, point, intersects) {
   set_color_from_intersects(intersects, get_color());
 }
 
-snot.init({
-  size: 1024,
-  gyro: true,
-  clicks_depth: 1024 / 2.5,
-  fov: 90,
-  max_fov: 110,
-  min_fov: 40,
-  mouse_sensitivity: 0.3,
-  auto_rotation: 0.0,
-  rx: 0,
-  ry: 0,
-  on_touch_move: on_touch_move,
-  fisheye_offset: - 30,
-  on_touch_start: on_touch_start,
-  raycaster_on_touch_move: true,
-  raycaster_on_touch_start: true,
-  sprites: [
-    {
-      id: 'triangle_net',
-      mesh_generator: function () {
-        var geo = new THREE.IcosahedronGeometry(100, 5);
-        triangle_net = new THREE.Mesh(
-          geo,
-          new THREE.MeshBasicMaterial({color: 0xffffff, vertexColors: THREE.VertexColors, side: THREE.DoubleSide})
-        );
-
-        for (var i = 0;i < geo.faces.length; ++i) {
-          var v1 = geo.vertices[geo.faces[i].a];
-          var v2 = geo.vertices[geo.faces[i].b];
-          var v3 = geo.vertices[geo.faces[i].c];
-
-          geo.faces[i].x = (v1.x + v2.x + v3.x) / 3;
-          geo.faces[i].y = (v1.y + v2.y + v3.y) / 3;
-          geo.faces[i].z = (v1.z + v2.z + v3.z) / 3;
-          geo.faces[i].index = i;
-        }
-        triangle_net_kd = new util.kd_tree(triangle_net.geometry.faces, function(a, b) {
-          return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) + Math.pow(a.z - b.z, 2);
-        }, ['x', 'y', 'z']);
-        return triangle_net;
-      },
-      x: 0,
-      y: 0,
-      z: 0
-    }, {
-      id: 'auxiliary_triangle_net',
-      mesh_generator: function () {
-        return new THREE.Mesh(
-          new THREE.IcosahedronGeometry(99, 5),
-          new THREE.MeshBasicMaterial({wireframe: true, color: 0x666666, opacity: 0.4, side: THREE.DoubleSide})
-        );
-      },
-      visible: false,
-      x: 0,
-      y: 0,
-      z: 0
-    }, {
-      id: 'auxiliary_sphere_net',
-      mesh_generator: function () {
-        return new THREE.Mesh(
-          new THREE.SphereGeometry(90, 32, 32),
-          new THREE.MeshBasicMaterial({wireframe: true, color: 0x666666, opacity: 0.4, side: THREE.DoubleSide})
-        );
-      },
-      visible: false,
-      x: 0,
-      y: 0,
-      z: 0
-    }
-  ]
-});
-
 var fps_dom = document.getElementsByClassName('fps')[0];
 var update_time_arr = [];
 function update_fps() {
@@ -127,7 +73,7 @@ function update_fps() {
 
 function update() {
   update_fps();
-  snot.update();
+  viewer.update();
   requestAnimationFrame(update);
 }
 update();
@@ -173,3 +119,58 @@ function init_palette() {
 }
 
 init_palette();
+var sprites = [
+  {
+    id: 'triangle_net',
+    mesh_generator: function () {
+      var geo = new THREE.IcosahedronGeometry(100, 5);
+      triangle_net = new THREE.Mesh(
+        geo,
+        new THREE.MeshBasicMaterial({color: 0xffffff, vertexColors: THREE.VertexColors, side: THREE.DoubleSide})
+      );
+
+      for (var i = 0;i < geo.faces.length; ++i) {
+        var v1 = geo.vertices[geo.faces[i].a];
+        var v2 = geo.vertices[geo.faces[i].b];
+        var v3 = geo.vertices[geo.faces[i].c];
+
+        geo.faces[i].x = (v1.x + v2.x + v3.x) / 3;
+        geo.faces[i].y = (v1.y + v2.y + v3.y) / 3;
+        geo.faces[i].z = (v1.z + v2.z + v3.z) / 3;
+        geo.faces[i].index = i;
+      }
+      triangle_net_kd = new util.kd_tree(triangle_net.geometry.faces, function(a, b) {
+        return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) + Math.pow(a.z - b.z, 2);
+      }, ['x', 'y', 'z']);
+      return triangle_net;
+    },
+    x: 0,
+    y: 0,
+    z: 0
+  }, {
+    id: 'auxiliary_triangle_net',
+    mesh_generator: function () {
+      return new THREE.Mesh(
+        new THREE.IcosahedronGeometry(99, 5),
+        new THREE.MeshBasicMaterial({wireframe: true, color: 0x666666, opacity: 0.4, side: THREE.DoubleSide})
+      );
+    },
+    visible: false,
+    x: 0,
+    y: 0,
+    z: 0
+  }, {
+    id: 'auxiliary_sphere_net',
+    mesh_generator: function () {
+      return new THREE.Mesh(
+        new THREE.SphereGeometry(90, 32, 32),
+        new THREE.MeshBasicMaterial({wireframe: true, color: 0x666666, opacity: 0.4, side: THREE.DoubleSide})
+      );
+    },
+    visible: false,
+    x: 0,
+    y: 0,
+    z: 0
+  }
+];
+viewer.add_sprites(sprites);

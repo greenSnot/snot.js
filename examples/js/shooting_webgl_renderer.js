@@ -1,8 +1,23 @@
-var util = snot.util;
-var THREE = snot.THREE;
+var viewer = new snot({
+  size: 1024,
+  clicks_depth: 1024 / 2.5,
+  bg_imgs: [
+    'images/forrest.jpg',
+  ],
+  fov: 90,
+  max_fov: 110,
+  min_fov: 60,
+  mouse_sensitivity: 0.3,
+  auto_rotation: 0.0,
+  rx: 0,
+  ry: 0,
+  sprites: {},
+});
+var util = viewer.util;
+var THREE = viewer.THREE;
 
 document.getElementsByClassName('btn-gyro')[0].addEventListener('click', function() {
-  snot.gyro = !snot.gyro;
+  viewer.gyro = !viewer.gyro;
 });
 
 function bullet_generator() {
@@ -114,22 +129,7 @@ for (var i in bullets) {
 for (var i in enemies) {
   sprites[i] = enemies[i];
 }
-
-snot.init({
-  size: 1024,
-  clicks_depth: 1024 / 2.5,
-  bg_imgs: [
-    'images/forrest.jpg',
-  ],
-  fov: 90,
-  max_fov: 110,
-  min_fov: 60,
-  mouse_sensitivity: 0.3,
-  auto_rotation: 0.0,
-  rx: 0,
-  ry: 0,
-  sprites: sprites,
-});
+viewer.add_sprites(sprites);
 
 var fps_dom = document.getElementsByClassName('fps')[0];
 var update_time_arr = [];
@@ -190,7 +190,7 @@ function update() {
     }
   }
   requestAnimationFrame(update);
-  snot.update();
+  viewer.update();
 }
 
 function fire(bullet) {
@@ -199,13 +199,13 @@ function fire(bullet) {
 
   bullet.need_update_visibility = true;
 
-  var look_at = snot.camera_look_at;
+  var look_at = viewer.camera_look_at;
   var scalar = 100;
   bullet.dest_x = look_at.x * scalar;
   bullet.dest_y = look_at.y * scalar;
   bullet.dest_z = look_at.z * scalar;
 
-  var initial = snot.camera.localToWorld(new THREE.Vector3(0, 3, 0));
+  var initial = viewer.camera.localToWorld(new THREE.Vector3(0, 3, 0));
   bullet.initial_x = initial.x;
   bullet.initial_y = initial.y;
   bullet.initial_z = initial.z;
@@ -251,7 +251,7 @@ function reborn(enemy) {
   enemy.initial_y = random.y * scalar;
   enemy.initial_z = random.z * scalar;
 
-  var dest = snot.camera.localToWorld(new THREE.Vector3(0, 3, 0));
+  var dest = viewer.camera.localToWorld(new THREE.Vector3(0, 3, 0));
   enemy.dest_x = dest.x;
   enemy.dest_y = dest.y;
   enemy.dest_z = dest.z;

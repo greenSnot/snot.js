@@ -1,5 +1,26 @@
-var util = snot.util;
-var THREE = snot.THREE;
+var viewer = new snot({
+  size: 1024,
+  gyro: true,
+  clicks_depth: 1024 / 2.5,
+  bg_imgs: [
+    'images/forrest.jpg',
+  ],
+  fov: 90,
+  max_fov: 110,
+  min_fov: 60,
+  mouse_sensitivity: 0.3,
+  auto_rotation: 0.0,
+  rx: 0,
+  ry: 0,
+  on_touch_move: on_touch_move,
+  on_touch_end: on_touch_end,
+  on_touch_start: on_touch_start,
+  raycaster_on_touch_move: true,
+  raycaster_on_touch_start: true,
+});
+
+var util = viewer.util;
+var THREE = viewer.THREE;
 
 var color, depth = 300, random_range = 3;
 function brush_triangle() {
@@ -21,7 +42,7 @@ function brush_triangle() {
 
   var mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: color - Math.random() * 1000, transparent: true, opacity: 0.8, side: THREE.DoubleSide}));
 
-  vertex_a = snot.frames % 2 === 0? vertex_b : vertex_a;
+  vertex_a = viewer.frames % 2 === 0? vertex_b : vertex_a;
   vertex_b = point;
 
   return mesh;
@@ -50,7 +71,7 @@ function on_touch_move(e, x, y, point, intersects) {
   last_x = x;
   last_y = y;
 
-  snot.add_sprites([{
+  viewer.add_sprites([{
     //mesh_enerator: brush_strip,
     mesh_generator: brush_triangle,
 
@@ -84,25 +105,4 @@ function on_touch_start(e, x, y, point) {
   make_bias(vertex_b);
 }
 
-snot.init({
-  size: 1024,
-  gyro: true,
-  clicks_depth: 1024 / 2.5,
-  bg_imgs: [
-    'images/forrest.jpg',
-  ],
-  fov: 90,
-  max_fov: 110,
-  min_fov: 60,
-  mouse_sensitivity: 0.3,
-  auto_rotation: 0.0,
-  rx: 0,
-  ry: 0,
-  on_touch_move: on_touch_move,
-  on_touch_end: on_touch_end,
-  on_touch_start: on_touch_start,
-  raycaster_on_touch_move: true,
-  raycaster_on_touch_start: true,
-});
-
-snot.run();
+viewer.run();

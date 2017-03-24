@@ -1,6 +1,28 @@
-var util = snot.util;
+var viewer = new snot({
+  size: 1248,
+  quality: quality,
+  bg_imgs:[
+    'images/test.png',
+    'images/test.png',
+    'images/test.png',
+    'images/test.png',
+    'images/test.png',
+    'images/test.png',
+  ],
+  bg_rotation: [0,0,0,0,0,0],
+  fov: 90,
+  max_fov: 110,
+  min_fov: 60,
+  mouse_sensitivity: 0.3,
+  auto_rotation: 0.0,
+  rx: 0,
+  ry: 0,
+  min_detect_distance: 20,
+});
+
+var util = viewer.util;
 document.getElementsByClassName('btn-gyro')[0].addEventListener('click', function() {
-  snot.gyro = !snot.gyro;
+  viewer.gyro = !viewer.gyro;
 });
 
 function enemy_generator() {
@@ -66,29 +88,6 @@ for (var i = 0 ;i < bullet_pool_size; ++i) {
   bullets_pool.push(id);
 }
 
-snot.init({
-  size: 1248,
-  quality: quality,
-  bg_imgs:[
-    'images/test.png',
-    'images/test.png',
-    'images/test.png',
-    'images/test.png',
-    'images/test.png',
-    'images/test.png',
-  ],
-  bg_rotation: [0,0,0,0,0,0],
-  fov: 90,
-  max_fov: 110,
-  min_fov: 60,
-  mouse_sensitivity: 0.3,
-  auto_rotation: 0.0,
-  rx: 0,
-  ry: 0,
-  min_detect_distance: 20,
-  sprites: sprites
-});
-
 var last_shoot_time = 0;
 var shoot_interval = 80; //ms
 function shoot() {
@@ -112,15 +111,15 @@ var bullet_offset_y = 50;
 function update() {
   var i, id;
   requestAnimationFrame(update);
-  snot.update();
+  viewer.update();
   if (bullets_running.length != max_bullets) {
     shoot();
   }
   var points_a = [];
   for (i in bullets_running) {
     id = bullets_running[i];
-    var bullet = snot.sprites[id];
-    points_a.push(snot.sprites[id]);
+    var bullet = viewer.sprites[id];
+    points_a.push(viewer.sprites[id]);
     if (bullet.status == -1) {
       bullet.y = - bullet_offset_y;
       // init or reset
@@ -134,12 +133,12 @@ function update() {
       bullet.need_update_visibility = true;
     }
     if (!bullet.steps) {
-      snot.sprites[id].dest_x = snot.camera_look_at.x * bullet_shooting_range;
-      snot.sprites[id].dest_y = snot.camera_look_at.y * bullet_shooting_range;
-      snot.sprites[id].dest_z = snot.camera_look_at.z * bullet_shooting_range;
-      bullet.x = snot.camera_look_at.x;
-      bullet.y = snot.camera_look_at.y - bullet_offset_y;
-      bullet.z = - snot.camera_look_at.z;
+      viewer.sprites[id].dest_x = viewer.camera_look_at.x * bullet_shooting_range;
+      viewer.sprites[id].dest_y = viewer.camera_look_at.y * bullet_shooting_range;
+      viewer.sprites[id].dest_z = viewer.camera_look_at.z * bullet_shooting_range;
+      bullet.x = viewer.camera_look_at.x;
+      bullet.y = viewer.camera_look_at.y - bullet_offset_y;
+      bullet.z = - viewer.camera_look_at.z;
       bullet.status = -1;
       bullet.visible = false;
       bullet.need_update_visibility = true;
@@ -158,8 +157,8 @@ function update() {
   var points_b = [];
   for (i in enemies_running) {
     id = enemies_running[i];
-    var enemy = snot.sprites[id];
-    points_b.push(snot.sprites[id]);
+    var enemy = viewer.sprites[id];
+    points_b.push(viewer.sprites[id]);
     if (enemy.status == -1) {
       enemy.status = 0;
       enemy.visible = true;
@@ -186,6 +185,7 @@ function update() {
   }
 
 }
+viewer.add_sprites(sprites);
 update();
 
-//snot.run();
+//viewer.run();
