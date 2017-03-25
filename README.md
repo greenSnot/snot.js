@@ -12,6 +12,10 @@ HTML5/Webgl panorama viewer
 
 [Painter(gyro sensor required)](http://greensnot.github.io/snot.js/examples/painter.html)
 
+[Voxel Painter(gyro sensor required)](http://greensnot.github.io/snot.js/examples/voxel_painter.html)
+
+[Multi-viewer](http://greensnot.github.io/snot.js/examples/multi_viewer.html)
+
 [Music wall](http://mclassical.org)
 
 #Usage

@@ -19,8 +19,8 @@ var viewer = new Snot({
   raycaster_on_touch_start: true,
 });
 
-var util = viewer.util;
-var THREE = viewer.THREE;
+var util = Snot.util;
+var THREE = Snot.THREE;
 
 var color, depth = 300, random_range = 3;
 function brush_triangle() {

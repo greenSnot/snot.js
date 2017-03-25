@@ -20,7 +20,7 @@ var viewer = new Snot({
   min_detect_distance: 20,
 });
 
-var util = viewer.util;
+var util = Snot.util;
 document.getElementsByClassName('btn-gyro')[0].addEventListener('click', function() {
   viewer.gyro = !viewer.gyro;
 });

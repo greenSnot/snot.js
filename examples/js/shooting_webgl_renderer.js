@@ -13,8 +13,8 @@ var viewer = new Snot({
   ry: 0,
   sprites: {},
 });
-var util = viewer.util;
-var THREE = viewer.THREE;
+var util = Snot.util;
+var THREE = Snot.THREE;
 
 document.getElementsByClassName('btn-gyro')[0].addEventListener('click', function() {
   viewer.gyro = !viewer.gyro;

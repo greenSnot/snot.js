@@ -1,36 +1,33 @@
-var viewer = new Snot({
+var viewer1 = new Snot({
   size: 1024,
-  clicks_depth: 1024 / 2.5,
-  //bg_imgs: [
-  //  'images/test.png',
-  //  'images/test.png',
-  //  'images/test.png',
-  //  'images/test.png',
-  //  'images/test.png',
-  //  'images/test.png',
-  //],
   bg_imgs: [
     'images/forrest.jpg',
   ],
-  bg_rotation: [0, 0, 0, 0, 0, 0],
-  fov: 90,
-  max_fov: 110,
-  min_fov: 60,
-  mouse_sensitivity: 0.3,
-  auto_rotation: 0.0,
-  rx: 0,
-  ry: 0,
-  min_detect_distance: 20,
-  on_click: on_click,
+  on_click: v1_on_click,
   sprite_on_click: sprite_on_click,
-  sprites: sprites
+  dom      : document.getElementById('viewer1-wrap'),
+  container: document.getElementById('viewer1-container'),
+  sprites: {}
+});
+
+var viewer2 = new Snot({
+  size: 1024,
+  bg_imgs: [
+    'images/forrest.jpg',
+  ],
+  on_click: v2_on_click,
+  sprite_on_click: sprite_on_click,
+  dom      : document.getElementById('viewer2-wrap'),
+  container: document.getElementById('viewer2-container'),
+  sprites: {}
 });
 
 var util = Snot.util;
 var THREE = Snot.THREE;
 
 document.getElementsByClassName('btn-gyro')[0].addEventListener('click', function() {
-  viewer.gyro = !viewer.gyro;
+  viewer1.gyro = !viewer1.gyro;
+  viewer2.gyro = !viewer2.gyro;
 });
 
 function text_generator(data) {
@@ -111,8 +108,8 @@ function sprite_on_click(data) {
   alert('sprite_on_click');
 }
 
-function on_click(point, rotation) {
-  viewer.add_sprites([{
+function v1_on_click(point, rotation) {
+  viewer1.add_sprites([{
     mesh_generator: spot_generator,
 
     spotType: 'right',
@@ -124,84 +121,18 @@ function on_click(point, rotation) {
   }]);
 }
 
-var sprites = {
-  '-x-axis': {
+function v2_on_click(point, rotation) {
+  viewer2.add_sprites([{
     mesh_generator: spot_generator,
-    id: '-x-axis',
-    x: - 360,
-    y: 0,
-    z: 0,
 
-    spotType: 'left',
-    text: '-x',
-  },
-  '-z-axis': {
-    mesh_generator: spot_generator,
-    id: '-z-axis',
-    z: - 360,
-    x: 0,
-    y: 0,
+    spotType: 'right',
+    id: 'spot-' + Math.random(),
+    text: 'haha',
+    x: point.x,
+    y: point.y,
+    z: point.z
+  }]);
+}
 
-    spotType: 'left',
-    text: '-z',
-  },
-  '-y-axis': {
-    mesh_generator: spot_generator,
-    id: '-y-axis',
-    y: - 360,
-    x: 0,
-    z: 0,
-
-    spotType: 'left',
-    text: '-y',
-  },
-  'x-axis': {
-    mesh_generator: spot_generator,
-    id: 'x-axis',
-    x: 360,
-    y: 0,
-    z: 0,
-
-    spotType: 'left',
-    text: 'x',
-  },
-  'y-axis': {
-    mesh_generator: spot_generator,
-    id: 'y-axis',
-    x: 0,
-    y: 360,
-    z: 0,
-
-    spotType: 'left',
-    text: 'y',
-  },
-  'z-axis': {
-    mesh_generator: spot_generator,
-    id: 'z-axis',
-    x: 0,
-    y: 0,
-    z: 360,
-
-    spotType: 'left',
-    text: 'z',
-  },
-  'spot1': {
-    mesh_generator: spot_generator,
-    spotType: 'left',
-    id: 'spot1',
-    text: 'Home',
-    x: 4,
-    y: 120,
-    z: 360
-  }, 'spot2': {
-    mesh_generator: spot_generator,
-    spotType: 'straight',
-    id: 'spot2',
-    text: 'Garage',
-    x: 400,
-    y: 0,
-    z: -110
-  }
-};
-
-viewer.run();
+viewer1.run();
+viewer2.run();
