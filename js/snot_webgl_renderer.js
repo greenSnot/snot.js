@@ -17,13 +17,10 @@ var adjust_screen_quats = {
 
 function get_default_options() {
   return {
-    version: 1.01,
     sprites_meshes: {},
     scene: new THREE.Scene(),
     renderer: new THREE.WebGLRenderer(),
     screenshot_renderer: new THREE.WebGLRenderer(),
-    util: util,
-    THREE: THREE,
     frames:0,
 
     bg_imgs: [],
@@ -476,5 +473,9 @@ class Snot {
     }
   }
 }
+
+Snot.version = 1.03;
+Snot.util = util;
+Snot.THREE = THREE;
 
 module.exports = Snot;

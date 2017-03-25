@@ -26,14 +26,8 @@ var look_at_euler = new THREE.Euler();
 
 function get_default_options() {
   return {
-    renderer: 'css',
-    version: 1.01,
-
     container: document.getElementById('snot-container'),
     dom: document.getElementById('snot-wrap'),
-
-    util: util,
-    THREE: THREE,
 
     quality: 1, // between 0 to 1, higher quality needs more computation
     camera_look_at: {
@@ -485,5 +479,9 @@ class Snot {
     }
   }
 }
+
+Snot.version = 1.03;
+Snot.util = util;
+Snot.THREE = THREE;
 
 module.exports = Snot;
