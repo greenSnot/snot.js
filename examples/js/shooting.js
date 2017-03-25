@@ -1,4 +1,4 @@
-var viewer = new snot({
+var viewer = new Snot({
   size: 1248,
   quality: quality,
   bg_imgs:[

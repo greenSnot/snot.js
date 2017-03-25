@@ -83,12 +83,12 @@ function hint() {
 
 function css_renderer() {
   do_watch('css_renderer');
-  return browserify_file('./js/snot_css_renderer.js', 'snot_css_renderer.min.js', './build/js', 'snot');
+  return browserify_file('./js/snot_css_renderer.js', 'snot_css_renderer.min.js', './build/js', 'Snot');
 }
 
 function webgl_renderer() {
   do_watch('webgl_renderer');
-  return browserify_file('./js/snot_webgl_renderer.js', 'snot_webgl_renderer.min.js', './build/js', 'snot');
+  return browserify_file('./js/snot_webgl_renderer.js', 'snot_webgl_renderer.min.js', './build/js', 'Snot');
 }
 
 function both_renderer() {

@@ -35,7 +35,7 @@ HTML5/Webgl panorama viewer
 </div>
 <script src="build/js/snot_css_renderer.min.js"></script>
 <script>
-  var viewer = new snot({
+  var viewer = new Snot({
     size: 1248, // usually it is the width of the background image
     quality: 0.9, // between 0 to 1, higher quality needs more computation
     bg_imgs:[
@@ -56,14 +56,14 @@ HTML5/Webgl panorama viewer
     rx: 0, // rotation of x axis (degree)
     ry: 0, // rotation of y axis (degree)
   });
-  snot.run();
+  viewer.run();
 </script>
 ```
 ###Custom Sprites
 ```
   <script>
     // ...
-    // after snot.init
+    // after viewer.init
     function spot_generator() {
       return '' +
         '<div class="spot-' + this.spotType + '">' +
@@ -71,7 +71,7 @@ HTML5/Webgl panorama viewer
           '<img class="spot-image" src="images/' + this.spotType + '.png"/>' +
         '</div>';
     }
-    snot.add_sprites([{
+    viewer.add_sprites([{
       //Essentials
       mesh_generator: spot_generator,
       id: 'spot-'+123,
@@ -106,7 +106,7 @@ function sprite_on_click(data) {
   console.log(data);
 }
 
-var viewer = new snot({
+var viewer = new Snot({
   //...
   on_click: on_click, // when you are clicking the backgrounds
   sprite_on_click: sprite_on_click
@@ -169,5 +169,5 @@ set_ry(ry:number);
 add_sprites(sprites);
 remove_sprite(sprite_id);
 update(); // update manually, see examples/shooting_webgl_renderer.html
-run(); // start main loop, it will call snot.update automatically.
+run(); // start main loop, it will call update automatically.
 screenshot(); //return base64_imgs_arr[front, down, left, back, top, right], webgl_renderer only.

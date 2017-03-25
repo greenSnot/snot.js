@@ -86,7 +86,7 @@ var distance3D = util.distance3D;
 var distance2D = util.distance2D;
 
 
-class snot {
+class Snot {
   constructor(opts) {
     var default_options = get_default_options();
     for (var i in default_options) {
@@ -486,4 +486,4 @@ class snot {
   }
 }
 
-module.exports = snot;
+module.exports = Snot;

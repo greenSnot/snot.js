@@ -76,7 +76,7 @@ function get_default_options() {
 var _overdraw = 1;
 THREE.ImageUtils.crossOrigin = '*';
 
-class snot {
+class Snot {
   constructor(opts) {
     var default_options = get_default_options();
     for (var i in default_options) {
@@ -477,4 +477,4 @@ class snot {
   }
 }
 
-module.exports = snot;
+module.exports = Snot;
