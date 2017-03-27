@@ -60,6 +60,7 @@ function get_default_options() {
     min_detect_distance: 20, // click nearest sprite
     on_click: function() {}, // background on click
     sprite_on_click: function() {},
+    controls_on_click: controls_on_click,
 
     camera_dom: document.getElementById('snot-camera'),
     sprites: {},
@@ -411,84 +412,85 @@ class Snot {
     }
   }
 
-  controls_on_click(x, y) {
-    var R = 100;
-    var fov = this.fov;
-    var size = this._size;
-    var arcFactor = Math.PI / 180;
-    var rz = this.rz * arcFactor;
-    var width = this.width;
-    var height = this.height;
+}
 
-    var ry = (x / width - 0.5) * fov;
-    var rx = (y / height-0.5) * fov * height / width;
-    var r = cos(fov / 2 * arcFactor) * size;
-    var ratiox = (x - width / 2) / width * 2;
-    var ratioy = (y - height / 2) / width * 2;
-    var P = sin(fov / 2 * arcFactor) * size;
+function controls_on_click(x, y) {
+  var R = 100;
+  var fov = this.fov;
+  var size = this._size;
+  var arcFactor = Math.PI / 180;
+  var rz = this.rz * arcFactor;
+  var width = this.width;
+  var height = this.height;
 
-    ry = atan(ratiox * P / r);
-    rx = atan(ratioy * P / r);
+  var ry = (x / width - 0.5) * fov;
+  var rx = (y / height-0.5) * fov * height / width;
+  var r = cos(fov / 2 * arcFactor) * size;
+  var ratiox = (x - width / 2) / width * 2;
+  var ratioy = (y - height / 2) / width * 2;
+  var P = sin(fov / 2 * arcFactor) * size;
 
-    ry *= 180 / PI;
-    rx *= 180 / PI;
+  ry = atan(ratiox * P / r);
+  rx = atan(ratioy * P / r);
 
-    var xyz2 = util.rotation_to_position(R, rx, 0);
+  ry *= 180 / PI;
+  rx *= 180 / PI;
 
-    var rr = distance3D(- tan(ry * arcFactor) * xyz2.z, - xyz2.y, xyz2.z, 0, 0, 0);
-    var ratio = R / rr;
+  var xyz2 = util.rotation_to_position(R, rx, 0);
 
-    var new_x = - tan(ry * PI / 180) * xyz2.z * ratio;
-    var new_y = - xyz2.y * ratio;
-    var new_z = xyz2.z * ratio;
+  var rr = distance3D(- tan(ry * arcFactor) * xyz2.z, - xyz2.y, xyz2.z, 0, 0, 0);
+  var ratio = R / rr;
 
-    var point = v_set_from_matrix_position(m_multiply(
-      m_make_rotation_axis({x: 0, y: 1, z: 0}, this.ry * PI / 180),
-      m_make_rotation_axis({x: 0, y: 0, z: 1}, - this.rz * PI / 180),
-      m_make_rotation_axis({x: 1, y: 0, z: 0}, - this.rx * PI / 180),
-      m_set_position({x: new_x, y: new_y, z: new_z})
-    ));
+  var new_x = - tan(ry * PI / 180) * xyz2.z * ratio;
+  var new_y = - xyz2.y * ratio;
+  var new_z = xyz2.z * ratio;
 
-    point = util.standardlization(point, this.clicks_depth * this.quality);
+  var point = v_set_from_matrix_position(m_multiply(
+    m_make_rotation_axis({x: 0, y: 1, z: 0}, this.ry * PI / 180),
+    m_make_rotation_axis({x: 0, y: 0, z: 1}, - this.rz * PI / 180),
+    m_make_rotation_axis({x: 1, y: 0, z: 0}, - this.rx * PI / 180),
+    m_set_position({x: new_x, y: new_y, z: new_z})
+  ));
 
-    var min_offset = 0.4;
-    var min_distance = this.min_detect_distance * this.quality;
-    var nearest;
+  point = util.standardlization(point, this.clicks_depth * this.quality);
 
-    var spriteContainers = document.getElementsByClassName('sprite-container');
-    for (var i = 0 ;i < spriteContainers.length; ++i) {
-      var self = spriteContainers[i];
-      if (this.ignore_map[self.parentElement.id]) {
-        continue;
-      }
-      var matrix = util.css_text_to_matrix(self.style.webkitTransform);
-      var candidate_point = util.standardlization({
-        x: this._size / 2 - matrix[12],
-        y: matrix[13] - this._size / 2,
-        z: - matrix[14],
-      }, this.clicks_depth * this.quality);
+  var min_offset = 0.4;
+  var min_distance = this.min_detect_distance * this.quality;
+  var nearest;
 
-      var distance = distance3D(point.x, - point.y, point.z, candidate_point.x, candidate_point.y, candidate_point.z);
-      if (distance < min_distance) {
-        min_distance = distance;
-        nearest = self.children[0];
-      }
+  var spriteContainers = document.getElementsByClassName('sprite-container');
+  for (var i = 0 ;i < spriteContainers.length; ++i) {
+    var self = spriteContainers[i];
+    if (this.ignore_map[self.parentElement.id]) {
+      continue;
     }
+    var matrix = util.css_text_to_matrix(self.style.webkitTransform);
+    var candidate_point = util.standardlization({
+      x: this._size / 2 - matrix[12],
+      y: matrix[13] - this._size / 2,
+      z: - matrix[14],
+    }, this.clicks_depth * this.quality);
 
-    var rotation = util.position_to_rotation(point.x, point.z, point.y);
-    if (nearest) {
-      this.sprite_on_click(this.sprites[nearest.parentElement.id], nearest);
-    } else {
-      point = util.standardlization(point, this.clicks_depth);
-      this.on_click(point, {
-        rx: rotation[0],
-        ry: rotation[1]
-      });
+    var distance = distance3D(point.x, - point.y, point.z, candidate_point.x, candidate_point.y, candidate_point.z);
+    if (distance < min_distance) {
+      min_distance = distance;
+      nearest = self.children[0];
     }
+  }
+
+  var rotation = util.position_to_rotation(point.x, point.z, point.y);
+  if (nearest) {
+    this.sprite_on_click(this.sprites[nearest.parentElement.id], nearest);
+  } else {
+    point = util.standardlization(point, this.clicks_depth);
+    this.on_click(point, {
+      rx: rotation[0],
+      ry: rotation[1]
+    });
   }
 }
 
-Snot.version = 1.04;
+Snot.version = 1.05;
 Snot.util = util;
 Snot.THREE = THREE;
 

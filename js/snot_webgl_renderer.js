@@ -63,6 +63,7 @@ function get_default_options() {
     on_touch_start: function() {},
     on_touch_end: function() {},
     sprite_on_click: function() {},
+    controls_on_click: controls_on_click,
 
     suspects_for_raycaster: [],
     raycaster_on_touch_move: false,
@@ -193,20 +194,6 @@ class Snot {
     this.screenshot_renderer.setSize(this.size, this.size);
     this.container.appendChild(this.renderer.domElement);
 
-  }
-
-  controls_on_click(x, y) {
-    var intersects = this.raycaster_from_mouse(x, y);
-    if (intersects.length !== 0) {
-      var point = intersects[0].point;
-      if (intersects[0].object.data) {
-        this.sprite_on_click(intersects[0].object.data);
-      } else {
-        point = util.standardlization(point, this.clicks_depth);
-        var rotation = util.position_to_rotation(point.x, point.y, point.z);
-        this.on_click(point, rotation);
-      }
-    }
   }
 
   init() {
@@ -476,7 +463,21 @@ class Snot {
   }
 }
 
-Snot.version = 1.04;
+function controls_on_click(x, y) {
+  var intersects = this.raycaster_from_mouse(x, y);
+  if (intersects.length !== 0) {
+    var point = intersects[0].point;
+    if (intersects[0].object.data) {
+      this.sprite_on_click(intersects[0].object.data);
+    } else {
+      point = util.standardlization(point, this.clicks_depth);
+      var rotation = util.position_to_rotation(point.x, point.y, point.z);
+      this.on_click(point, rotation);
+    }
+  }
+}
+
+Snot.version = 1.05;
 Snot.util = util;
 Snot.THREE = THREE;
 
