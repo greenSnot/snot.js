@@ -86,6 +86,7 @@ class Snot {
     for (var i in default_options) {
       this[i] = opts[i] || default_options[i];
     }
+    this.ignore_map = {};
     this.width = this.dom.offsetWidth;
     this.height = this.dom.offsetHeight;
     this.init();
@@ -252,17 +253,21 @@ class Snot {
       if (!this.sprites[sprites[i].id]) {
         this.sprites[sprites[i].id] = sprites[i];
       }
-      var t = sprites[i];
+      var data = sprites[i];
       var temp_wrapper = document.createElement('div');
-      temp_wrapper.innerHTML = t.mesh_generator();
+      temp_wrapper.innerHTML = data.mesh_generator();
       var element = temp_wrapper.children[0];
       element.data = sprites[i];
-      this.add_sprite_by_position(element, t);
+      this.add_sprite_by_position(element, data);
+      if (data.ignore_raycaster) {
+        this.ignore_map[data.id] = true;
+      }
     }
   }
   remove_sprite(sprite_id) {
     document.getElementById(sprite_id).remove();
     delete(this.sprites[sprite_id]);
+    delete(this.ignore_map[sprite_id]);
   }
 
   add_sprite_by_position(element, p) {
@@ -453,6 +458,9 @@ class Snot {
     var spriteContainers = document.getElementsByClassName('sprite-container');
     for (var i = 0 ;i < spriteContainers.length; ++i) {
       var self = spriteContainers[i];
+      if (this.ignore_map[self.parentElement.id]) {
+        continue;
+      }
       var matrix = util.css_text_to_matrix(self.style.webkitTransform);
       var candidate_point = util.standardlization({
         x: this._size / 2 - matrix[12],
@@ -480,7 +488,7 @@ class Snot {
   }
 }
 
-Snot.version = 1.03;
+Snot.version = 1.04;
 Snot.util = util;
 Snot.THREE = THREE;
 

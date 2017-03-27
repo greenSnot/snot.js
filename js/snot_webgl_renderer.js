@@ -166,7 +166,9 @@ class Snot {
       this.sprites_meshes[mesh.name] = mesh;
       data.mesh = mesh;
       this.sprites[mesh.name] = data;
-      this.suspects_for_raycaster.push(mesh);
+      if (!data.ignore_raycaster) {
+        this.suspects_for_raycaster.push(mesh);
+      }
       this.scene.add(mesh);
 
     }
@@ -474,7 +476,7 @@ class Snot {
   }
 }
 
-Snot.version = 1.03;
+Snot.version = 1.04;
 Snot.util = util;
 Snot.THREE = THREE;
 
