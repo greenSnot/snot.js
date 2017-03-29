@@ -1,6 +1,6 @@
 {
   "name": "snot.js",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "dependencies": {
     "babelify": "^7.3.0",
     "kd-tree-javascript": "^1.0.1"

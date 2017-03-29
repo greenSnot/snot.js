@@ -78,8 +78,8 @@ export class Controls {
     }
     event.stopPropagation();
 
-    var x = floor(event.clientX >= 0 ? event.clientX : event.touches[0].clientX);
-    var y = floor(event.clientY >= 0 ? event.clientY : event.touches[0].clientY);
+    var x = floor(event.clientX >= 0 ? event.clientX : event.touches[event.touches.length - 1].clientX);
+    var y = floor(event.clientY >= 0 ? event.clientY : event.touches[event.touches.length - 1].clientY);
     x -= this.dom_offset_left;
     y -= this.dom_offset_top;
 
@@ -123,8 +123,8 @@ export class Controls {
     }
     event.stopPropagation();
 
-    var x = floor(event.clientX >= 0 ? event.clientX : event.changedTouches[0].pageX);
-    var y = floor(event.clientY >= 0 ? event.clientY : event.changedTouches[0].pageY);
+    var x = floor(event.clientX >= 0 ? event.clientX : event.changedTouches[event.touches.length - 1].pageX);
+    var y = floor(event.clientY >= 0 ? event.clientY : event.changedTouches[event.touches.length - 1].pageY);
     x -= this.dom_offset_left;
     y -= this.dom_offset_top;
 
@@ -144,8 +144,8 @@ export class Controls {
     }
     event.stopPropagation();
 
-    var x = Math.floor(event.clientX >= 0 ? event.clientX : event.touches[0].pageX);
-    var y = Math.floor(event.clientY >= 0 ? event.clientY : event.touches[0].pageY);
+    var x = Math.floor(event.clientX >= 0 ? event.clientX : event.touches[event.touches.length - 1].pageX);
+    var y = Math.floor(event.clientY >= 0 ? event.clientY : event.touches[event.touches.length - 1].pageY);
     x -= this.dom_offset_left;
     y -= this.dom_offset_top;
 
@@ -155,24 +155,26 @@ export class Controls {
       return false;
     }
 
-    if (event.touches && event.touches.length > 1 && this.allow_zooming_by_multi_fingers ) {
+    if (event.touches && event.touches.length > 1) {
+      if (this.allow_zooming_by_multi_fingers ) {
 
-      var cfx = x;                          // Current frist  finger x
-      var cfy = y;                          // Current first  finger y
-      var csx = event.touches[1].pageX;     // Current second finger x
-      var csy = event.touches[1].pageY;     // Current second finger y
+        var cfx = x;                          // Current frist  finger x
+        var cfy = y;                          // Current first  finger y
+        var csx = event.touches[1].pageX;     // Current second finger x
+        var csy = event.touches[1].pageY;     // Current second finger y
 
-      var dis = distance2D(this.touches.fx, this.touches.fy, this.touches.sx, this.touches.sy) - distance2D(cfx, cfy, csx, csy);
+        var dis = distance2D(this.touches.fx, this.touches.fy, this.touches.sx, this.touches.sy) - distance2D(cfx, cfy, csx, csy);
 
-      var ratio = 0.12;
-      this.host.set_fov(this.host.fov + dis * ratio);
+        var ratio = 0.12;
+        this.host.set_fov(this.host.fov + dis * ratio);
 
-      this.touches.fx = cfx;
-      this.touches.fy = cfy;
-      this.touches.sx = csx;
-      this.touches.sy = csy;
+        this.touches.fx = cfx;
+        this.touches.fy = cfy;
+        this.touches.sx = csx;
+        this.touches.sy = csy;
 
-      return false;
+        return false;
+      }
     }
 
     if (this.host.on_touch_move) {
