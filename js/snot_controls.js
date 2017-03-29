@@ -123,8 +123,8 @@ export class Controls {
     }
     event.stopPropagation();
 
-    var x = floor(event.clientX >= 0 ? event.clientX : event.changedTouches[event.touches.length - 1].pageX);
-    var y = floor(event.clientY >= 0 ? event.clientY : event.changedTouches[event.touches.length - 1].pageY);
+    var x = floor(event.clientX >= 0 ? event.clientX : event.changedTouches[event.changedTouches.length - 1].pageX);
+    var y = floor(event.clientY >= 0 ? event.clientY : event.changedTouches[event.changedTouches.length - 1].pageY);
     x -= this.dom_offset_left;
     y -= this.dom_offset_top;
 
