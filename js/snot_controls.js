@@ -30,6 +30,7 @@ export class Controls {
 
   constructor(host, _on_click) {
     this.host = host;
+    this.allow_zooming_by_multi_fingers = true;
     this.on_click = _on_click || function() {};
 
     this.dom_offset_left = util.left_pos(this.host.dom);
@@ -154,7 +155,7 @@ export class Controls {
       return false;
     }
 
-    if (event.touches && event.touches.length > 1) {
+    if (event.touches && event.touches.length > 1 && this.allow_zooming_by_multi_fingers ) {
 
       var cfx = x;                          // Current frist  finger x
       var cfy = y;                          // Current first  finger y
