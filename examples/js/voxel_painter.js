@@ -1,6 +1,6 @@
 var viewer = new Snot({
   size: 1024,
-  gyro: false,
+  gyro: true,
   clicks_depth: 1024 / 2.5,
   fov: 90,
   max_fov: 110,
@@ -18,31 +18,6 @@ var viewer = new Snot({
 
 var util = Snot.util;
 var THREE = Snot.THREE;
-
-viewer.controls.multi_fingers_handler = function(e, x, y) {
-  var cfx = event.touches[0].pageX;// Current frist  finger x
-  var cfy = event.touches[0].pageY;// Current first  finger y
-  var csx = x;                     // Current second finger x
-  var csy = y;                     // Current second finger y
-  var avg_x = (cfx + csx) * 0.5;
-  var avg_y = (cfy + csy) * 0.5;
-
-  var last_avg_x = (this.touches.fx + this.touches.sx) * 0.5;
-  var last_avg_y = (this.touches.fy + this.touches.sy) * 0.5;
-
-  this.host.set_ry(this.host.dest_ry + (last_avg_x - avg_x) * this.host.mouse_sensitivity);
-  this.host.set_rx(this.host.dest_rx - (last_avg_y - avg_y) * this.host.mouse_sensitivity);
-
-  var dis = util.distance2D(this.touches.fx, this.touches.fy, this.touches.sx, this.touches.sy) - util.distance2D(cfx, cfy, csx, csy);
-
-  var ratio = 0.12;
-  this.host.set_fov(this.host.fov + dis * ratio);
-
-  this.touches.fx = cfx;
-  this.touches.fy = cfy;
-  this.touches.sx = csx;
-  this.touches.sy = csy;
-};
 
 var triangle_net;
 var current_color = new THREE.Color();

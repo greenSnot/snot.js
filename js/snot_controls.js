@@ -63,7 +63,7 @@ export class Controls {
   }
 
   stop_listeners(opts) {
-    for (var i in opts) {
+    for (var i in opts.events) {
       if (i === 'orientationchange' || i === 'deviceorientation') {
         window.removeEventListener(i, opts.events[i], false);
       } else {
