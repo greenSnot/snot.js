@@ -30,7 +30,7 @@ export class Controls {
 
   constructor(host, _on_click) {
     this.host = host;
-    this.allow_zooming_by_multi_fingers = true;
+    this.enable_multi_fingers_handler = true;
     this.on_click = _on_click || function() {};
 
     this.dom_offset_left = util.left_pos(this.host.dom);
@@ -91,8 +91,8 @@ export class Controls {
 
     if (event.touches && event.touches.length > 1) {
 
-      this.touches.sx = event.touches[1].pageX;
-      this.touches.sy = event.touches[1].pageY;
+      this.touches.sx = event.touches[0].pageX;
+      this.touches.sy = event.touches[0].pageY;
 
     }
 
@@ -138,6 +138,23 @@ export class Controls {
     this.touches.is_touching = false;
   }
 
+  multi_fingers_handler(event, x, y) {
+    var cfx = event.touches[0].pageX;// Current frist  finger x
+    var cfy = event.touches[0].pageY;// Current first  finger y
+    var csx = x;                     // Current second finger x
+    var csy = y;                     // Current second finger y
+
+    var dis = distance2D(this.touches.fx, this.touches.fy, this.touches.sx, this.touches.sy) - distance2D(cfx, cfy, csx, csy);
+
+    var ratio = 0.12;
+    this.host.set_fov(this.host.fov + dis * ratio);
+
+    this.touches.fx = cfx;
+    this.touches.fy = cfy;
+    this.touches.sx = csx;
+    this.touches.sy = csy;
+  }
+
   mouse_move_handler(event) {
     if (event.cancelable) {
       event.preventDefault();
@@ -156,23 +173,8 @@ export class Controls {
     }
 
     if (event.touches && event.touches.length > 1) {
-      if (this.allow_zooming_by_multi_fingers ) {
-
-        var cfx = x;                          // Current frist  finger x
-        var cfy = y;                          // Current first  finger y
-        var csx = event.touches[1].pageX;     // Current second finger x
-        var csy = event.touches[1].pageY;     // Current second finger y
-
-        var dis = distance2D(this.touches.fx, this.touches.fy, this.touches.sx, this.touches.sy) - distance2D(cfx, cfy, csx, csy);
-
-        var ratio = 0.12;
-        this.host.set_fov(this.host.fov + dis * ratio);
-
-        this.touches.fx = cfx;
-        this.touches.fy = cfy;
-        this.touches.sx = csx;
-        this.touches.sy = csy;
-
+      if (this.enable_multi_fingers_handler) {
+        this.multi_fingers_handler(event, x, y);
         return false;
       }
     }
@@ -187,15 +189,11 @@ export class Controls {
       }
     }
 
-    this.host.dest_ry = this.host.dest_ry + (this.touches.fx - x) * this.host.mouse_sensitivity;
-    this.host.dest_rx = this.host.dest_rx - (this.touches.fy - y) * this.host.mouse_sensitivity;
+    this.host.set_ry(this.host.dest_ry + (this.touches.fx - x) * this.host.mouse_sensitivity);
+    this.host.set_rx(this.host.dest_rx - (this.touches.fy - y) * this.host.mouse_sensitivity);
 
     this.touches.fx = x;
     this.touches.fy = y;
-
-    this.host.dest_rx = this.host.dest_rx > 90 ? 90 : this.host.dest_rx;
-    this.host.dest_rx = this.host.dest_rx < -90 ? -90 : this.host.dest_rx;
-
   }
 
   orientation_on_change_handler(ev) {

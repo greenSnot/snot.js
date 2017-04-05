@@ -390,6 +390,8 @@ class Snot {
 
   set_rx(rx) {
     this.dest_rx = rx;
+    this.dest_rx = this.dest_rx > 90 ? 90 : this.dest_rx;
+    this.dest_rx = this.dest_rx < -90 ? -90 : this.dest_rx;
   }
 
   set_ry(ry) {
