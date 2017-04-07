@@ -411,7 +411,7 @@ class Snot {
   }
   update() {
 
-    this.ry += this.auto_rotation;
+    this.dest_ry += this.auto_rotation;
 
     var ry = this.dest_rx * Math.PI / 180 + Math.PI / 2;
     var rx = - this.dest_ry * Math.PI / 180 + Math.PI;
@@ -479,7 +479,7 @@ function controls_on_click(x, y) {
   }
 }
 
-Snot.version = 1.05;
+Snot.version = 1.11;
 Snot.util = util;
 Snot.THREE = THREE;
 

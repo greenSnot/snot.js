@@ -17,7 +17,7 @@ var viewer = new Snot({
   max_fov: 110,
   min_fov: 60,
   mouse_sensitivity: 0.3,
-  auto_rotation: 0.0,
+  auto_rotation: 0.1,
   rx: 0,
   ry: 0,
   min_detect_distance: 20,

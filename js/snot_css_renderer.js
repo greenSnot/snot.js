@@ -490,7 +490,7 @@ function controls_on_click(x, y) {
   }
 }
 
-Snot.version = 1.05;
+Snot.version = 1.11;
 Snot.util = util;
 Snot.THREE = THREE;
 
