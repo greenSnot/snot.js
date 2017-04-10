@@ -16,6 +16,8 @@ HTML5/Webgl panorama viewer
 
 [Multi-viewer](http://greensnot.github.io/snot.js/examples/multi_viewer.html)
 
+[Planet view](http://greensnot.github.io/snot.js/examples/planet.html)
+
 [Music wall](http://mclassical.org)
 
 #Usage
@@ -167,6 +169,7 @@ var viewer = new Snot({
 
 ```
 ###API
+```
 set_fov(fov:number);
 set_rx(rx:number);
 set_ry(ry:number);
@@ -175,3 +178,4 @@ remove_sprite(sprite_id);
 update(); // update manually, see examples/shooting_webgl_renderer.html
 run(); // start main loop, it will call update automatically.
 screenshot(); //return base64_imgs_arr[front, down, left, back, top, right], webgl_renderer only.
+```

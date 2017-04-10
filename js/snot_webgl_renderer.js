@@ -32,6 +32,7 @@ function get_default_options() {
       z: - 1,
     },
     quality: 1,
+    camera_offset_y: 0,
 
     mouse_sensitivity: 0.3,
     auto_rotation: 0,
@@ -54,6 +55,7 @@ function get_default_options() {
     dest_ry: 0,   // Destination of rotationY
     dest_rz: 0,   // Destination of rotationY
 
+    lock_rx: false,
     max_fov: 120, // Max field of view (degree)
     min_fov: 60,  // Min field of view (degree)
     fov: 90,      // Default field of view
@@ -389,6 +391,7 @@ class Snot {
   }
 
   set_rx(rx) {
+    if (this.lock_rx) return;
     this.dest_rx = rx;
     this.dest_rx = this.dest_rx > 90 ? 90 : this.dest_rx;
     this.dest_rx = this.dest_rx < -90 ? -90 : this.dest_rx;
@@ -451,6 +454,7 @@ class Snot {
     this.camera.fov = this.fov;
     this.camera_look_at = new THREE.Vector3(0, 0, -1).applyQuaternion(this.camera.quaternion);
     this.camera.position.copy(this.camera_look_at).multiplyScalar(this.fisheye_offset);
+    this.camera.position.y += this.camera_offset_y;
 
     this.update_sprites();
     this.renderer.render(this.scene, this.camera);
@@ -467,19 +471,25 @@ class Snot {
 
 function controls_on_click(x, y) {
   var intersects = this.raycaster_from_mouse(x, y);
+  var point;
+  var rotation;
   if (intersects.length !== 0) {
-    var point = intersects[0].point;
+    point = intersects[0].point;
     if (intersects[0].object.data) {
       this.sprite_on_click(intersects[0].object.data);
     } else {
       point = util.standardlization(point, this.clicks_depth);
-      var rotation = util.position_to_rotation(point.x, point.y, point.z);
+      rotation = util.position_to_rotation(point.x, point.y, point.z);
       this.on_click(point, rotation);
     }
+  } else {
+    point = this.raycaster_point_from_mouse(x, y, 1);
+    rotation = util.position_to_rotation(point.x, point.y, point.z);
+    this.on_click(point, rotation);
   }
 }
 
-Snot.version = 1.11;
+Snot.version = 1.12;
 Snot.util = util;
 Snot.THREE = THREE;
 
