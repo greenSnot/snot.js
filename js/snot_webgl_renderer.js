@@ -20,7 +20,7 @@ function get_default_options() {
     sprites_meshes: {},
     scene: new THREE.Scene(),
     renderer: new THREE.WebGLRenderer(),
-    screenshot_renderer: new THREE.WebGLRenderer(),
+    screenshot_camera: new THREE.PerspectiveCamera(90, 1, 1, 1024),
     frames:0,
 
     bg_imgs: [],
@@ -192,10 +192,7 @@ class Snot {
   init_renderer() {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(this.width, this.height);
-    this.screenshot_renderer.setPixelRatio(1);
-    this.screenshot_renderer.setSize(this.size, this.size);
     this.container.appendChild(this.renderer.domElement);
-
   }
 
   init() {
@@ -215,9 +212,28 @@ class Snot {
     this.update();
   }
 
-  screenshot(directions) {
+  screenshot_planet_view(renderer, fov, offset) {
+    fov = fov || 150;
+    offset = offset || this.size / 2;
+    this.screenshot_camera.fov = fov;
+    this.screenshot_camera.near = 1;
+    this.screenshot_camera.far = this.size * 2;
+    this.screenshot_camera.position.set(0, offset, 0);
+    this.screenshot_camera.lookAt(new THREE.Vector3());
+    this.screenshot_camera.updateMatrixWorld();
+    this.screenshot_camera.updateProjectionMatrix();
+    renderer.render(this.scene, this.screenshot_camera);
+    return renderer.domElement.toDataURL('image/png');
+  }
+
+  screenshot(renderer, directions) {
     directions = directions || [true, true, true, true, true, true]; // front bottom left back top right
-    var camera = new THREE.PerspectiveCamera(90, 1, 1, this.size);
+    this.screenshot_camera.fov = 90;
+    this.screenshot_camera.near = 1;
+    this.screenshot_camera.far = this.size * 2;
+    this.screenshot_camera.position.set(0, 0, 0);
+    this.screenshot_camera.updateMatrixWorld();
+    this.screenshot_camera.updateProjectionMatrix();
     var look_at = [
       [0, 0, 1],
       [0, -1, 0],
@@ -231,9 +247,9 @@ class Snot {
       if (!directions[i]) {
         continue;
       }
-      camera.lookAt(new THREE.Vector3(look_at[i][0], look_at[i][1], look_at[i][2]));
-      this.screenshot_renderer.render(this.scene, camera);
-      images.push(this.screenshot_renderer.domElement.toDataURL('image/png'));
+      this.screenshot_camera.lookAt(new THREE.Vector3(look_at[i][0], look_at[i][1], look_at[i][2]));
+      renderer.render(this.scene, this.screenshot_camera);
+      images.push(renderer.domElement.toDataURL('image/png'));
     }
     return images;
   }
