@@ -174,14 +174,23 @@ function load_js(file, callback) {
 function position_to_rotation(x, y, z) {
   var r = distance3D(x, y, z, 0, 0, 0);
   var rx = Math.asin(z / r);
-  var ry = Math.asin(y / r / Math.cos(rx));
+  var ry;
+  var cos_rx = Math.cos(rx);
+
+  if (cos_rx) {
+    var t = y / r / cos_rx;
+    ry = Math.asin(t > 1 ? 1 : (t < -1 ? -1 : t));
+  } else {
+    ry = 0;
+  }
+
   if (x < 0) {
     ry = ry > 0 ? Math.PI - ry : - Math.PI - ry;
   }
 
   return {
-    rx: - rx * 180 / Math.PI,
-    ry: (ry < 0 ? ry + Math.PI * 2 : ry) * 180 / Math.PI
+    rx: - rx * 180 / Math.PI, // (-90, 90)
+    ry: (ry < 0 ? ry + Math.PI * 2 : ry) * 180 / Math.PI // [0 - 360)
   };
 }
 
