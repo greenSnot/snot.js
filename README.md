@@ -1,4 +1,4 @@
-# Snot-pano
+# Snot.js
 HTML5/Webgl panorama viewer
 
 # Examples
@@ -20,12 +20,27 @@ HTML5/Webgl panorama viewer
 
 [Music wall](http://mclassical.org)
 
+#Installation
+###install with npm(recommend)
+```
+$ npm install snot.js
+```
+```
+// your index.js
+var Snot = require('snot.js');
+var viewer = new Snot({
+  //...
+});
+```
+
 #Usage
+
 ###CSS Render
 ####./examples/streetview.html
 ```
 <head>
   <link rel="stylesheet" type="text/css" href="build/css/snot.min.css">
+  <!-- this css file is OPTIONAL -->
 </head>
 <div id="snot-wrap">
   <div id="snot-container">
@@ -114,7 +129,7 @@ function sprite_on_click(data) {
 
 var viewer = new Snot({
   //...
-  on_click: on_click, // when you are clicking the backgrounds
+  on_click: on_click, // when you are clicking the background
   sprite_on_click: sprite_on_click
 });
 ```
@@ -133,7 +148,7 @@ var viewer = new Snot({
 
 ###Unstable:
 * Android-QQbrowser-x5(微信浏览器）
-* Android-original-browser(webkit) 
+* Android-original-browser(webkit)
 
 ###Options
 ```
@@ -154,9 +169,9 @@ var viewer = new Snot({
   gyro: false,
   ry: 0,        // Rotate * degrees around y axis
   rx: 0,        // Rotate * degrees around x axis
-  dest_rx: 0,   // Destination of rotationX
-  dest_ry: 0,   // Destination of rotationY
-  dest_rz: 0,   // Destination of rotationY
+  dest_rx: 0,   // Destination rotationX
+  dest_ry: 0,   // Destination rotationY
+  dest_rz: 0,   // Destination rotationY
 
   max_fov: 120,
   min_fov: 60,
@@ -173,9 +188,9 @@ var viewer = new Snot({
 set_fov(fov:number);
 set_rx(rx:number);
 set_ry(ry:number);
-add_sprites(sprites);
+add_sprites(sprites:[SpriteData]);
 remove_sprite(sprite_id);
 update(); // update manually, see examples/shooting_webgl_renderer.html
 run(); // start main loop, it will call update automatically.
-screenshot(); //return base64_imgs_arr[front, down, left, back, top, right], webgl_renderer only.
+screenshot(renderer:THREE.WebglRenderer); //return base64_imgs_arr[front, down, left, back, top, right], webgl_renderer only.
 ```
