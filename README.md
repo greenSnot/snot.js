@@ -20,8 +20,8 @@ HTML5/Webgl panorama viewer
 
 [Music wall](http://mclassical.org)
 
-#Installation
-###install with npm(recommend)
+# Installation
+### install with npm(recommend)
 ```
 $ npm install snot.js
 ```
@@ -33,10 +33,10 @@ var viewer = new Snot({
 });
 ```
 
-#Usage
+# Usage
 
-###CSS Render
-####./examples/streetview.html
+### CSS Render
+#### ./examples/streetview.html
 ```
 <head>
   <link rel="stylesheet" type="text/css" href="build/css/snot.min.css">
@@ -80,7 +80,7 @@ var viewer = new Snot({
   viewer.run();
 </script>
 ```
-###Custom Sprites
+### Custom Sprites
 ```
   <script>
     // ...
@@ -106,8 +106,8 @@ var viewer = new Snot({
     }]);
   </script>
 ```
-###Webgl Render
-####./examples/streetview_webgl_renderer.html
+### Webgl Render
+#### ./examples/streetview_webgl_renderer.html
 ```
 <div id="snot-wrap">
   <div id="snot-container">
@@ -115,10 +115,10 @@ var viewer = new Snot({
 </div>
 <script src="build/js/snot_webgl_renderer.min.js"></script>
 ```
-####Custom Sprites
-####./examples/shooting_webgl_renderer.html
+#### Custom Sprites
+#### ./examples/shooting_webgl_renderer.html
 
-##Interaction
+## Interaction
 ```
 function on_click(point, rotation) {
 }
@@ -134,23 +134,23 @@ var viewer = new Snot({
 });
 ```
 
-##Compatibility
+## Compatibility
 
-###Support:
+### Support:
 * Safari
 * Safari Mobile
 * Chrome
 * Chrome Mobile
 
-###Unsupport:
+### Unsupport:
 * IE
 * Firefox
 
-###Unstable:
+### Unstable:
 * Android-QQbrowser-x5(微信浏览器）
 * Android-original-browser(webkit)
 
-###Options
+### Options
 ```
 {
   container: document.getElementById('snot-container'),
@@ -183,7 +183,7 @@ var viewer = new Snot({
 }
 
 ```
-###API
+### API
 ```
 set_fov(fov:number);
 set_rx(rx:number);
