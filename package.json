@@ -1,6 +1,6 @@
 {
   "name": "snot.js",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "dependencies": {
     "babelify": "^7.3.0",
     "kd-tree-javascript": "^1.0.1"
@@ -30,5 +30,5 @@
     "build": "gulp"
   },
   "author": "greenSnot",
-  "license": "UNLICENSED"
+  "license": "GPLv3"
 }

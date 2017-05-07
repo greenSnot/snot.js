@@ -60,6 +60,9 @@ function get_default_options() {
     min_detect_distance: 20, // click nearest sprite
     on_click: function() {}, // background on click
     sprite_on_click: function() {},
+    on_touch_move: function() {},
+    on_touch_start: function() {},
+    on_touch_end: function() {},
     controls_on_click: controls_on_click,
 
     camera_dom: document.getElementById('snot-camera'),
@@ -412,6 +415,17 @@ class Snot {
     }
   }
 
+  set_rx(rx) {
+    if (this.lock_rx) return;
+    this.dest_rx = rx;
+    this.dest_rx = this.dest_rx > 90 ? 90 : this.dest_rx;
+    this.dest_rx = this.dest_rx < -90 ? -90 : this.dest_rx;
+  }
+
+  set_ry(ry) {
+    this.dest_ry = ry;
+  }
+
 }
 
 function controls_on_click(x, y) {
@@ -488,9 +502,10 @@ function controls_on_click(x, y) {
       ry: rotation[1]
     });
   }
+
 }
 
-Snot.version = 1.11;
+Snot.version = 1.15;
 Snot.util = util;
 Snot.THREE = THREE;
 

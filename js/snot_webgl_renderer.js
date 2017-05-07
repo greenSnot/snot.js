@@ -505,7 +505,7 @@ function controls_on_click(x, y) {
   }
 }
 
-Snot.version = 1.12;
+Snot.version = 1.15;
 Snot.util = util;
 Snot.THREE = THREE;
 
